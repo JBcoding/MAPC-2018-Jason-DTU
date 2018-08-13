@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project Multiagent">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="${dir.buildfile}/.."/>
+    <property name="dir.jarfile" value="${dir.buildfile}"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/Multiagent.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="mapc2017.mas.RunClient"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${dir.jarfile}/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/c4jason.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/cartago.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/junit-4.8.2.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/jason.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/jade-4.3.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/eismassim.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/javaagents.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/protocol.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/server.jar"/>
+        </jar>
+    </target>
+</project>
