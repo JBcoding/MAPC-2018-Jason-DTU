@@ -1,0 +1,5 @@
+shop(shop0,51.47583152672272,-0.1299925177542683,[item(item19),item(item17),item(item3),item(item14),item(item1),item(item8),item(item6)])
+shop(shop1,51.46876151857878,-0.07797229392282068,[item(item7),item(item19),item(item2),item(item9),item(item13)])
+shop(shop2,51.47876296974655,-0.007530401225847306,[item(item19),item(item17),item(item15),item(item2),item(item14),item(item0),item(item10),item(item13),item(item4),item(item5),item(item16)])
+shop(shop3,51.50970403340925,-0.12692232152092497,[item(item17),item(item15),item(item3),item(item2),item(item14),item(item11),item(item6)])
+shop(shop4,51.52929412557259,-0.031776769641786794,[item(item17),item(item15),item(item14),item(item18),item(item13),item(item4),item(item12),item(item16)])

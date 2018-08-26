@@ -1,6 +1,6 @@
 {
-  "tournamentMode" : "random",
-  "teamsPerMatch" : 1,
+  "tournamentMode" : "round-robin",
+  "teamsPerMatch" : 2,
   "teamSize" : 28,
   "launch" : "key",
   "port" : 12300,

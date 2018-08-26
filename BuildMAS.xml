@@ -9,7 +9,7 @@
     <target name="create_run_jar">
         <jar destfile="${dir.jarfile}/Multiagent.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="mapc2017.mas.RunClient"/>
+                <attribute name="Main-Class" value="mas.RunMAS"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="${dir.jarfile}/bin"/>

@@ -9,7 +9,7 @@
     <target name="create_run_jar">
         <jar destfile="${dir.jarfile}/RunServer.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="mapc2017.mas.RunServer"/>
+                <attribute name="Main-Class" value="mas.RunServer"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="${dir.jarfile}/bin"/>
