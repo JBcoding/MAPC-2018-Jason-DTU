@@ -77,7 +77,7 @@ public class TaskArtifact extends Artifact {
 	{
 		instance.announce("assembleRequest", items, workshop, taskId, deliveryLocation, type);
 	}
-	
+
 	@OPERATION
 	void announceRetrieve(String agent, Object shoppingList, String workshop)
 	{

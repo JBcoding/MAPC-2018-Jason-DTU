@@ -18,6 +18,7 @@ import data.CEntity;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
+import massim.protocol.scenario.city.data.RoleData;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Role;
 import massim.scenario.city.data.Route;
@@ -85,7 +86,7 @@ public class StaticInfoArtifact extends Artifact {
 	{
 		CEntity agent = AgentArtifact.getEntity(agentName);
 		
-		return StaticInfoArtifact.getMap().findRoute(agent.getLocation(), to, agent.getPremissions());
+		return StaticInfoArtifact.getMap().findRoute(agent.getLocation(), to, agent.getPermissions());
 	}
 
 	public static void perceiveInitial(Collection<Percept> percepts)
@@ -171,23 +172,24 @@ public class StaticInfoArtifact extends Artifact {
 	{
 		Object[] args = Translator.perceptToObject(percept);
 
-		String 		name 	= (String)   args[0];
-		int 		speed 	= (int)      args[1];
-		int 		load 	= (int)      args[2];
-		int 		battery = (int)      args[3];
-		Object[] 	tools 	= (Object[]) args[4];
-		
-		Set<String> permissions = Arrays.stream(tools)
-				.map(String.class::cast)
-				.collect(Collectors.toSet());
-		
-		Role role = new Role(name, speed, battery, load, permissions);
-		
-		permissions.forEach(tool -> ItemArtifact.addToolPermission(tool, name));
-		
-		role.addTools(permissions.stream().map(x -> ItemArtifact.getTool(x)).collect(Collectors.toList()));
-		
-		roles.put(name, role);
+        String name = (String) args[0];
+        int baseSpeed = (int) args[1];
+        int maxSpeed = (int) args[2];
+        int baseLoad = (int) args[3];
+        int maxLoad = (int) args[4];
+        int baseSkill = (int) args[5];
+        int maxSkill = (int) args[6];
+        int baseVision = (int) args[7];
+        int maxVision = (int) args[8];
+        int baseBattery = (int) args[9];
+        int maxBattery = (int) args[10];
+
+
+        RoleData rd = new RoleData(name, baseSpeed, maxSpeed, baseBattery, maxBattery, baseLoad, maxLoad, baseSkill, maxSkill, baseVision, maxVision);
+		throw new Error("TODO ISH");
+
+
+		//roles.put(name, role);
 	}
 
 	// Literal(int)

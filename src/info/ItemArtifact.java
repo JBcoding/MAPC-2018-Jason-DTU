@@ -22,7 +22,6 @@ import env.EIArtifact;
 import env.Translator;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
-import massim.scenario.city.data.Tool;
 import massim.scenario.city.data.facilities.Shop;
 
 public class ItemArtifact extends Artifact {
@@ -34,7 +33,6 @@ public class ItemArtifact extends Artifact {
 	public static final Set<String>	PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(ITEM)));
 
-	private static Map<String, Tool> 				tools 			= new HashMap<>();
 	private static Map<String, Item>				items 			= new HashMap<>();
 	private static Map<String, Map<String, Shop>> 	itemLocations 	= new HashMap<>();	
 	
@@ -82,8 +80,8 @@ public class ItemArtifact extends Artifact {
 	@OPERATION 
 	void getRequiredItems(Object itemName, OpFeedbackParam<Object> ret)
 	{
-		ret.set(items.get(itemName).getRequiredItems().entrySet().stream()
-				.collect(Collectors.toMap(x -> x.getKey().getName(), Entry::getValue)));
+		ret.set(items.get(itemName).getRequiredItems().stream()
+				.collect(Collectors.toMap(Item::getName, x -> x)));
 	}
 	
 	/**
@@ -140,80 +138,10 @@ public class ItemArtifact extends Artifact {
 	public static Map<Shop, Map<Item, Integer>> getShoppingList(Map<Item, Integer> items)
 	{	
 		Map<Shop, Map<Item, Integer>> shoppingList = new HashMap<>();
-		
-		for (Entry<Item, Integer> entry : items.entrySet())
-		{
-			Collection<Shop> shops = getShopSelling(entry.getKey().getName());
-			
-			Item item 	= entry.getKey();
-			int amount 	= entry.getValue();
-			
-			Optional<Shop> shop = shops.stream()
-					.filter(x -> x.getItemCount(item) > amount)
-//					.findAny();
-					.min((x, y) -> x.getPrice(item) - y.getPrice(item));
-			
-			if (shop.isPresent())
-			{
-				CUtil.addToMapOfMaps(shoppingList, shop.get(), item, amount);
-			}
-			else 
-			{
-				int amountRemaining = amount;
-				do
-				{
-					// If there is only one shop remaining, it should buy the rest
-					if (shops.size() == 1)
-					{
-						CUtil.addToMapOfMaps(shoppingList, shops.stream().sorted((x,y) -> x.getPrice(item) - y.getPrice(item)).findFirst().get(), item, amountRemaining);
-						break;
-					}
-					
-					// Find the shop with the largest number of the item
-//					shop = shops.stream().max((x, y) -> x.getItemCount(item) - y.getItemCount(item));
-					shop = shops.stream().min((x, y) -> x.getPrice(item) - y.getPrice(item));
-					
-					if (shop.isPresent())
-					{
-						shops.remove(shop.get());
-						
-						int amountToBuy = Math.min(shop.get().getItemCount(item), amountRemaining);
-						
-						amountRemaining -= amountToBuy;
-						
-						CUtil.addToMapOfMaps(shoppingList, shop.get(), item, amountToBuy);
-					}
-				}
-				while (amountRemaining > 0);
-			}
-		}
-		
+
 		return shoppingList;
 	}
 
-
-	
-	@OPERATION
-	void getShopSelling(String itemName, int quantity, OpFeedbackParam<String> retShop, OpFeedbackParam<Integer> retQuantity) 
-	{
-		Item 				item 	= items.get(itemName);
-		Collection<Shop> 	shops 	= itemLocations.get(itemName).values();
-		
-		List<Shop> sortedShops = shops.stream().sorted((s1, s2) -> s2.getItemCount(item) - s1.getItemCount(item)).collect(Collectors.toList());
-
-		retShop.set(sortedShops.get(0).getName());
-		retQuantity.set(Math.min(quantity, sortedShops.get(0).getItemCount(item)));
-	}
-	
-	@OPERATION
-	void getAvailableAmount(String itemName, int quantity, String shopName, OpFeedbackParam<Integer> retQuantity) 
-	{
-		Item item 	= items.get(itemName);
-		Shop shop 	= (Shop) FacilityArtifact.getFacility("shop", shopName);
-		
-		retQuantity.set(Math.min(quantity, shop.getItemCount(item)));
-	}
-	
 	@OPERATION
 	void getClosestFacilitySelling(String item, OpFeedbackParam<String> ret)
 	{
@@ -268,24 +196,6 @@ public class ItemArtifact extends Artifact {
 		ret.set(ItemArtifact.getVolume(Translator.convertASObjectToMap(input)));
 	}
 	
-	/**
-	 * @param item
-	 * @return Get the best price for an item on the market
-	 */
-	public static int itemPrice(Item item)
-	{
-		Collection<Shop> shops = getShopSelling(item.getName());
-		
-		if (shops.isEmpty()) return 0;
-		
-		int bestPrice = Integer.MAX_VALUE;
-		
-		for (Shop shop : shops)
-			bestPrice = bestPrice > shop.getPrice(item) ? shop.getPrice(item) : bestPrice;
-		
-		return bestPrice;
-	}
-	
 	@OPERATION
 	void getItemsToCarry(Object[] items, int capacity, OpFeedbackParam<Object> retRetrieve, OpFeedbackParam<Object> retRest)
 	{
@@ -320,13 +230,16 @@ public class ItemArtifact extends Artifact {
 	{		
 		Map<Item, Set<Object[]>> requirements = new HashMap<>();
 		
-		percepts.stream().filter(percept -> percept.getName() == ITEM)
+		percepts.stream().filter(percept -> percept.getName().equals(ITEM))
 						 .forEach(item -> perceiveItem(item, requirements));
 		
 		// Item requirements has to be added after all items have been created, 
 		// since they are not necessarily given in a chronological order.
 		// TODO: Tools and items that require assembly have a volume of 0.
-		for (Entry<Item, Set<Object[]>> entry : requirements.entrySet())
+
+        throw new Error("TODO");
+
+		/*for (Entry<Item, Set<Object[]>> entry : requirements.entrySet())
 		{
 			Item item = entry.getKey();
 			
@@ -344,7 +257,7 @@ public class ItemArtifact extends Artifact {
 			logger.info("Perceived items:");		
 			for (Item item : items.values())
 				logger.info(item.toString());
-		}
+		}*/
 	}
 
 	// Literal(String, int, Literal(List<String>), Literal(List<List<String, int>>))
@@ -354,51 +267,40 @@ public class ItemArtifact extends Artifact {
 		
 		String     id		= (String) args[0];
 		int 	   volume	= (int)    args[1];
-		
-		if (id.contains("tool"))
-		{
-			tools.put(id, new Tool(id, volume, 0));
-		}
-		else 
-		{
-			Item item = new Item(id, volume, 0, Collections.emptySet());
-	
-			for (Object toolArg : ((Object[]) ((Object[]) args[2])[0]))
-			{
-				String toolId = (String) toolArg;
-				
-				if (!tools.containsKey(toolId))
-				{
-					tools.put(toolId, new Tool(toolId, 0, 0));
-				}				
-				item.addRequiredTool(tools.get(toolId));
-			}
-			
-			Set<Object[]> parts = new HashSet<>();
-	
-			for (Object part : ((Object[]) ((Object[]) args[3])[0]))
-			{			
-				parts.add((Object[]) part);	
-			}
-			items.put(id, item);
-			requirements.put(item, parts);
-		}
-	}
-	
+
+        Item item = new Item(id, volume, Collections.emptySet(), Collections.emptySet());
+
+        // TODO: FIX
+
+        throw new Error("TODO");
+
+        /*for (Object rolesArg : ((Object[]) ((Object[]) args[2])[0]))
+        {
+            String toolId = (String) rolesArg;
+
+            if (!tools.containsKey(toolId))
+            {
+                tools.put(toolId, new Tool(toolId, 0, 0));
+            }
+            item.addRequiredTool(tools.get(toolId));
+        }
+
+        Set<Object[]> parts = new HashSet<>();
+
+        for (Object part : ((Object[]) ((Object[]) args[3])[0]))
+        {
+            parts.add((Object[]) part);
+        }
+        items.put(id, item);
+        requirements.put(item, parts);*/
+
+    }
+
 	// Used by the FacilityArtifact when adding items to shops.
 	public static Item getItem(String itemId)
 	{
         if (items.containsKey(itemId)) return items.get(itemId);
-        return tools.get(itemId);
-	}
-	
-	/**
-	 * @param toolName Name of the tool
-	 * @return The tool with the given name
-	 */
-	public static Tool getTool(String toolName)
-	{
-		return tools.get(toolName);
+        return null;
 	}
 	
 	// Used by the FacilityArtifact when adding shops
@@ -415,17 +317,8 @@ public class ItemArtifact extends Artifact {
 		}
 	}
 
-	public static void addToolPermission(String toolName, String role) 
-	{
-		if (tools.containsKey(toolName))
-		{
-			tools.get(toolName).getRoles().add(role);
-		}
-	}
-
 	public static void reset() 
 	{
-		tools 			= new HashMap<>();
 		items 			= new HashMap<>();
 		itemLocations 	= new HashMap<>();
 	}

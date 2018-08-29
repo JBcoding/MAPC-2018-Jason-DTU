@@ -19,12 +19,22 @@ import massim.scenario.city.util.GraphHopperManager;
 public class CEntity {
 
     private Role role;
-    private Set<String> premissions;
+    private Set<String> permissions;
     private double lat; 
     private double lon;
     private Route route;
     private int routeLength;
     private Facility facility;
+
+    public int getCurrentSpeed() {
+        return currentSpeed;
+    }
+
+    public void setCurrentSpeed(int currentSpeed) {
+        this.currentSpeed = currentSpeed;
+    }
+
+    private int currentSpeed;
 
     private int currentBattery;
     private CBoundedItemBox items;
@@ -36,10 +46,10 @@ public class CEntity {
     public CEntity(Role role, Location location){
         this.role = role;
         
-        premissions = new HashSet<>();
+        permissions = new HashSet<>();
         
-        if (role.getName() == "drone") 	premissions.add(GraphHopperManager.PERMISSION_AIR);
-        else 				        	premissions.add(GraphHopperManager.PERMISSION_ROAD);
+        if (role.getName().equals("drone")) 	permissions.add(GraphHopperManager.PERMISSION_AIR);
+        else 				        	permissions.add(GraphHopperManager.PERMISSION_ROAD);
         
         items = new CBoundedItemBox(role.getMaxLoad());
         this.lat = location.getLat();
@@ -47,9 +57,9 @@ public class CEntity {
         currentBattery = role.getMaxBattery();
     }
 
-    public Set<String> getPremissions()
+    public Set<String> getPermissions()
     {
-    	return this.premissions;
+    	return this.permissions;
     }
     
     public int getCurrentBattery(){
@@ -131,7 +141,7 @@ public class CEntity {
             return false;
         }
         currentBattery -= cost;
-        Location newLoc = this.route.advance(role.getSpeed());
+        Location newLoc = this.route.advance(getCurrentSpeed());
         if (newLoc != null) 
     	{
         	this.lat = newLoc.getLat();

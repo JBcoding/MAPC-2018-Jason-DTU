@@ -20,12 +20,7 @@ import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
 import massim.protocol.scenario.city.data.ItemAmountData;
-import massim.scenario.city.data.AuctionJob;
-import massim.scenario.city.data.Item;
-import massim.scenario.city.data.Job;
-import massim.scenario.city.data.Mission;
-import massim.scenario.city.data.Role;
-import massim.scenario.city.data.Route;
+import massim.scenario.city.data.*;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.Shop;
 import massim.scenario.city.data.facilities.Storage;
@@ -89,17 +84,6 @@ public class JobArtifact extends Artifact {
 	public static int priceForItems(Job job)
 	{
 		int price = 0;
-		for (ItemAmountData itemData : job.getRequiredItems().toItemAmountData())
-		{
-			int currentPrice = 0;
-			
-			for (Entry<Item, Integer> entry : ItemArtifact.getBaseItems(itemData.getName()).entrySet())
-			{				
-				currentPrice += ItemArtifact.itemPrice(entry.getKey()) * entry.getValue();
-			}
-			
-			price += currentPrice * itemData.getAmount();
-		}
 		return price;
 	}
 	
@@ -118,39 +102,7 @@ public class JobArtifact extends Artifact {
 	 */
 	public static int estimateSteps(Job job)
 	{
-		Map<Item, Integer> items = job.getRequiredItems()
-				.toItemAmountData().stream()
-				.collect(Collectors.toMap(x -> ItemArtifact.getItem(x.getName()), x -> x.getAmount()));
-		Map<Shop, Map<Item, Integer>> shoppingList = ItemArtifact.getShoppingList(ItemArtifact.getBaseItems(items));
-		
-		// Use the car role to estimate
-		Role role = StaticInfoArtifact.getRole("car");
-		
-		Set<String> permissions = new HashSet<>();
-		permissions.add(GraphHopperManager.PERMISSION_ROAD);
-		
-		Shop lastShop = null;
-		int length = 0;
-		
-		// Find distance between all shops
-		for (Shop shop : shoppingList.keySet())
-		{
-			if (lastShop != null) 
-			{
-				Route route = StaticInfoArtifact.getMap().findRoute(lastShop.getLocation(), shop.getLocation(), permissions);
-				length += route.getRouteLength();
-			}
-			lastShop = shop;
-		}
-		
-		Facility workshop = FacilityArtifact.getFacilities("workshop").stream().findAny().get();
-		length += StaticInfoArtifact.getMap().findRoute(lastShop.getLocation(), workshop.getLocation(), permissions).getRouteLength();
-		
-		length += StaticInfoArtifact.getMap().findRoute(workshop.getLocation(), job.getStorage().getLocation(), permissions).getRouteLength();
-		
-		int steps = length / role.getSpeed();
-		
-		return steps;
+		return 0;
 	}
 	
 	@OPERATION
@@ -216,22 +168,18 @@ public class JobArtifact extends Artifact {
 		int 	fine		= (int)    args[5];
 		int 	bid 		= (int)    args[6];
 		int 	time		= (int)    args[7];
+		Object[][] itemsToBuild = (Object[][]) args[8];
+
+        ItemBox itemBox = new ItemBox();
+        for (Object[] tuple : itemsToBuild) {
+            itemBox.store(ItemArtifact.getItem((String)tuple[0]), (int) tuple[1]);
+        }
 		
 		Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
 		
-		AuctionJob auction = new AuctionJob(reward, storage, start, end, time, fine);
+		AuctionJob auction = new AuctionJob(reward, storage, start, end, itemBox, time, fine);
 		
-		auction.bid(null, bid);
-
-		for (Object part : (Object[]) args[8])
-		{
-			Object[] partArgs = (Object[]) part;
-			
-			String 	itemId   = (String) partArgs[0];
-			int    	quantity = (int)    partArgs[1];
-			
-			auction.addRequiredItem(ItemArtifact.getItem(itemId), quantity);
-		}
+		auction.bid(0,null, bid);
 		
 		if (auction.getBeginStep() + auction.getAuctionTime() > DynamicInfoArtifact.getStep())
 		{
@@ -260,20 +208,23 @@ public class JobArtifact extends Artifact {
 		int 	reward 		= (int)    args[2];
 		int 	start 		= (int)    args[3];
 		int 	end 		= (int)    args[4];
-		
-		Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
-		
-		Job job = new Job(reward, storage, start, end, "");
 
+		ItemBox itemBox = new ItemBox();
 		for (Object part : (Object[]) args[5])
-		{
-			Object[] partArgs = (Object[]) part;
-			
-			String 	itemId   = (String) partArgs[0];
-			int    	quantity = (int)    partArgs[1];
-			
-			job.addRequiredItem(ItemArtifact.getItem(itemId), quantity);
-		}
+        {
+            Object[] partArgs = (Object[]) part;
+
+            String 	itemId   = (String) partArgs[0];
+            int    	quantity = (int)    partArgs[1];
+
+            itemBox.store(ItemArtifact.getItem(itemId), quantity);
+        }
+
+        Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
+		
+		Job job = new Job(reward, storage, start, end, itemBox, "");
+
+
 		
 		if (!jobs.containsKey(id))
 			toBeAnnounced.put(id, "job");
@@ -294,22 +245,25 @@ public class JobArtifact extends Artifact {
 		int 	bid 		= (int)    args[6];
 //		int 	time		= (int)    args[7];
 		String	mId			= (String) args[8];
-		
+
+		ItemBox itemBox = new ItemBox();
+		for (Object part : (Object[]) args[9])
+        {
+            Object[] partArgs = (Object[]) part;
+
+            String itemId   = (String) partArgs[0];
+            int    quantity = (int)    partArgs[1];
+
+            itemBox.store(ItemArtifact.getItem(itemId), quantity);
+        }
+
 		Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
 		
-		Mission mission = new Mission(reward, storage, start, end, fine, null, mId);
+		Mission mission = new Mission(reward, storage, start, end, fine, itemBox, null, mId);
 		
-		mission.bid(null, bid);
+		mission.bid(0,null, bid);
 
-		for (Object part : (Object[]) args[9])
-		{
-			Object[] partArgs = (Object[]) part;
-			
-			String itemId   = (String) partArgs[0];
-			int    quantity = (int)    partArgs[1];
-			
-			mission.addRequiredItem(ItemArtifact.getItem(itemId), quantity);
-		}
+
 		
 		if (!missions.containsKey(id))
 			toBeAnnounced.put(id, "mission");	
@@ -327,20 +281,23 @@ public class JobArtifact extends Artifact {
 		int 	reward 		= (int)    args[2];
 		int 	start 		= (int)    args[3];
 		int 	end 		= (int)    args[4];
-		
+
+		ItemBox itemBox = new ItemBox();
+		for (Object part : (Object[]) args[5])
+        {
+            Object[] partArgs = (Object[]) part;
+
+            String 	itemId   = (String) partArgs[0];
+            int    	quantity = (int)    partArgs[1];
+
+            itemBox.store(ItemArtifact.getItem(itemId), quantity);
+        }
+
 		Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
 		
-		Job job = new Job(reward, storage, start, end, "");
+		Job job = new Job(reward, storage, start, end, itemBox, "");
 
-		for (Object part : (Object[]) args[5])
-		{
-			Object[] partArgs = (Object[]) part;
-			
-			String 	itemId   = (String) partArgs[0];
-			int    	quantity = (int)    partArgs[1];
-			
-			job.addRequiredItem(ItemArtifact.getItem(itemId), quantity);
-		}
+
 
 		if (!postedJobs.containsKey(id))
 			toBeAnnounced.put(id, "postedJob");

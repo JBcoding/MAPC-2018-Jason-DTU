@@ -125,7 +125,7 @@ public class FacilityArtifact extends Artifact {
 	{
 		CEntity agent = AgentArtifact.getEntity(getOpUserName());
 		
-		duration.set(StaticInfoArtifact.getRoute(getOpUserName(), getFacility(facilityName).getLocation()).getRouteDuration(agent.getRole().getSpeed()));
+		duration.set(StaticInfoArtifact.getRoute(getOpUserName(), getFacility(facilityName).getLocation()).getRouteDuration(agent.getCurrentSpeed()));
 	}
 	
 	@OPERATION 
@@ -226,8 +226,10 @@ public class FacilityArtifact extends Artifact {
 	// Literal(String, double, double, int, List<Literal(String, int, int)>)
 	private static void perceiveShop(Percept percept) 
 	{
+		throw new Error("TODO");
+		/*
 		Object[] args = Translator.perceptToObject(percept);
-		
+
 		String 	name	= (String) args[0];
 		double 	lat		= (double) args[1];
 		double 	lon		= (double) args[2];
@@ -246,7 +248,7 @@ public class FacilityArtifact extends Artifact {
 			shop.addItem(ItemArtifact.getItem(itemId), quantity, price);	
 			ItemArtifact.addItemLocation(itemId, shop);
 		}
-		shops.put(name, shop);
+		shops.put(name, shop);*/
 	}
 
 	// Literal(String, double, double, int)
@@ -292,7 +294,7 @@ public class FacilityArtifact extends Artifact {
 	
 	public static Facility getFacility(String facilityName)
 	{
-		if (facilityName == "none") return null;
+		if (facilityName.equals("none")) return null;
 		
 		return allFacilities.stream().filter(facilities -> facilities.containsKey(facilityName))
 				.findFirst().get().get(facilityName);
