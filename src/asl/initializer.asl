@@ -15,4 +15,4 @@
 	for (assembleRequest(_, _, _, _, _, CnpId)) { clearAssemble(CnpId); };
 	for (retrieveRequest(_, _, _, CnpId)) { clearRetrieve(CnpId); };
 	-reset.
-	
+

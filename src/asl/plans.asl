@@ -52,6 +52,7 @@
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
 +!charge : charge(X) & maxCharge(X).
+// +!charge : not enoughCharge <- recharge.
 +!charge : inChargingStation 			<- !doAction(charge); !charge.
 +!charge <-
 	getClosestFacility("chargingStation", F);
