@@ -188,7 +188,6 @@ public class StaticInfoArtifact extends Artifact {
         RoleData rd = new RoleData(name, baseSpeed, maxSpeed, baseBattery, maxBattery, baseLoad, maxLoad, baseSkill, maxSkill, baseVision, maxVision);
 		throw new Error("TODO ISH");
 
-
 		//roles.put(name, role);
 	}
 

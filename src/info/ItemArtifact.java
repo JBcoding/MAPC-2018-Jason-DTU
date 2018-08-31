@@ -22,6 +22,7 @@ import env.EIArtifact;
 import env.Translator;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
+import massim.scenario.city.data.Role;
 import massim.scenario.city.data.facilities.Shop;
 
 public class ItemArtifact extends Artifact {
@@ -228,78 +229,98 @@ public class ItemArtifact extends Artifact {
 	
 	public static void perceiveInitial(Collection<Percept> percepts)
 	{		
-		Map<Item, Set<Object[]>> requirements = new HashMap<>();
+		Map<Item, Set<String>> requirements = new HashMap<>();
 		
 		percepts.stream().filter(percept -> percept.getName().equals(ITEM))
 						 .forEach(item -> perceiveItem(item, requirements));
 		
-		// Item requirements has to be added after all items have been created, 
-		// since they are not necessarily given in a chronological order.
-		// TODO: Tools and items that require assembly have a volume of 0.
+		// TODO: Tools and items that require assembly have a volume of 0. -- AHF: Still relevant?
 
-        throw new Error("TODO");
+        // This is hella annoying since we cannot add parts to items after the fact.
+        // Loop through the requirements map until empty and add an item to `items` if all
+        // requirements are already in `items`.
 
-		/*for (Entry<Item, Set<Object[]>> entry : requirements.entrySet())
-		{
-			Item item = entry.getKey();
-			
-			for (Object[] part : entry.getValue())
-			{
-				String itemId   = (String) part[0];
-				int    quantity = (int)    part[1];
-				
-				item.addRequirement(items.get(itemId), quantity);
-			}
-		}
+        while (!requirements.isEmpty()) {
+            Item finished = null;
+
+            for (Entry<Item, Set<String>> entry : requirements.entrySet()) {
+                finished = null;
+                Item item = entry.getKey();
+
+                HashSet<Item> partSet = new HashSet<>();
+
+                boolean missing = false;
+
+                for (String partId : entry.getValue()) {
+                    if (items.containsKey(partId)) {
+                        partSet.add(items.get(partId));
+                    } else {
+                        missing = true;
+                        break;
+                    }
+                }
+
+                if (missing) {
+                    continue;
+                }
+
+                Item newItem = new Item(item.getName(), item.getVolume(), partSet, item.getRequiredRoles());
+                items.put(item.getName(), newItem);
+                finished = item;
+            }
+
+            if (finished != null) {
+                requirements.remove(finished);
+            }
+        }
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{
 			logger.info("Perceived items:");		
 			for (Item item : items.values())
 				logger.info(item.toString());
-		}*/
+		}
 	}
 
 	// Literal(String, int, Literal(List<String>), Literal(List<List<String, int>>))
-	private static void perceiveItem(Percept percept, Map<Item, Set<Object[]>> requirements)
+	private static void perceiveItem(Percept percept, Map<Item, Set<String>> requirements)
 	{				
 		Object[] args = Translator.perceptToObject(percept);
 		
-		String     id		= (String) args[0];
-		int 	   volume	= (int)    args[1];
+		String id = (String) args[0];
+		int volume = (int) args[1];
+		Object[] roles = (Object[]) args[2];
+        Object[] parts = (Object[]) args[3];
 
-        Item item = new Item(id, volume, Collections.emptySet(), Collections.emptySet());
 
-        // TODO: FIX
-
-        throw new Error("TODO");
-
-        /*for (Object rolesArg : ((Object[]) ((Object[]) args[2])[0]))
-        {
-            String toolId = (String) rolesArg;
-
-            if (!tools.containsKey(toolId))
-            {
-                tools.put(toolId, new Tool(toolId, 0, 0));
-            }
-            item.addRequiredTool(tools.get(toolId));
+        HashSet<Role> roleSet = new HashSet<>();
+        for (Object roleId : (Object[]) roles[0]) {
+            Role role = StaticInfoArtifact.getRole((String) roleId);
+            roleSet.add(role);
         }
 
-        Set<Object[]> parts = new HashSet<>();
-
-        for (Object part : ((Object[]) ((Object[]) args[3])[0]))
-        {
-            parts.add((Object[]) part);
+        HashSet<String> partSet = new HashSet<>();
+        for (Object partId : (Object[]) parts[0]) {
+            // We cannot process the parts yet as we do not know of all items.
+            // Instead we add just the identifier here and deal with it in perceiveInitial above.
+            partSet.add((String) partId);
         }
-        items.put(id, item);
-        requirements.put(item, parts);*/
 
+        Item item = new Item(id, volume, Collections.emptySet(), roleSet);
+
+        // Only put base items into items and store the rest as keys in requirements.
+        // perceiveInitial above will populate items in the correct order.
+        if (requirements.isEmpty()) {
+            items.put(id, item);
+        }
+        requirements.put(item, partSet);
     }
 
 	// Used by the FacilityArtifact when adding items to shops.
 	public static Item getItem(String itemId)
 	{
         if (items.containsKey(itemId)) return items.get(itemId);
+        logger.warning("Unknown item: " + itemId);
         return null;
 	}
 	
