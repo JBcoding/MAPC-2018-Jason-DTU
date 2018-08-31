@@ -19,12 +19,8 @@ import data.CUtil;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
-import massim.protocol.scenario.city.data.ItemAmountData;
 import massim.scenario.city.data.*;
-import massim.scenario.city.data.facilities.Facility;
-import massim.scenario.city.data.facilities.Shop;
 import massim.scenario.city.data.facilities.Storage;
-import massim.scenario.city.util.GraphHopperManager;
 
 public class JobArtifact extends Artifact {
 	

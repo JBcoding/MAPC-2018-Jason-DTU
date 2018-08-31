@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,11 +17,8 @@ import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import eis.AgentListener;
 import eis.EnvironmentInterfaceStandard;
-import eis.iilang.Action;
-import eis.iilang.Identifier;
-import eis.iilang.Parameter;
-import eis.iilang.Percept;
-import eis.iilang.PrologVisitor;
+import eis.EnvironmentListener;
+import eis.iilang.*;
 import info.AgentArtifact;
 import info.DynamicInfoArtifact;
 import info.FacilityArtifact;
@@ -31,7 +29,7 @@ import logging.LoggerFactory;
 import massim.eismassim.EnvironmentInterface;
 import massim.scenario.city.data.Role;
 
-public class EIArtifact extends Artifact {
+public class EIArtifact extends Artifact implements AgentListener, EnvironmentListener {
 
     private static final Logger logger = Logger.getLogger(EIArtifact.class.getName());
     
@@ -56,14 +54,14 @@ public class EIArtifact extends Artifact {
 		try 
 		{
 			ei = new EnvironmentInterface(configFile);
-			
+
 			// Get the team name from EI. Should be a better way
 			this.team = ((String) (ei.getEntities().toArray())[0]).substring(10, 11);
 
 			fileLogger = LoggerFactory.createFileLogger(team);
 			
 			ei.start();
-		} 
+		}
 		catch (Throwable e) 
 		{
 			logger.log(Level.SEVERE, "Failure in init: " + e.getMessage(), e);
@@ -71,55 +69,54 @@ public class EIArtifact extends Artifact {
     }
 	
 	@OPERATION
-	void register()  
-	{
-		String agentName 	= getOpUserName();
-		String id 			= agentName.substring(5);
-		String connection 	= "connection" + team + id;
-		String entity 		= "agent" + team + id;
-		
-		logger.fine("register " + agentName + " on " + connection);
-		
-		try 
-		{			
-			ei.registerAgent(agentName);
-			
-			ei.associateEntity(agentName, connection);
-			
-			connections	.put(agentName, connection);
-			entities	.put(agentName, entity);
+	void register() {
+        String agentName = getOpUserName();
+        String id = agentName.substring(5);
+        String connection = "connection" + team + id;
+        String entity = "agent" + team + id;
 
-			if (connections.size() == ei.getEntities().size())
-			{
-				// Attach listener for perceiving the following steps
-				ei.attachAgentListener(agentName, new AgentListener() 
-				{				
-					@Override
-					public void handlePercept(String agentName, Percept percept) 
-					{
-						if (percept.getName().equals("simStart"))
-						{
-							execInternalOp("perceiveInitial");
-						}
-						else if (percept.getName().equals("simEnd"))
-						{
-							System.out.println("This is the end!");
-							System.out.println(percept);
-						}
-						else if (percept.getName().equals("step"))
-						{
-							execInternalOp("perceiveUpdate");
-						}
-					}
-				});
-			}
-		}
-		catch (Throwable e) 
-		{
-			logger.log(Level.SEVERE, "Failure in register: " + e.getMessage(), e);
-		}
-	}
-	
+        logger.fine("register " + agentName + " on " + connection);
+
+        try {
+            ei.registerAgent(agentName);
+
+            ei.associateEntity(agentName, connection);
+
+            connections.put(agentName, connection);
+            entities.put(agentName, entity);
+
+            if (connections.size() == ei.getEntities().size()) {
+                // Attach listener for perceiving the following steps
+                ei.attachAgentListener(agentName, this);
+            }
+
+
+            if (connections.size() == ei.getEntities().size()) {
+                ei.attachEnvironmentListener(this);
+            }
+        } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Failure in register: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void handlePercept(String s, Percept percept) {
+        switch (percept.getName()) {
+            case "simStart":
+                execInternalOp("perceiveInitial");
+                break;
+            case "simEnd":
+                System.out.println("This is the end!");
+                System.out.println(percept);
+                break;
+            case "step":
+                execInternalOp("perceiveUpdate");
+                break;
+            default:
+                logger.warning("Unhandled percept: " + percept.getName());
+        }
+    }
+
 	public static void performAction(String agentName, Action action)
 	{
 		logger.fine("Step " + DynamicInfoArtifact.getStep() + ": " + agentName + " doing " + action);
@@ -288,4 +285,24 @@ public class EIArtifact extends Artifact {
 			fileLogger.info("Completed jobs: " + DynamicInfoArtifact.getJobsCompleted());
 		}
 	}
+
+    @Override
+    public void handleStateChange(EnvironmentState environmentState) {
+	    System.out.println("State change.");
+    }
+
+    @Override
+    public void handleFreeEntity(String s, Collection<String> collection) {
+
+    }
+
+    @Override
+    public void handleDeletedEntity(String s, Collection<String> collection) {
+
+    }
+
+    @Override
+    public void handleNewEntity(String s) {
+
+    }
 }
