@@ -34,10 +34,10 @@
 			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/junit-4.8.2.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/jason.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/jade-4.3.jar"/>
-			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/eismassim.jar"/>
-			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/javaagents.jar"/>
-			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/protocol.jar"/>
-			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/server.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/eismassim-3.6-jar-with-dependencies.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/javaagents-2018-1.0-jar-with-dependencies.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/protocol-1.6.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/agentcontest/server-2018-1.1-jar-with-dependencies.jar"/>
 		</jar>
 	</target>
 </project>
