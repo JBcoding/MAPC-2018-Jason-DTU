@@ -226,29 +226,15 @@ public class FacilityArtifact extends Artifact {
 	// Literal(String, double, double, int, List<Literal(String, int, int)>)
 	private static void perceiveShop(Percept percept) 
 	{
-		throw new Error("TODO");
-		/*
 		Object[] args = Translator.perceptToObject(percept);
 
 		String 	name	= (String) args[0];
 		double 	lat		= (double) args[1];
 		double 	lon		= (double) args[2];
-		int    	restock	= (int)    args[3];
 		
-		Shop shop = new Shop(name, new Location(lon, lat), restock);
+		Shop shop = new Shop(name, new Location(lon, lat), 1);
 
-		for (Object item : (Object[]) args[4]) 
-		{
-			Object[] itemArgs = (Object[]) item;
-			
-			String 	itemId 		= (String) itemArgs[0];
-			int 	price 	  	= (int)    itemArgs[1];
-			int 	quantity  	= (int)    itemArgs[2];
-			
-			shop.addItem(ItemArtifact.getItem(itemId), quantity, price);	
-			ItemArtifact.addItemLocation(itemId, shop);
-		}
-		shops.put(name, shop);*/
+		shops.put(name, shop);
 	}
 
 	// Literal(String, double, double, int)
