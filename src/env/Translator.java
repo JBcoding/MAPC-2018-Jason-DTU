@@ -136,7 +136,7 @@ public class Translator
 	 * @return
 	 */
 	public static Literal perceptToLiteral(Percept percept) {
-		return Literal.parseLiteral(PrologVisitor.staticVisit(percept));
+		return Literal.parseLiteral(percept.toString());
 	}
 	
 	public static Object[] perceptToObject(Percept p) {
