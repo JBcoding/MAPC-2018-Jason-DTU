@@ -19,9 +19,7 @@ import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
 import massim.protocol.scenario.city.data.RoleData;
-import massim.scenario.city.data.Location;
-import massim.scenario.city.data.Role;
-import massim.scenario.city.data.Route;
+import massim.scenario.city.data.*;
 
 public class StaticInfoArtifact extends Artifact {
 	
@@ -170,6 +168,7 @@ public class StaticInfoArtifact extends Artifact {
 	// Literal(String,)
 	private static void perceiveRole(Percept percept)
 	{
+        System.out.println(percept);
 		Object[] args = Translator.perceptToObject(percept);
 
         String name = (String) args[0];
@@ -186,9 +185,19 @@ public class StaticInfoArtifact extends Artifact {
 
 
         RoleData rd = new RoleData(name, baseSpeed, maxSpeed, baseBattery, maxBattery, baseLoad, maxLoad, baseSkill, maxSkill, baseVision, maxVision);
-		throw new Error("TODO ISH");
 
-		//roles.put(name, role);
+        Set<String> permissions = new HashSet<>();
+        if (name.equals("drone")) {
+            permissions.add("air");
+        } else {
+            permissions.add("road");
+        }
+
+        System.out.println(name);
+
+
+        Role role = RoleGetter.getRole(rd, permissions);
+		roles.put(name, role);
 	}
 
 	// Literal(int)
@@ -218,7 +227,7 @@ public class StaticInfoArtifact extends Artifact {
 	/**
 	 * @return The roles in this simulation
 	 */
-	public static Collection<Role> getRoles() 
+	public static Collection<Role> getRoles()
 	{
 		return roles.values();
 	}	
