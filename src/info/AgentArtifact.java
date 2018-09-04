@@ -40,7 +40,8 @@ public class AgentArtifact extends Artifact {
 	private static final String LON 				= "lon";
 	private static final String LOAD				= "load";
 	private static final String ROUTE 				= "route";
-	private static final String ROUTE_LENGTH 		= "routeLength";
+    private static final String ROUTE_LENGTH 		= "routeLength";
+    private static final String CURRENT_BATTERY     = "maxBattery";
 	
 	public static final Set<String>	PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(ACTION_ID, CHARGE, FACILITY, HAS_ITEM, LAST_ACTION, LAST_ACTION_PARAMS, 
@@ -62,9 +63,11 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("load", 				0);                
 		defineObsProperty("routeLength", 		0);                
 		defineObsProperty("lastAction", 		"noAction"); 
-		defineObsProperty("lastActionResult", 	"successful");           
-		defineObsProperty("lastActionParam", 	"[]");            
-	}
+		defineObsProperty("lastActionResult", 	"successful");
+        defineObsProperty("lastActionParam", 	"[]");
+
+        defineObsProperty("currentBattery", 	250);
+    }
 	
 	/**
 	 * Get the artifact related to the agent
@@ -162,7 +165,8 @@ public class AgentArtifact extends Artifact {
 			case LAT: 					perceiveLat(percept); break;
 			case LON: 					perceiveLon(percept); break;
 			case ROUTE: 				perceiveRoute(percept); break;
-			case ROUTE_LENGTH: 			perceiveRouteLength(percept); break;
+            case ROUTE_LENGTH: 			perceiveRouteLength(percept); break;
+            case CURRENT_BATTERY:       perceiveCurrentBattery(percept); break;
 			}
 		}
 		
@@ -192,14 +196,31 @@ public class AgentArtifact extends Artifact {
 	 * @param percept
 	 */
 	@OPERATION
-	private void perceiveCharge(Percept percept) 
+	private void perceiveCharge(Percept percept)
 	{
 		int charge = (int) Translator.perceptToObject(percept)[0];
-		
-		if (charge != this.getEntity().getCurrentBattery())
+
+		if (charge != this.getEntity().getCurrentCharge())
 		{
-			this.getEntity().setCurrentBattery(charge);
-			getObsProperty("charge").updateValue(this.getEntity().getCurrentBattery());
+			this.getEntity().setCurrentCharge(charge);
+			getObsProperty("charge").updateValue(this.getEntity().getCurrentCharge());
+		}
+	}
+
+	/**
+	 * Literal(int)
+	 * Battery is the amount of charge when the agent is fully charged
+	 * @param percept
+	 */
+	@OPERATION
+	private void perceiveCurrentBattery(Percept percept)
+	{
+		int battery = (int) Translator.perceptToObject(percept)[0];
+
+		if (battery != this.getEntity().getCurrentBattery())
+		{
+			this.getEntity().setCurrentCharge(battery);
+			getObsProperty("currentBattery").updateValue(this.getEntity().getCurrentBattery());
 		}
 	}
 	
@@ -242,7 +263,6 @@ public class AgentArtifact extends Artifact {
 	
 	/**
 	 * Literal(String)
-	 * @param agentName
 	 * @param percept
 	 */
 	@OPERATION
@@ -262,7 +282,6 @@ public class AgentArtifact extends Artifact {
 	
 	/**
 	 * Literal(String)
-	 * @param agentName
 	 * @param percept
 	 */
 	@OPERATION
@@ -279,7 +298,6 @@ public class AgentArtifact extends Artifact {
 	
 	/**
 	 * Literal(int)
-	 * @param agentName
 	 * @param percept
 	 */
 	private void perceiveLat(Percept percept)
@@ -291,7 +309,6 @@ public class AgentArtifact extends Artifact {
 	
 	/**
 	 * Literal(int)
-	 * @param agentName
 	 * @param percept
 	 */
 	private void perceiveLon(Percept percept)
@@ -303,7 +320,6 @@ public class AgentArtifact extends Artifact {
 	
 	/**
 	 * Literal([wp(int, lat, lon)])
-	 * @param agentName
 	 * @param percept
 	 */
 	public void perceiveRoute(Percept percept)
@@ -328,7 +344,6 @@ public class AgentArtifact extends Artifact {
 	
 	/**
 	 * Literal(int)
-	 * @param agentName
 	 * @param percept
 	 */
 	@OPERATION

@@ -36,6 +36,7 @@ public class CEntity {
 
     private int currentSpeed;
 
+    private int currentCharge;
     private int currentBattery;
     private CBoundedItemBox items;
 
@@ -54,21 +55,31 @@ public class CEntity {
         items = new CBoundedItemBox(role.getMaxLoad());
         this.lat = location.getLat();
         this.lon = location.getLon();
-        currentBattery = role.getMaxBattery();
+        currentCharge = role.getBaseBattery();
+        currentBattery = role.getBaseBattery();
     }
 
     public Set<String> getPermissions()
     {
     	return this.permissions;
     }
-    
+
+    public int getCurrentCharge(){
+        return currentCharge;
+    }
+
+    public void setCurrentCharge(int charge)
+    {
+        this.currentCharge = charge;
+    }
+
     public int getCurrentBattery(){
         return currentBattery;
     }
-    
+
     public void setCurrentBattery(int battery)
     {
-    	this.currentBattery = battery;
+        this.currentBattery = battery;
     }
 
     public int getCurrentLoad(){
@@ -135,12 +146,12 @@ public class CEntity {
         if (route == null) {
             return false;
         }
-        if (currentBattery < cost){
+        if (currentCharge < cost){
             route = null;
-            currentBattery = 0;
+            currentCharge = 0;
             return false;
         }
-        currentBattery -= cost;
+        currentCharge -= cost;
         Location newLoc = this.route.advance(getCurrentSpeed());
         if (newLoc != null) 
     	{
@@ -224,7 +235,7 @@ public class CEntity {
      * @param rate the amount to charge
      */
     public void charge(int rate) {
-        currentBattery = Math.min(currentBattery + rate, role.getMaxBattery());
+        currentCharge = Math.min(currentCharge + rate, getCurrentBattery());
     }
 
     /**
@@ -261,7 +272,7 @@ public class CEntity {
      * Completely drains the entity's battery.
      */
     public void discharge(){
-        this.currentBattery = 0;
+        this.currentCharge = 0;
     }
 
 	public void setFacility(Facility facility) {

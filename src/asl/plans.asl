@@ -11,7 +11,7 @@
 +!retrieveItems(map(Shop, Items)) <-
 	!getToFacility(Shop);
 	!buyItems(Items).
-	
+
 +!buyItems([]).
 +!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
 +!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <- 
@@ -51,7 +51,7 @@
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F)	<- !charge; 			!getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
-+!charge : charge(X) & maxCharge(X).
++!charge : charge(X) & currentBattery(X).
 // +!charge : not enoughCharge <- recharge.
 +!charge : inChargingStation 			<- !doAction(charge); !charge.
 +!charge <-
