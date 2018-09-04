@@ -18,7 +18,7 @@ public class CUtil {
 
 	public static Map<String, Integer> toStringMap(Map<Item, Integer> items) {
 		return items.entrySet().stream()
-				.collect(Collectors.toMap(e -> e.getKey().getName(), Entry::getValue));
+				.collect(Collectors.toMap(CUtil::getName, Entry::getValue));
 	}
 
 	public static String getName(Entry<Item, Integer> entry) {

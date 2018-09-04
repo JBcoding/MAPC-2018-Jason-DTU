@@ -179,7 +179,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			// TODO:
 			for (Role role : StaticInfoArtifact.getRoles())
 			{
-				defineObsProperty("role", role.getName(), role.getBaseSpeed(), role.getMaxSpeed(), role.getMaxLoad(),
+				defineObsProperty("role", role.getName(), role.getMaxSpeed(), role.getMaxLoad(),
 						role.getMaxBattery(), role.getPermissions().toArray());
 			}
 

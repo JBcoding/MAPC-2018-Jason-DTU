@@ -38,6 +38,7 @@ public class CEntity {
 
     private int currentCharge;
     private int currentBattery;
+    private int currentCapacity;
     private CBoundedItemBox items;
 
     private Action lastAction = Action.STD_NO_ACTION;
@@ -80,6 +81,14 @@ public class CEntity {
     public void setCurrentBattery(int battery)
     {
         this.currentBattery = battery;
+    }
+
+    public int getCurrentCapacity(){
+        return currentCapacity;
+    }
+
+    public void setCurrentCapacity(int capacity) {
+        this.currentCapacity = capacity;
     }
 
     public int getCurrentLoad(){

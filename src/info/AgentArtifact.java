@@ -42,7 +42,8 @@ public class AgentArtifact extends Artifact {
 	private static final String ROUTE 				= "route";
     private static final String ROUTE_LENGTH 		= "routeLength";
     private static final String CURRENT_BATTERY     = "maxBattery";
-	
+    private static final String CURRENT_CAPACITY = "maxLoad";
+
 	public static final Set<String>	PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(ACTION_ID, CHARGE, FACILITY, HAS_ITEM, LAST_ACTION, LAST_ACTION_PARAMS, 
 				LAST_ACTION_RESULT, LAT, LON, LOAD, ROUTE, ROUTE_LENGTH)));
@@ -58,7 +59,8 @@ public class AgentArtifact extends Artifact {
 		
 		artifacts.put(this.agentName, this);
 		
-		defineObsProperty("inFacility", 		"none");               
+		defineObsProperty("inFacility", 		"none");
+        defineObsProperty("speed", 	0);
 		defineObsProperty("charge", 			250);
 		defineObsProperty("load", 				0);                
 		defineObsProperty("routeLength", 		0);                
@@ -67,8 +69,9 @@ public class AgentArtifact extends Artifact {
         defineObsProperty("lastActionParam", 	"[]");
 
         defineObsProperty("currentBattery", 	250);
+        defineObsProperty("currentCapacity", 	0);
     }
-	
+
 	/**
 	 * Get the artifact related to the agent
 	 * @param agentName Name of the agent
@@ -167,16 +170,19 @@ public class AgentArtifact extends Artifact {
 			case ROUTE: 				perceiveRoute(percept); break;
             case ROUTE_LENGTH: 			perceiveRouteLength(percept); break;
             case CURRENT_BATTERY:       perceiveCurrentBattery(percept); break;
+            case CURRENT_CAPACITY: perceiveCurrentCapacity(percept); break;
 			}
 		}
 		
 
 		if (load != this.getEntity().getCurrentLoad())
 		{
-			getObsProperty("load"  				).updateValue(this.getEntity().getCurrentLoad());
+			getObsProperty("load").updateValue(this.getEntity().getCurrentLoad());
 		}
 		
-		getObsProperty("lastActionParam"  	).updateValue(this.getEntity().getLastActionParam());
+		getObsProperty("lastActionParam").updateValue(this.getEntity().getLastActionParam());
+
+		getObsProperty("speed").updateValue(this.getEntity().getCurrentSpeed());
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{
@@ -223,7 +229,23 @@ public class AgentArtifact extends Artifact {
 			getObsProperty("currentBattery").updateValue(this.getEntity().getCurrentBattery());
 		}
 	}
-	
+
+    /**
+     * Literal(int)
+     * @param percept
+     */
+    @OPERATION
+    private void perceiveCurrentCapacity(Percept percept)
+    {
+        int capacity = (int) Translator.perceptToObject(percept)[0];
+
+        if (capacity != this.getEntity().getCurrentCapacity())
+        {
+            this.getEntity().setCurrentCapacity(capacity);
+            getObsProperty("currentCapacity").updateValue(this.getEntity().getCurrentCapacity());
+        }
+    }
+
 	@OPERATION
 	public void perceiveFacility(Percept percept) 
 	{
