@@ -1,0 +1,11 @@
+MAS multiagent_jason {
+	
+    environment: c4jason.CartagoEnvironment
+
+    agents:  
+    	announcer	agentArchClass c4jason.CAgentArch;
+    	initializer agentArchClass c4jason.CAgentArch;
+    	agent		agentArchClass c4jason.CAgentArch #34;
+
+	aslSourcePath: "src/asl";
+}

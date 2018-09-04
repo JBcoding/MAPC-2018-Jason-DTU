@@ -98,7 +98,7 @@ public class JobArtifact extends Artifact {
 	 */
 	public static int estimateSteps(Job job)
 	{
-		return 0;
+		return 1;
 	}
 	
 	@OPERATION

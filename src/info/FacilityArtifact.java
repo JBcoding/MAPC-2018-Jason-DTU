@@ -233,8 +233,7 @@ public class FacilityArtifact extends Artifact {
 		double 	lon		= (double) args[2];
 		
 		Shop shop = new Shop(name, new Location(lon, lat), 1);
-
-		shops.put(name, shop);
+        shops.put(name, shop);
 	}
 
 	// Literal(String, double, double, int)

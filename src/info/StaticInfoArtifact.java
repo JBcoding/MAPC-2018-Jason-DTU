@@ -168,7 +168,6 @@ public class StaticInfoArtifact extends Artifact {
 	// Literal(String,)
 	private static void perceiveRole(Percept percept)
 	{
-        System.out.println(percept);
 		Object[] args = Translator.perceptToObject(percept);
 
         String name = (String) args[0];
@@ -192,9 +191,6 @@ public class StaticInfoArtifact extends Artifact {
         } else {
             permissions.add("road");
         }
-
-        System.out.println(name);
-
 
         Role role = RoleGetter.getRole(rd, permissions);
 		roles.put(name, role);
