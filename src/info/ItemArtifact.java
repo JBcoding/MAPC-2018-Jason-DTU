@@ -263,7 +263,6 @@ public class ItemArtifact extends Artifact {
                 }
 
                 Item newItem = new Item(item.getName(), item.getVolume(), partSet, item.getRequiredRoles());
-                System.out.println(newItem.getName());
                 items.put(newItem.getName(), newItem);
                 finished = item;
                 break;
