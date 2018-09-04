@@ -43,9 +43,8 @@ public class ItemArtifact extends Artifact {
 	}
 	
 	public static Map<Item, Integer> getBaseItems(String name)
-	{	
-		return items.get(name).getRequiredBaseItems().entrySet().stream()
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));				
+	{
+		return items.get(name).getRequiredBaseItems();
 	}
 
 	/**
@@ -244,7 +243,6 @@ public class ItemArtifact extends Artifact {
             Item finished = null;
 
             for (Entry<Item, Set<String>> entry : requirements.entrySet()) {
-                finished = null;
                 Item item = entry.getKey();
 
                 HashSet<Item> partSet = new HashSet<>();
@@ -265,8 +263,9 @@ public class ItemArtifact extends Artifact {
                 }
 
                 Item newItem = new Item(item.getName(), item.getVolume(), partSet, item.getRequiredRoles());
-                items.put(item.getName(), newItem);
+                items.put(newItem.getName(), newItem);
                 finished = item;
+                break;
             }
 
             if (finished != null) {
