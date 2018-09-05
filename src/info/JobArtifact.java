@@ -240,27 +240,20 @@ public class JobArtifact extends Artifact {
 		int 	end 		= (int)    args[4];
 		int 	fine		= (int)    args[5];
 		int 	bid 		= (int)    args[6];
-//		int 	time		= (int)    args[7];
-		String	mId			= (String) args[8];
+		int 	time		= (int)    args[7]; // TODO: This is the same as auction, but what is its purpose here?
+        Object[] itemsToBuild = (Object[]) args[8];
 
 		ItemBox itemBox = new ItemBox();
-		for (Object part : (Object[]) args[9])
-        {
-            Object[] partArgs = (Object[]) part;
-
-            String itemId   = (String) partArgs[0];
-            int    quantity = (int)    partArgs[1];
-
-            itemBox.store(ItemArtifact.getItem(itemId), quantity);
+        for (Object tuple : itemsToBuild) {
+            Object[] tup = (Object[])tuple;
+            itemBox.store(ItemArtifact.getItem((String)tup[0]), (int) tup[1]);
         }
 
 		Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
 		
-		Mission mission = new Mission(reward, storage, start, end, fine, itemBox, null, mId);
+		Mission mission = new Mission(reward, storage, start, end, fine, itemBox, null, id);
 		
 		mission.bid(0,null, bid);
-
-
 		
 		if (!missions.containsKey(id))
 			toBeAnnounced.put(id, "mission");	

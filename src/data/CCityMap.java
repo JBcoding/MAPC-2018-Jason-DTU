@@ -24,6 +24,7 @@ public class CCityMap implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private String mapName;
 	private double cellSize;
 	private double minLat;
 	private double maxLat;
@@ -33,6 +34,7 @@ public class CCityMap implements Serializable {
 
 	public CCityMap(String mapName, double cellSize, double minLat, double maxLat, double minLon, double maxLon, Location center) 
 	{
+	    this.mapName = mapName;
 		this.cellSize = cellSize;
 		this.minLon = minLon;
 		this.maxLon = maxLon;
@@ -257,5 +259,14 @@ public class CCityMap implements Serializable {
 	public Location getCenter()
 	{
 		return center;
+	}
+
+	/**
+	 * @return A string with all information about the map
+	 */
+	@Override
+	public String toString() {
+		return String.format("Map of %s. Min lat: %f Min lon: %f Max lat: %f Max lon: %f Center: (%f, %f).",
+                mapName, minLat, minLon, maxLat, maxLon, center.getLat(), center.getLon());
 	}
 }
