@@ -117,8 +117,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
         }
     }
 
-	public static void performAction(String agentName, Action action)
-	{
+	public static void performAction(String agentName, Action action) {
 		logger.fine("Step " + DynamicInfoArtifact.getStep() + ": " + agentName + " doing " + action);
 		
 		try 

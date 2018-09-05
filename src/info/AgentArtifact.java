@@ -241,7 +241,7 @@ public class AgentArtifact extends Artifact {
 
 		if (battery != this.getEntity().getCurrentBattery())
 		{
-			this.getEntity().setCurrentCharge(battery);
+			this.getEntity().setCurrentBattery(battery);
 			getObsProperty("currentBattery").updateValue(this.getEntity().getCurrentBattery());
 		}
 	}

@@ -45,7 +45,7 @@ public class CNPArtifact extends Artifact {
 	 */
 	@OPERATION
 	void bid(int bid)
-	{		
+	{
 		if (isOpen)
 		{
 			if (bestBid == null || bestBid.getBid() > bid)
@@ -95,7 +95,7 @@ public class CNPArtifact extends Artifact {
 	void takeTask(OpFeedbackParam<Boolean> canTake)
 	{
 		await("biddingClosed");
-		
+
 		if (bestBid == null && winner == null)
 		{
 			winner = getOpUserName();
