@@ -164,11 +164,12 @@ public class JobArtifact extends Artifact {
 		int 	fine		= (int)    args[5];
 		int 	bid 		= (int)    args[6];
 		int 	time		= (int)    args[7];
-		Object[][] itemsToBuild = (Object[][]) args[8];
+		Object[] itemsToBuild = (Object[]) args[8];
 
         ItemBox itemBox = new ItemBox();
-        for (Object[] tuple : itemsToBuild) {
-            itemBox.store(ItemArtifact.getItem((String)tuple[0]), (int) tuple[1]);
+        for (Object tuple : itemsToBuild) {
+        	Object[] tup = (Object[])tuple;
+            itemBox.store(ItemArtifact.getItem((String)tup[0]), (int) tup[1]);
         }
 		
 		Storage storage = (Storage) FacilityArtifact.getFacility(FacilityArtifact.STORAGE, storageId);
