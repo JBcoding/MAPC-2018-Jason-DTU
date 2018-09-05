@@ -43,6 +43,7 @@ public class AgentArtifact extends Artifact {
     private static final String ROUTE_LENGTH 		= "routeLength";
     private static final String CURRENT_BATTERY     = "maxBattery";
     private static final String CURRENT_CAPACITY = "maxLoad";
+	private static final String SPEED = "speed";
 
 	public static final Set<String>	PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(ACTION_ID, CHARGE, FACILITY, HAS_ITEM, LAST_ACTION, LAST_ACTION_PARAMS, 
@@ -171,6 +172,7 @@ public class AgentArtifact extends Artifact {
             case ROUTE_LENGTH: 			perceiveRouteLength(percept); break;
             case CURRENT_BATTERY:       perceiveCurrentBattery(percept); break;
             case CURRENT_CAPACITY: perceiveCurrentCapacity(percept); break;
+			case SPEED: perceiveSpeed(percept); break;
 			}
 		}
 		
@@ -181,8 +183,6 @@ public class AgentArtifact extends Artifact {
 		}
 		
 		getObsProperty("lastActionParam").updateValue(this.getEntity().getLastActionParam());
-
-		getObsProperty("speed").updateValue(this.getEntity().getCurrentSpeed());
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{
@@ -210,6 +210,22 @@ public class AgentArtifact extends Artifact {
 		{
 			this.getEntity().setCurrentCharge(charge);
 			getObsProperty("charge").updateValue(this.getEntity().getCurrentCharge());
+		}
+	}
+
+	/**
+	 * Literal(int)
+	 * @param percept
+	 */
+	@OPERATION
+	private void perceiveSpeed(Percept percept)
+	{
+		int speed = (int) Translator.perceptToObject(percept)[0];
+
+		if (speed != this.getEntity().getCurrentSpeed())
+		{
+			this.getEntity().setCurrentSpeed(speed);
+			getObsProperty("speed").updateValue(this.getEntity().getCurrentSpeed());
 		}
 	}
 
