@@ -23,6 +23,8 @@ import env.Translator;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Role;
+import massim.scenario.city.data.facilities.Facility;
+import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Shop;
 
 public class ItemArtifact extends Artifact {
@@ -126,7 +128,7 @@ public class ItemArtifact extends Artifact {
 	{
 		ret.set(getShoppingList(Translator.convertASObjectToMap(itemsMap)).entrySet().stream()
 				.collect(Collectors.toMap(shop -> shop.getKey().getName(), map -> map.getValue().entrySet().stream()
-						.collect(Collectors.toMap(item -> item.getKey().getName(), amount -> amount.getValue())))));
+						.collect(Collectors.toMap(item -> item.getKey().getName(), Entry::getValue)))));
 	}
 	
 	/**
@@ -137,6 +139,24 @@ public class ItemArtifact extends Artifact {
 	public static Map<Shop, Map<Item, Integer>> getShoppingList(Map<Item, Integer> items)
 	{	
 		Map<Shop, Map<Item, Integer>> shoppingList = new HashMap<>();
+
+		/*
+		Map<String, ResourceNode> nodes = FacilityArtifact.getResourceNodes();
+
+        for (Entry<Item, Integer> entry : items.entrySet()) {
+            Item item = entry.getKey();
+            int amount = entry.getValue();
+
+            if (!item.getRequiredItems().isEmpty()) {
+                // We can only gather base items
+                continue;
+            }
+
+
+        }
+        */
+
+		// TODO: This needs to return a map keyed by resource nodes instead.
 
 		return shoppingList;
 	}

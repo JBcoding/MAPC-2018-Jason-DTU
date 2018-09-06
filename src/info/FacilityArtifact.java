@@ -64,33 +64,44 @@ public class FacilityArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void getClosestFacility(String facilityType, OpFeedbackParam<String> ret)
-	{		
-		Location agentLoc = AgentArtifact.getEntity(getOpUserName()).getLocation();
-		
-		Collection<? extends Facility> facilities = Collections.emptySet();
+	void getClosestFacility(String facilityType, OpFeedbackParam<String> ret) {
+        Location agentLoc = AgentArtifact.getEntity(getOpUserName()).getLocation();
 
-		switch (facilityType)
-		{
-		case CHARGING_STATION: 	facilities = chargingStations	.values();	break;	
-		case DUMP:				facilities = dumps				.values();  break;        
-		case SHOP:				facilities = shops				.values();  break;           
-		case STORAGE:			facilities = storages			.values();  break;
-		case WORKSHOP:			facilities = workshops			.values();  break;
-		case RESOURCE_NODE:		facilities = resourceNodes		.values();  break;
-		}
-		
-		// What happens if the feedback parameter is null?
-		if (facilities.isEmpty())
-		{
-			ret.set("none");
-		}
-		else
-		{
-			ret.set(getClosestFacility(agentLoc, facilities));
-		}
-	}
-	
+        Collection<? extends Facility> facilities = Collections.emptySet();
+
+        switch (facilityType) {
+            case CHARGING_STATION:
+                facilities = chargingStations.values();
+                break;
+            case DUMP:
+                facilities = dumps.values();
+                break;
+            case SHOP:
+                facilities = shops.values();
+                break;
+            case STORAGE:
+                facilities = storages.values();
+                break;
+            case WORKSHOP:
+                facilities = workshops.values();
+                break;
+            case RESOURCE_NODE:
+                facilities = resourceNodes.values();
+                break;
+        }
+
+        // What happens if the feedback parameter is null?
+        if (facilities.isEmpty()) {
+            ret.set("none");
+        } else {
+            ret.set(getClosestFacility(agentLoc, facilities));
+        }
+    }
+
+    static Map<String, ResourceNode> getResourceNodes() {
+	    return new HashMap<>(resourceNodes);
+    }
+
 	@OPERATION
 	void getClosestShop(Object[] shopNames, OpFeedbackParam<String> ret)
 	{
