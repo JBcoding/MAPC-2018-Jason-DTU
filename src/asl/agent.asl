@@ -16,7 +16,7 @@ free.
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); !loop.
-+!loop <- !doAction(continue); !loop.
++!loop <- !doAction(recharge); !loop.
 	
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
