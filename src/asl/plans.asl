@@ -48,11 +48,11 @@
 	
 +!getToFacility(F) : inFacility(F).
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
-+!getToFacility(F) : not enoughCharge & not isChargingStation(F)	<- !getToFacility(F).
++!getToFacility(F) : not enoughCharge & not isChargingStation(F) <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
 +!charge : charge(X) & currentBattery(X).
-// +!charge : not enoughCharge <- recharge.
++!charge : not canMove <- !doAction(recharge); !charge.
 +!charge : inChargingStation <-
     !doAction(charge);
     !charge.
