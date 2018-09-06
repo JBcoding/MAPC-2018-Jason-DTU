@@ -36,6 +36,6 @@
 
   "teams" : {
     "A" : "$(teams/A.json)",
-    "B" : "$(teams/B.json)"
+    "Jason-DTU" : "$(teams/B.json)"
   }
 }

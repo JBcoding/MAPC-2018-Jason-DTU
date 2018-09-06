@@ -57,7 +57,7 @@ public class AgentArtifact extends Artifact {
 	void init()
 	{
 		this.agentName = this.getId().getName();
-		
+
 		artifacts.put(this.agentName, this);
 		
 		defineObsProperty("inFacility", 		"none");
@@ -150,11 +150,11 @@ public class AgentArtifact extends Artifact {
 	
 	@OPERATION
 	private void update(Collection<Percept> percepts)
-	{		
+	{
 		int load = this.getEntity().getCurrentLoad();
-		
+
 		this.getEntity().clearInventory();
-		
+
 		for (Percept percept : percepts)
 		{			
 			switch (percept.getName())
