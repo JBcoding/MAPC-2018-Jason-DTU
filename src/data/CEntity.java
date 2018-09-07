@@ -3,6 +3,8 @@ package data;
 import java.util.HashSet;
 import java.util.Set;
 
+import info.AgentArtifact;
+import info.FacilityArtifact;
 import massim.protocol.messagecontent.Action;
 import massim.scenario.city.ActionExecutor;
 import massim.scenario.city.data.Entity;
@@ -25,6 +27,7 @@ public class CEntity {
     private Route route;
     private int routeLength;
     private Facility facility;
+    private AgentArtifact agentArtifact;
 
     public int getCurrentSpeed() {
         return currentSpeed;
@@ -47,9 +50,9 @@ public class CEntity {
 
     public CEntity(Role role, Location location){
         this.role = role;
-        
+
         permissions = new HashSet<>();
-        
+
         if (role.getName().equals("drone")) 	permissions.add(GraphHopperManager.PERMISSION_AIR);
         else 				        	permissions.add(GraphHopperManager.PERMISSION_ROAD);
         
@@ -305,4 +308,13 @@ public class CEntity {
 	{
 		return this.lastActionParam;
 	}
+
+    public void addAgentArtifact(AgentArtifact agentArtifact) {
+        this.agentArtifact = agentArtifact;
+        if (this.role.getName().equals("drone")) {
+            this.agentArtifact.setToScout();
+            FacilityArtifact.calculateMissingResourceNodes();
+        }
+    }
+
 }

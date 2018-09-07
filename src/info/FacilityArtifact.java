@@ -21,6 +21,7 @@ import cnp.TaskArtifact;
 import data.CEntity;
 import eis.iilang.Percept;
 import env.Translator;
+import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.*;
@@ -36,7 +37,7 @@ public class FacilityArtifact extends Artifact {
 	public static final String WORKSHOP 			= "workshop";
 	public static final String RESOURCE_NODE		= "resourceNode";
 	private static final String WELL	 			= "well";
-	
+
 	public static final Set<String>	STATIC_PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(CHARGING_STATION, DUMP, SHOP, STORAGE, WORKSHOP)));
 
@@ -50,7 +51,7 @@ public class FacilityArtifact extends Artifact {
 	private static Map<String, Workshop> 		workshops 			= new HashMap<>();
 	private static Map<String, ResourceNode>	resourceNodes		= new HashMap<>();
 	private static Map<String, Well>			wells				= new HashMap<>();
-	
+
 	private static List<Map<String, ? extends Facility>> allFacilities = new ArrayList<>(
 			Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
 	
@@ -285,8 +286,10 @@ public class FacilityArtifact extends Artifact {
 		String resource = (String) args[3];
 		int threshold = (int) args[4];
 		
-		resourceNodes.put(name, 
+		resourceNodes.put(name,
 				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(resource), threshold));
+
+        calculateMissingResourceNodes();
 	}
 
 	private static void perceiveWell(Percept percept)
@@ -364,4 +367,14 @@ public class FacilityArtifact extends Artifact {
 		resourceNodes		= new HashMap<>();
 		wells				= new HashMap<>();
 	}
+
+	public static Set<Item> calculateMissingResourceNodes() {
+	    Set<Item> baseItems = ItemArtifact.getLevel0Items();
+	    Set<Item> itemsWeCanLocate = resourceNodes.values().stream().map(ResourceNode::getResource).collect(Collectors.toSet());
+        Set<Item> itemsWeStillNeedToFindAResourceNodeFor = new HashSet<>(baseItems);
+	    itemsWeStillNeedToFindAResourceNodeFor.removeAll(itemsWeCanLocate);
+
+	    return itemsWeStillNeedToFindAResourceNodeFor;
+
+    }
 }

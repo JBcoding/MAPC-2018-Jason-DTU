@@ -101,6 +101,7 @@ public class AgentArtifact extends Artifact {
 	protected static void addEntity(String name, CEntity entity)
 	{
 		entities.put(name, entity);
+		entity.addAgentArtifact(artifacts.get(name));
 	}
 	
 	public static CEntity getEntity(String name)
@@ -409,4 +410,8 @@ public class AgentArtifact extends Artifact {
 	{
 		
 	}
+
+    public void setToScout() {
+	    defineObsProperty("scout");
+    }
 }

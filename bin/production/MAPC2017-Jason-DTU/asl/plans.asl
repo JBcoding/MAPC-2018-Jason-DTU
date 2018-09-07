@@ -11,7 +11,7 @@
 +!retrieveItems(map(Shop, Items)) <-
 	!getToFacility(Shop);
 	!buyItems(Items).
-	
+
 +!buyItems([]).
 +!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
 +!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <- 
@@ -28,9 +28,9 @@
 +!assembleItems([map(	_, 		0) | Items]) <- !assembleItems(Items).
 +!assembleItems([map(Item, Amount) | Items]) <- 
 	getRequiredItems(Item, ReqItems);
-	!assembleItem(Item, ReqItems); 
+	!assembleItem(Item, ReqItems);
 	!assembleItems([map(Item, Amount - 1) | Items]).
-	
+
 // Recursively assemble required items
 +!assembleItem(	  _, 	   []).
 +!assembleItem(Item, ReqItems) <-
@@ -48,12 +48,14 @@
 	
 +!getToFacility(F) : inFacility(F).
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
-+!getToFacility(F) : not enoughCharge & not isChargingStation(F)	<- !charge; 			!getToFacility(F).
++!getToFacility(F) : not enoughCharge & not isChargingStation(F) <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
-+!charge : charge(X) & maxCharge(X).
-// +!charge : not enoughCharge <- recharge.
-+!charge : inChargingStation 			<- !doAction(charge); !charge.
++!charge : charge(X) & currentBattery(X).
++!charge : not canMove <- !doAction(recharge); !charge.
++!charge : inChargingStation <-
+    !doAction(charge);
+    !charge.
 +!charge <-
 	getClosestFacility("chargingStation", F);
 	!getToFacility(F); 
