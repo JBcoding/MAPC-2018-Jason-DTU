@@ -8,7 +8,7 @@ routeDuration(D)	:- routeLength(L) & speed(S) & D = math.ceil(L / S).
 
 chargeThreshold(X) :- currentBattery(C) & X = 0.35 * C.
 remainingCapacity(C) :- currentCapacity(M) & load(L) & C = M - L.
-canMove :- charge(X) & X >= 10.
+canMove :- charge(X) & X >= 1.
 
 // Check facility type
 isChargingStation(F)	:- .substring("chargingStation", F).

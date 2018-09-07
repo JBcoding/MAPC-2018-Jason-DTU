@@ -43,7 +43,23 @@ public class CCityMap implements Serializable {
 		this.center = center;
 		GraphHopperManager.init(mapName);
 	}
-	
+
+	public double getMinLat() {
+		return minLat;
+	}
+
+	public double getMaxLat() {
+		return maxLat;
+	}
+
+	public double getMinLon() {
+		return minLon;
+	}
+
+	public double getMaxLon() {
+		return maxLon;
+	}
+
 	/**
 	 * Calculates a new route between two locations.
 	 * @param from the source location
@@ -150,7 +166,7 @@ public class CCityMap implements Serializable {
 	}
 
 
-	private double getLength(Location loc1, Location loc2) 
+	public double getLength(Location loc1, Location loc2)
 	{
 		return LocationUtil.calculateRange(loc1.getLat(), loc1.getLon(), loc2.getLat(), loc2.getLon());
 	}
