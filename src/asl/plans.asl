@@ -10,13 +10,14 @@
 	
 +!retrieveItems(map(Node, Amount)) <-
     getLocation(Node, Lat, Lon);
-    .print("before !getToLocation");
+    getResource(Node, Item);
 	!getToLocation(Node, Lat, Lon);
-	!gatherItem(Node, Amount).
+	!gatherItem(Node, map(Item, Amount)).
 
-+!gatherItem(Node, Amount) : inFacility(Node) & getResource(Node, Item) & not hasItems([map(Item, Amount)]) <-
-	!doAction(gather);
-	!gatherItem(Node, Amount).
++!gatherItem(Node, Map) : getInventory(Inv) & contains(Map, Inv).
++!gatherItem(Node, map(Item, Amount)) <-
+    !doAction(gather);
+    !gatherItem(Node, map(Item, Amount)).
 
 //+!goToResourceNode(Lat, Lon)
 //+!goToWell(Lat, Lon)
@@ -70,7 +71,8 @@
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F) <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
-+!getToLocation(F, _) : inFacility(F).
+// Meant for getting to resource nodes
++!getToLocation(F, _, _) : inFacility(F).
 +!getToLocation(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocation(F, Lat, Lon).

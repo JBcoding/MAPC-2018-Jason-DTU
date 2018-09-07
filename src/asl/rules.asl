@@ -15,19 +15,17 @@ isChargingStation(F)	:- .substring("chargingStation", F).
 isWorkshop(F)			:- .substring("workshop", F).
 isStorage(F)			:- .substring("storage",  F).
 isShop(F)				:- .substring("shop",     F).
-isResourceNode(F)	    :- .substring("resourceNode", F).
-isResourceNode(F, Resource) :- isResourceNode(F) & inFacility(_, Resource).
+isResourceNode(F)	    :- .substring("node", F).
 isWell(F)	            :- .substring("well", F).
 
 // Check if agent is in this type of facility
-inChargingStation 	:- inFacility(F, _) & isChargingStation(F).
-inWorkshop 			:- inFacility(F, _) & isWorkshop(F).
-inStorage 			:- inFacility(F, _) & isStorage(F).
-inShop	    		:- inFacility(F, _) & isShop(F).
-inShop(F)			:- inFacility(F, _) & inShop.
+inChargingStation 	:- inFacility(F) & isChargingStation(F).
+inWorkshop 			:- inFacility(F) & isWorkshop(F).
+inStorage 			:- inFacility(F) & isStorage(F).
+inShop	    		:- inFacility(F) & isShop(F).
+inShop(F)			:- inFacility(F) & inShop.
 inResourceNode      :- inFacility(F) & isResourceNode(F).
-inResourceNode(Resource) :- inFacility(F, _) & isResourceNode(F, Resource).
-inWell              :- inFacility(F, _) & isWell(F).
+inWell              :- inFacility(F) & isWell(F).
 
 contains(map(Item, X), [map(Item, Y) | _]) 	:- X <= Y. 		// There is a .member function, but we need to unwrap the objects
 contains(Item, [_ | Inventory]) 		    :- contains(Item, Inventory).

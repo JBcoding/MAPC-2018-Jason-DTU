@@ -25,7 +25,7 @@ public class getInventory extends DefaultInternalAction {
 		ListTerm list = ASSyntax.createList();
 		
 		inventory.entrySet().forEach(e -> list.add(ASSyntax.createLiteral("map", 
-													ASSyntax.createAtom(e.getKey()),
+													ASSyntax.createString(e.getKey()),
 													ASSyntax.createNumber(e.getValue()))));
 		
 		return un.unifies(terms[1], list);

@@ -61,7 +61,7 @@ public class AgentArtifact extends Artifact {
 
 		artifacts.put(this.agentName, this);
 
-		defineObsProperty("inFacility", 		"none", "");
+		defineObsProperty("inFacility", 		"none");
         defineObsProperty("speed", 	0);
 		defineObsProperty("charge", 			250);
 		defineObsProperty("load", 				0);                
@@ -265,24 +265,17 @@ public class AgentArtifact extends Artifact {
     }
 
 	@OPERATION
-	public void perceiveFacility(Percept percept) 
-	{
+	public void perceiveFacility(Percept percept) {
 		Parameter param = percept.getParameters().get(0);
 		if (!PrologVisitor.staticVisit(param).equals(""))
 		{
 			Object[] args = Translator.perceptToObject(percept);
 			
 			Facility facility = FacilityArtifact.getFacility((String) args[0]);
-			
-			if (!this.getEntity().getFacilityName().equals(facility.getName()))
-			{
+
+			if (!this.getEntity().getFacilityName().equals(facility.getName())) {
 				this.getEntity().setFacility(facility);
-				if (facility instanceof ResourceNode) {
-					getObsProperty("inFacility").updateValues(this.getEntity().getFacilityName(),
-							((ResourceNode)facility).getResource().getName());
-				} else {
-					getObsProperty("inFacility").updateValues(this.getEntity().getFacilityName(), "");
-				}
+                getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
 			}
 		}
 		else 
@@ -290,7 +283,7 @@ public class AgentArtifact extends Artifact {
 			if (!this.getEntity().getFacilityName().equals("none"))
 			{
 				this.getEntity().setFacility(null);
-				getObsProperty("inFacility").updateValues(this.getEntity().getFacilityName(), "");
+				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
 			}
 		}
 		

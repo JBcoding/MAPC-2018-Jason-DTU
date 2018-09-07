@@ -142,6 +142,7 @@ public class ItemArtifact extends Artifact {
                 continue;
             }
 
+            // TODO: threshold is probably always 0
             Optional<ResourceNode> best = nodes.values().stream()
                     .filter(x -> x.getResource().equals(item))
                     .min(Comparator.comparingInt(ResourceNode::getThreshold));
@@ -149,6 +150,7 @@ public class ItemArtifact extends Artifact {
             if (best.isPresent()) {
                 resourceList.put(best.get(), amount);
             } else {
+                // TODO: maybe fail entirely if this is the case?
                 logger.severe("No known resource node for " + item);
             }
         }

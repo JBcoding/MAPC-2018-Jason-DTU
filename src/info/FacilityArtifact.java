@@ -151,8 +151,8 @@ public class FacilityArtifact extends Artifact {
 	}
 
     @OPERATION
-    void getResource(String node, OpFeedbackParam<Item> item) {
-        item.set(resourceNodes.get(node).getResource());
+    void getResource(String node, OpFeedbackParam<String> item) {
+        item.set(resourceNodes.get(node).getResource().getName());
     }
 
     @OPERATION

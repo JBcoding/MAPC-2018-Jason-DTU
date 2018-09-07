@@ -15,16 +15,13 @@ free.
 
 // !startLoop.
 
-<<<<<<< HEAD
 +!startLoop <- .wait({+step(_)}); !loop.
 +!loop <- !getToFacility("shop1"); !getToFacility("shop2"); !loop.
-=======
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 // +!loop <- !doAction(recharge); !loop.
 +!loop : scout <- !getToFacility("shop2"); !loop.
 +!loop <- !getToFacility("shop1"); !loop.
->>>>>>> 262754b0db3e2cff2a8502101573afee8500bfbe
-	
+
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
