@@ -18,6 +18,19 @@
 	!doAction(gather);
 	!gatherItem(Node, Amount).
 
+//+!goToResourceNode(Lat, Lon)
+//+!goToWell(Lat, Lon)
+
++!gather : inResourceNode	<- !doAction(gather); !gather.
++!gather 					<-
+	getClosestFacility("resourceNode", F);
+	if (not (F == "none"))
+	{
+		!getToFacility(F);
+		!gather;
+	}
+	else { .print("Can not find any resource nodes"); }.
+
 +!buyItems([]).
 +!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
 +!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <- 
@@ -71,13 +84,3 @@
 	getClosestFacility("chargingStation", F);
 	!getToFacility(F); 
 	!charge.
-	
-+!gather : inResourceNode	<- !doAction(gather); !gather.
-+!gather 					<- 
-	getClosestFacility("resourceNode", F);
-	if (not (F == "none"))
-	{
-		!getToFacility(F);
-		!gather;
-	}
-	else { .print("Can not find any resource nodes"); }.

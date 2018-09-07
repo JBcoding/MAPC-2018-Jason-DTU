@@ -1,5 +1,5 @@
 {
-  "scenario": "city2017",
+  "scenario": "city2018",
   "host": "localhost",
   "port": 12300,
   "scheduling": true,
@@ -35,6 +35,12 @@
   	{"name": "connectionB25", "username": "agentB25", "password": "1", "iilang": false, "xml": false},
   	{"name": "connectionB26", "username": "agentB26", "password": "1", "iilang": false, "xml": false},
   	{"name": "connectionB27", "username": "agentB27", "password": "1", "iilang": false, "xml": false},
-  	{"name": "connectionB28", "username": "agentB28", "password": "1", "iilang": false, "xml": false}
+  	{"name": "connectionB28", "username": "agentB28", "password": "1", "iilang": false, "xml": false},
+    {"name": "connectionB29", "username": "agentB29", "password": "1", "iilang": false, "xml": false},
+    {"name": "connectionB30", "username": "agentB30", "password": "1", "iilang": false, "xml": false},
+    {"name": "connectionB31", "username": "agentB31", "password": "1", "iilang": false, "xml": false},
+    {"name": "connectionB32", "username": "agentB32", "password": "1", "iilang": false, "xml": false},
+    {"name": "connectionB33", "username": "agentB33", "password": "1", "iilang": false, "xml": false},
+    {"name": "connectionB34", "username": "agentB34", "password": "1", "iilang": false, "xml": false}
   ]
 }

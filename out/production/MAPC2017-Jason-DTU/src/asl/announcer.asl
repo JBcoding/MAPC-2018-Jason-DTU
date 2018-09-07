@@ -15,8 +15,9 @@
 +task(TaskId, "auction") <- announceAuction(TaskId); clearTask(TaskId); -task(TaskId, _).
 	
 +!announceAssemble([], _, _, _, _).
-+!announceAssemble(Items, Workshop, TaskId, Storage, Type) 	 <- announceAssemble(Items, Workshop, TaskId, Storage, Type).
-	
++!announceAssemble(Items, Workshop, TaskId, Storage, Type) <-
+    announceAssemble(Items, Workshop, TaskId, Storage, Type).
+
 +!announceRetrieve(Agent, [map(Shop,[])|Rest], Workshop) <- !announceRetrieve(Agent, Rest, Workshop).
 +!announceRetrieve(Agent, ShoppingList		 , Workshop) <- announceRetrieve(Agent, ShoppingList, Workshop).
 	

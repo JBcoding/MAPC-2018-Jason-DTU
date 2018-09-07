@@ -6,7 +6,7 @@
 +!focusArtifacts : .my_name(Me) & .term2string(Me, Name) <-
 	!focusArtifact("TaskArtifact");
 	!focusArtifact("EIArtifact");
-	makeArtifact(Name, "info.AgentArtifact", [], _);
+	makeArtifact(Name, "info.AgentArtifact", [], Id);
 	!focusArtifact(Name);
 	.print("Successfully focused artifacts").
 -!focusArtifacts <- .wait(500); !focusArtifacts.

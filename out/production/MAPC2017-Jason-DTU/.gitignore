@@ -8,5 +8,6 @@ src/mas/bin
 .idea
 *.iml
 .project
+out/
 
-Runner.jar
+# Runner.jar

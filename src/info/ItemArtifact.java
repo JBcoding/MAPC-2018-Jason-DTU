@@ -357,4 +357,14 @@ public class ItemArtifact extends Artifact {
 		items 			= new HashMap<>();
 		itemLocations 	= new HashMap<>();
 	}
+
+	public static Set<Item> getLevel0Items() {
+	    Set<Item> baseItems = new HashSet<>();
+	    for (Item item : items.values()) {
+	        if (!item.needsAssembly()) {
+	            baseItems.add(item);
+            }
+        }
+        return baseItems;
+    }
 }
