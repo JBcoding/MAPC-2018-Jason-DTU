@@ -284,10 +284,10 @@ public class FacilityArtifact extends Artifact {
 		double lat = (double) args[1];
 		double lon = (double) args[2];
 		String resource = (String) args[3];
-		int threshold = (int) args[4];
+		//int threshold = (int) args[4];
 		
 		resourceNodes.put(name,
-				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(resource), threshold));
+				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(resource), 0));
 
         calculateMissingResourceNodes();
 	}

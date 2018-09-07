@@ -34,7 +34,7 @@ contains(Item, [_ | Inventory]) 		    :- contains(Item, Inventory).
 
 enoughCharge :- routeLength(L) & enoughCharge(L).
 enoughCharge(L) :- speed(S) & charge(C) & chargeThreshold(Threshold) & 
-				Steps = math.ceil(L / S) & Steps <= (C - Threshold) / 10.
+				Steps = math.ceil(L / S) & Steps <= (C - Threshold).
 				
 getInventory(Inventory)			:- .my_name(Me) & getInventory(Me, Inventory).
 getInventory(Agent, Inventory) 	:- jia.getInventory(Agent, Inventory).
