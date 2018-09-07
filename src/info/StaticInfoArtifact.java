@@ -15,6 +15,7 @@ import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import data.CCityMap;
 import data.CEntity;
+import data.CExploredMap;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
@@ -60,7 +61,10 @@ public class StaticInfoArtifact extends Artifact {
 	private static Map<String, WellType>    wellTypes = new HashMap<>();
 	private static int                      proximity;
 	private static CCityMap				    cityMap;
-	
+    private static CExploredMap exploredMap;
+
+    private static
+
 	@OPERATION
 	void getSimulationData(OpFeedbackParam<String> id, OpFeedbackParam<String> map,
 			OpFeedbackParam<Integer> seedCapital, OpFeedbackParam<Integer> steps, 
@@ -89,8 +93,12 @@ public class StaticInfoArtifact extends Artifact {
 	{
 		return cityMap;
 	}
-	
-	/**
+
+    public static CExploredMap getExploredMap() {
+        return exploredMap;
+    }
+
+    /**
 	 * Get the route from an agent to any location
 	 * @param agentName Name of the agent
 	 * @param to The location
@@ -209,6 +217,7 @@ public class StaticInfoArtifact extends Artifact {
         Location center = new Location((double)args[7], (double)args[6]);
 
 		cityMap = new CCityMap(map, cellSize, minLat, maxLat, minLon, maxLon, center);
+		exploredMap = new CExploredMap(cityMap);
 	}
 
 	// Literal(String,)

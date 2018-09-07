@@ -86,3 +86,9 @@
 	getClosestFacility("chargingStation", F);
 	!getToFacility(F); 
 	!charge.
+
++!scoutt : scout <- getClosestUnexploredPosition(Lat, Lon); !scout(Lat, Lon).
+
++!scout(Lat, Lon) : not canMove									<- !doAction(recharge); !scout(Lat, Lon).
++!scout(Lat, Lon) : not enoughCharge                            <- !charge; !scout(Lat, Lon).
++!scout(Lat, Lon) 												<- !doAction(goto(Lat, Lon)); 	!scoutt.

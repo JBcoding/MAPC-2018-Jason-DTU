@@ -157,8 +157,12 @@ public class AgentArtifact extends Artifact {
 
 		this.getEntity().clearInventory();
 
+		boolean positionChange = false;
 		for (Percept percept : percepts)
-		{			
+		{
+		    if (percept.getName().equals(LAT) || percept.getName().equals(LON)) {
+		        positionChange = true;
+            }
 			switch (percept.getName())
 			{
 //			case ACTION_ID: perceiveActionID(percept); break;
@@ -177,6 +181,10 @@ public class AgentArtifact extends Artifact {
 			case SPEED: perceiveSpeed(percept); break;
 			}
 		}
+
+		if (positionChange) {
+		    StaticInfoArtifact.getExploredMap().updateExplored(this.getEntity().getLocation(), this.getEntity().getRole().getBaseVision(), this.agentName);
+        }
 		
 
 		if (load != this.getEntity().getCurrentLoad())
@@ -395,6 +403,13 @@ public class AgentArtifact extends Artifact {
 			getObsProperty("routeLength").updateValue(this.getEntity().getRouteLength());
 		}
 	}
+
+	@OPERATION
+    void getClosestUnexploredPosition(OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+	    Location l = StaticInfoArtifact.getExploredMap().getClosestUnxploredLocation(getEntity().getLocation());
+	    lat.set(l.getLat());
+	    lon.set(l.getLon());
+    }
 
 	/**
 	 * Resets the agent artifact
