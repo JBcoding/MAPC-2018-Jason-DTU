@@ -2,12 +2,12 @@
 +!giveItems(Agent, [map(Item, Amount)|Items]) : connection(Agent, Entity, _) <-
 	!doAction(give(Entity, Item, Amount));
 	!giveItems(Agent, Items).
-	
+
 +!receiveItems([]).
 +!receiveItems([_|Items]) <-
 	!doAction(receive);
 	!receiveItems(Items).
-	
+
 +!retrieveItems(map(Node, Amount)) <-
     getLocation(Node, Lat, Lon);
     getResource(Node, Item);
@@ -22,6 +22,20 @@
 //+!goToResourceNode(Lat, Lon)
 //+!goToWell(Lat, Lon)
 
++!buildWell : inWell <- !doAction(build); !buildWell.
++!buildWell :
+    atPeriphery
+    <-
+    getMoney(Money);
+    bestWellType(Money, WellType);
+    !doAction(build(WellType));
+    !buildWell.
++!buildWell
+    <-
+    closestPeriphery(Lat, Lon);
+    !doAction(goto(Lat, Lon));
+    !buildWell.
+
 +!gather : inResourceNode	<- !doAction(gather); !gather.
 +!gather 					<-
 	getClosestFacility("resourceNode", F);
@@ -34,19 +48,19 @@
 
 +!buyItems([]).
 +!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
-+!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <- 
++!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <-
 	getAvailableAmount(Item, Amount, Shop, AmountAvailable);
 	!doAction(buy(Item, AmountAvailable));
 	!buyItems(Items);
 	!buyItems([map(Item, Amount - AmountAvailable)]).
-	
-+!deliverItems(TaskId, Facility) <- 
+
++!deliverItems(TaskId, Facility) <-
 	!getToFacility(Facility);
  	!doAction(deliver_job(TaskId)).
- 	
+
 +!assembleItems([]).
 +!assembleItems([map(	_, 		0) | Items]) <- !assembleItems(Items).
-+!assembleItems([map(Item, Amount) | Items]) <- 
++!assembleItems([map(Item, Amount) | Items]) <-
 	getRequiredItems(Item, ReqItems);
 	!assembleItem(Item, ReqItems);
 	!assembleItems([map(Item, Amount - 1) | Items]).
@@ -56,7 +70,7 @@
 +!assembleItem(Item, ReqItems) <-
 	!assembleItems(ReqItems);
 	!doAction(assemble(Item)).
-	
+
 +!assistAssemble(Agent) : load(0) | assembleComplete.
 +!assistAssemble(Agent) <- !doAction(assist_assemble(Agent)); !assistAssemble(Agent).
 
@@ -65,7 +79,7 @@
 +!retrieveTools([Tool | Tools]) 				<- !retrieveTool(Tool);	!retrieveTools(Tools).
 +!retrieveTool(Tool) : canUseTool(Tool) 		<- !retrieveItems([map(Tool, 1)]).
 +!retrieveTool(Tool) 							<- .print("Can not use ", Tool). // Need help from someone that can use this tool
-	
+
 +!getToFacility(F) : inFacility(F).
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F) <- !charge; !getToFacility(F).
@@ -84,7 +98,7 @@
     !charge.
 +!charge <-
 	getClosestFacility("chargingStation", F);
-	!getToFacility(F); 
+	!getToFacility(F);
 	!charge.
 
 +!scoutt : scout <- getClosestUnexploredPosition(Lat, Lon); !scout(Lat, Lon).

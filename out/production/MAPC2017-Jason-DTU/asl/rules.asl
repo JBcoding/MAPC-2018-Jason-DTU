@@ -8,13 +8,15 @@ routeDuration(D)	:- routeLength(L) & speed(S) & D = math.ceil(L / S).
 
 chargeThreshold(X) :- currentBattery(C) & X = 0.35 * C.
 remainingCapacity(C) :- currentCapacity(M) & load(L) & C = M - L.
-canMove :- charge(X) & X >= 10.
+canMove :- charge(X) & X >= 1.
 
 // Check facility type
 isChargingStation(F)	:- .substring("chargingStation", F).
 isWorkshop(F)			:- .substring("workshop", F).
 isStorage(F)			:- .substring("storage",  F).
 isShop(F)				:- .substring("shop",     F).
+isResourceNode(F)	    :- .substring("node", F).
+isWell(F)	            :- .substring("well", F).
 
 // Check if agent is in this type of facility
 inChargingStation 	:- inFacility(F) & isChargingStation(F).
@@ -22,13 +24,17 @@ inWorkshop 			:- inFacility(F) & isWorkshop(F).
 inStorage 			:- inFacility(F) & isStorage(F).
 inShop	    		:- inFacility(F) & isShop(F).
 inShop(F)			:- inFacility(F) & inShop.
+inResourceNode      :- inFacility(F) & isResourceNode(F).
+inWell              :- inFacility(F) & isWell(F).
+
+atPeriphery         :- atPeriphery(X) & X.
 
 contains(map(Item, X), [map(Item, Y) | _]) 	:- X <= Y. 		// There is a .member function, but we need to unwrap the objects
 contains(Item, [_ | Inventory]) 		    :- contains(Item, Inventory).
 
 enoughCharge :- routeLength(L) & enoughCharge(L).
 enoughCharge(L) :- speed(S) & charge(C) & chargeThreshold(Threshold) & 
-				Steps = math.ceil(L / S) & Steps <= (C - Threshold) / 10.
+				Steps = math.ceil(L / S) & Steps <= (C - Threshold).
 				
 getInventory(Inventory)			:- .my_name(Me) & getInventory(Me, Inventory).
 getInventory(Agent, Inventory) 	:- jia.getInventory(Agent, Inventory).

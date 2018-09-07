@@ -17,7 +17,7 @@ public class DynamicInfoArtifact extends Artifact {
 	private static final Logger logger = Logger.getLogger(DynamicInfoArtifact.class.getName());
 
 	private static final String DEADLINE			= "deadline";
-	private static final String MONEY 				= "money";
+	private static final String MONEY 				= "massium";
 	private static final String STEP 				= "step";
 	private static final String TIMESTAMP 			= "timestamp";
 	
@@ -75,12 +75,12 @@ public class DynamicInfoArtifact extends Artifact {
 	{
 		return jobsCompleted;
 	}
-	
+
 	public static int getStep() 
 	{
 		return step;
 	}
-	
+
 	public static int getMoney()
 	{
 		return money;

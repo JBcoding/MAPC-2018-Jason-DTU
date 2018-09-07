@@ -25,17 +25,14 @@ public class CExploredMap {
 
     public void updateExplored(Location center, int vision, String agentName) {
         if (agentName.equals("agent1")) {
-            System.out.println(this);
+            //System.out.println(this);
         }
         int lonSquare = (int) ((center.getLon() - cityMap.getMinLon()) / lonPerSquare);
         int latSquare = (int) ((center.getLat() - cityMap.getMinLat()) / latPerSquare);
-        if (latSquare >= SQUARE_WIDTH) {
-            latSquare --;
-        }
-        if (lonSquare >= SQUARE_WIDTH) {
-            lonSquare --;
-        }
-        explored[latSquare][lonSquare] = true;
+        latSquare = Math.min(Math.max(latSquare, 0), SQUARE_WIDTH - 1);
+        lonSquare = Math.min(Math.max(lonSquare, 0), SQUARE_WIDTH - 1);
+
+        explored[latSquare][lonSquare] = true; // TODO: TSH received ArrayIndexOutOfBounds (-1)
         int range = 1;
         boolean change = true;
         while (change) {

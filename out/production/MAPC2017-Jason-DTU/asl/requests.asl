@@ -90,30 +90,27 @@
 +!assemble(ItemsToRetrieve, ItemsToAssemble, AssembleRest, Workshop, TaskId, DeliveryLocation) 
 	: .my_name(Me) <-
 
-	getShoppingList(ItemsToRetrieve, ShoppingList);
-	.print("getShoppingList");
+	getResourceList(ItemsToRetrieve, ResourceList);
 	.print(ShoppingList);
-	ShoppingList = [Shop|RetrieveRest];
-	.print("match");
+	ResourceList = [Node|RetrieveRest];
 
 	+assistants([]);
 
 	if (not RetrieveRest = [])
 	{
 		+assistCount(1);
-	    .print("before send");
 		.send(announcer, achieve, announceRetrieve(Me, RetrieveRest, Workshop));
-	    .print("after send");
 	}
-
-	.print("woop");
 
 	if (not AssembleRest = [])
 	{
 		.send(announcer, achieve, announceAssemble(AssembleRest, Workshop, TaskId, DeliveryLocation, "old"));			
 	}
-	
-	!retrieveItems(Shop);
+
+	.print("before !retrieveItems: ", Node);
+	!retrieveItems(Node);
+	.print("after !retrieveItems");
+
 	!getToFacility(Workshop);
 	
 	.wait(assistCount(N) & assistants(L) & .length(L, N));

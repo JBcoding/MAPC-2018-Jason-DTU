@@ -27,6 +27,8 @@ inShop(F)			:- inFacility(F) & inShop.
 inResourceNode      :- inFacility(F) & isResourceNode(F).
 inWell              :- inFacility(F) & isWell(F).
 
+atPeriphery         :- atPeriphery(X) & X.
+
 contains(map(Item, X), [map(Item, Y) | _]) 	:- X <= Y. 		// There is a .member function, but we need to unwrap the objects
 contains(Item, [_ | Inventory]) 		    :- contains(Item, Inventory).
 

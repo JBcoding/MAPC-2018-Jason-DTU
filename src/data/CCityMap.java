@@ -26,6 +26,7 @@ public class CCityMap implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String mapName;
 	private double cellSize;
+
 	private double minLat;
 	private double maxLat;
 	private double minLon;
@@ -197,7 +198,7 @@ public class CCityMap implements Serializable {
 	 * @param loc the location that should be snapped to a road.
 	 * @return a new location object fitting the description or null if there was no road found to snap to
 	 */
-	private Location getNearestRoad(Location loc)
+	public Location getNearestRoad(Location loc)
 	{
 		QueryResult qr = GraphHopperManager.getHopper().getLocationIndex().findClosest(loc.getLat(), loc.getLon(),
 				EdgeFilter.ALL_EDGES);
@@ -254,7 +255,7 @@ public class CCityMap implements Serializable {
 	 * @return true if the location is reachable (i.e. it's not null, it's within map bounds,
 	 * and the permissions contain "air" or a route to the center and back exists)
 	 */
-	private boolean isReachable(Location loc, Set<String> roads) 
+	private boolean isReachable(Location loc, Set<String> roads)
 	{
 		if (loc == null || !isInBounds(loc)) return false;
 		return roads.contains("air") || (existsRoute(loc, center) && existsRoute(center, loc));

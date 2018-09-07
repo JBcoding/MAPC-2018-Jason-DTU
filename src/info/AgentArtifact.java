@@ -13,12 +13,14 @@ import java.util.stream.Collectors;
 import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
+import data.CCityMap;
 import data.CEntity;
 import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import eis.iilang.PrologVisitor;
 import env.EIArtifact;
 import env.Translator;
+import mapc2017.env.info.StaticInfo;
 import massim.protocol.messagecontent.Action;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
@@ -41,7 +43,7 @@ public class AgentArtifact extends Artifact {
 	private static final String LON 				= "lon";
 	private static final String LOAD				= "load";
 	private static final String ROUTE 				= "route";
-    private static final String ROUTE_LENGTH 		= "routeLength";
+	private static final String ROUTE_LENGTH 		= "routeLength";
     private static final String CURRENT_BATTERY     = "maxBattery";
     private static final String CURRENT_CAPACITY = "maxLoad";
 	private static final String SPEED = "speed";
@@ -54,6 +56,8 @@ public class AgentArtifact extends Artifact {
 	private static Map<String, AgentArtifact> artifacts = new HashMap<>();
 	
 	private String agentName;
+
+	private static final double epsilon = 1E-5;
 	
 	void init()
 	{
@@ -68,7 +72,8 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("routeLength", 		0);                
 		defineObsProperty("lastAction", 		"noAction"); 
 		defineObsProperty("lastActionResult", 	"successful");
-        defineObsProperty("lastActionParam", 	"[]");
+		defineObsProperty("lastActionParam", 	"[]");
+		defineObsProperty("atPeriphery", 	false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -125,7 +130,49 @@ public class AgentArtifact extends Artifact {
 		lon.set(l.getLon());
 		lat.set(l.getLat());
 	}
-	
+
+	@OPERATION
+	void closestPeriphery(OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon)
+	{
+		Location l = this.getEntity().getLocation();
+
+		CCityMap map = StaticInfoArtifact.getMap();
+
+		double minLat = map.getMinLat();
+		double maxLat = map.getMaxLat();
+		double minLon = map.getMinLon();
+		double maxLon = map.getMaxLon();
+
+		double newLat;
+		double newLon;
+		double latDiff;
+		double lonDiff;
+
+		if (l.getLat() - minLat < maxLat - l.getLat()) {
+			latDiff = l.getLat() - minLat;
+			newLat = minLat + epsilon;
+		} else {
+			latDiff = maxLat - l.getLat();
+			newLat = maxLat - epsilon;
+		}
+
+		if (l.getLon() - minLon < maxLon - l.getLon()) {
+			lonDiff = l.getLon() - minLon;
+			newLon = minLon + epsilon;
+		} else {
+			lonDiff = maxLon - l.getLon();
+			newLon = maxLon - epsilon;
+		}
+
+		//Location loc = map.getNearestRoad(latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat()));
+		Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
+
+		lat.set(loc.getLat());
+		lon.set(loc.getLon());
+
+//		logger.info(String.format("Current location: %f, %f Goal location: %f, %f", l.getLat(), l.getLon(), loc.getLat(), loc.getLon()));
+	}
+
 	@OPERATION
 	void getAgentInventory(OpFeedbackParam<Object> ret)
 	{
@@ -191,13 +238,33 @@ public class AgentArtifact extends Artifact {
 		{
 			getObsProperty("load").updateValue(this.getEntity().getCurrentLoad());
 		}
-		
+
 		getObsProperty("lastActionParam").updateValue(this.getEntity().getLastActionParam());
+
+		updateAtPeriphery();
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{
 			logger.info(agentName + " perceived");
 		}
+	}
+
+	private void updateAtPeriphery() {
+		CCityMap m = StaticInfoArtifact.getMap();
+		Location l = getEntity().getLocation();
+		getObsProperty("atPeriphery").updateValue(
+				doubleEquals(l.getLat(), m.getMinLat(), epsilon) ||
+				doubleEquals(l.getLat(), m.getMaxLat(), epsilon) ||
+				doubleEquals(l.getLon(), m.getMinLon(), epsilon) ||
+				doubleEquals(l.getLon(), m.getMaxLon(), epsilon)
+		);
+
+		//if ((boolean)getObsProperty("atPeriphery").getValue())
+		//	logger.info(String.format("At periphery: %f, %f", l.getLat(), l.getLon()));
+	}
+
+	private boolean doubleEquals(double a, double b, double epsilon) {
+		return Math.abs(a - b) < epsilon;
 	}
 
 	private void perceiveLastActionParams(Percept percept) 
@@ -387,7 +454,7 @@ public class AgentArtifact extends Artifact {
 
 		this.getEntity().setRoute(route);
 	}
-	
+
 	/**
 	 * Literal(int)
 	 * @param percept
@@ -396,10 +463,10 @@ public class AgentArtifact extends Artifact {
 	private void perceiveRouteLength(Percept percept)
 	{
 		int length = (int) Translator.perceptToObject(percept)[0];
-		
+
 		if (this.getEntity().getRouteLength() != length)
 		{
-			this.getEntity().setRouteLength(length);	
+			this.getEntity().setRouteLength(length);
 			getObsProperty("routeLength").updateValue(this.getEntity().getRouteLength());
 		}
 	}

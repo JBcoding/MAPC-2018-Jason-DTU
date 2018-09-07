@@ -150,9 +150,9 @@ public class StaticInfoArtifact extends Artifact {
                 case SEED_CAPITAL:	perceiveSeedCapital	(percept);  break;
                 case STEPS:			perceiveSteps		(percept);  break;
                 case TEAM:			perceiveTeam		(percept); 	break;
-                // case UPGRADE:       perceiveUpgrade     (percept);  break;
-                // case WELL_TYPE:     perceiveWellType    (percept);  break;
-                // case PROXIMITY:     perceiveProximity   (percept);  break;
+                case UPGRADE:       perceiveUpgrade     (percept);  break;
+                case WELL_TYPE:     perceiveWellType    (percept);  break;
+                case PROXIMITY:     perceiveProximity   (percept);  break;
 			}
 		}
 
@@ -165,9 +165,9 @@ public class StaticInfoArtifact extends Artifact {
 			logger.info("Perceived map:\t" 			+ map);
 			logger.info("Perceived seedCapital:\t" 	+ seedCapital);
             logger.info("Perceived steps:\t" 		+ steps);
-            // logger.info("Perceived upgrades:\t" 		+ upgrades);
-            // logger.info("Perceived well types:\t" 		+ wellTypes);
-            // logger.info("Perceived proximity:\t" 		+ proximity);
+            logger.info("Perceived upgrades:\t" 		+ upgrades);
+            logger.info("Perceived well types:\t" 		+ wellTypes);
+            logger.info("Perceived proximity:\t" 		+ proximity);
 		}		
 	}
 	
@@ -185,8 +185,8 @@ public class StaticInfoArtifact extends Artifact {
 		// Entity has not been made public
 		if (team.equals(StaticInfoArtifact.team))
 		{
-		    // name = "agent" + name; // TODO
-		    // System.out.println(name);
+		    //name = "agent" + name;
+		    //System.out.println(name);
 			AgentArtifact.addEntity(name, new CEntity(roles.get(role), new Location(lon, lat)));
 		}
 	}
@@ -281,6 +281,7 @@ public class StaticInfoArtifact extends Artifact {
         Object[] args = Translator.perceptToObject(percept);
 
         team = (String) args[0];
+        //System.out.println(team);
     }
 
     private static void perceiveUpgrade(Percept percept)
@@ -355,7 +356,17 @@ public class StaticInfoArtifact extends Artifact {
         return proximity;
     }
 
-	public static void reset() 
+    @OPERATION
+    void bestWellType(int money, OpFeedbackParam<String> wellType)
+    {
+        try {
+            wellType.set(wellTypes.values().stream().filter(wt -> wt.getCost() <= money).max((wt1, wt2) -> wt1.getEfficiency() - wt2.getEfficiency()).get().getName());
+        } catch (Exception e) {
+            wellType.set("none");
+        }
+    }
+
+	public static void reset()
 	{
 		id 			= "";
 		map 		= "";

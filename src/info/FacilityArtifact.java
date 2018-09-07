@@ -24,7 +24,6 @@ import env.Translator;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
-import massim.scenario.city.data.Item;
 import massim.scenario.city.data.facilities.*;
 
 public class FacilityArtifact extends Artifact {
@@ -37,7 +36,7 @@ public class FacilityArtifact extends Artifact {
 	public static final String STORAGE 				= "storage";
 	public static final String WORKSHOP 			= "workshop";
 	public static final String RESOURCE_NODE		= "resourceNode";
-	private static final String WELL	 			= "well";
+	public static final String WELL	 			    = "well";
 
 	public static final Set<String>	STATIC_PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(CHARGING_STATION, DUMP, SHOP, STORAGE, WORKSHOP)));
@@ -52,7 +51,7 @@ public class FacilityArtifact extends Artifact {
 	private static Map<String, Workshop> 		workshops 			= new HashMap<>();
 	private static Map<String, ResourceNode>	resourceNodes		= new HashMap<>();
 	private static Map<String, Well>			wells				= new HashMap<>();
-
+	
 	private static List<Map<String, ? extends Facility>> allFacilities = new ArrayList<>(
 			Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
 	
@@ -88,6 +87,7 @@ public class FacilityArtifact extends Artifact {
 				break;
 			case WELL:
 				facilities = wells.values();
+				break;
 		}
 
 		// What happens if the feedback parameter is null?
@@ -182,7 +182,7 @@ public class FacilityArtifact extends Artifact {
 	}
 	
 	public static void perceiveUpdate(Collection<Percept> percepts)
-	{		
+	{
 		for (Percept percept : percepts)
 		{
 			switch (percept.getName())
@@ -204,7 +204,7 @@ public class FacilityArtifact extends Artifact {
 		logFacilities("Storages perceived:"			, storages			.values());
 		logFacilities("Workshops perceived:"		, workshops			.values());
 		logFacilities("Resource nodes perceived:"	, resourceNodes		.values());
-		logFacilities("wells perceived:"	, wells		.values());
+		logFacilities("Wells perceived:"	, wells		.values());
 	}
 	
 	private static void logFacilities(String msg, Collection<? extends Facility> facilities)
@@ -297,12 +297,9 @@ public class FacilityArtifact extends Artifact {
 		double lat = (double) args[1];
 		double lon = (double) args[2];
 		String resource = (String) args[3];
-		//int threshold = (int) args[4];
 		
-		resourceNodes.put(name,
+		resourceNodes.put(name, 
 				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(resource), 0));
-
-        calculateMissingResourceNodes();
 	}
 
 	private static void perceiveWell(Percept percept)
@@ -316,14 +313,19 @@ public class FacilityArtifact extends Artifact {
 		String team = (String) args[4];
 		int integrity = (int) args[5];
 
-		wells.put(name, new Well(name, team, new Location(lon, lat),
-				StaticInfoArtifact.getWellTypes().stream().filter(well -> well.getName().equals(name)).findFirst().get()));
+
+		Well well = new Well(name, team, new Location(lon, lat),
+                StaticInfoArtifact.getWellTypes().stream().filter(w -> w.getName().equals(type)).findFirst().get());
+		wells.put(name, well);
+        allFacilities = new ArrayList<>(
+                Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
+//		allFacilities.get(allFacilities.size()-1).put(name, well);
 	}
 	
 	public static Facility getFacility(String facilityName)
 	{
 		if (facilityName.equals("none")) return null;
-		
+
 		return allFacilities.stream().filter(facilities -> facilities.containsKey(facilityName))
 				.findFirst().get().get(facilityName);
 	}

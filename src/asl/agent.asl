@@ -6,22 +6,18 @@
 { include("requests.asl") }
 
 // Initial beliefs
-free.
+// free.
 
 // Initial goals
 !register.
 !focusArtifacts.
 
-
-// !startLoop.
+!startLoop.
 
 +!startLoop <- .wait({+step(_)}); !loop.
-+!loop <- !getToFacility("shop1"); !getToFacility("shop2"); !loop.
-+!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 // +!loop <- !doAction(recharge); !loop.
-+!loop : scout <- !scoutt; !loop.
-+!loop <- !getToFacility("shop1"); !loop.
-
++!loop <- !buildWell; !loop.
+	
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 

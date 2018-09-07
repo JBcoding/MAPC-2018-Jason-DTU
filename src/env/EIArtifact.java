@@ -37,7 +37,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     
     private static EnvironmentInterfaceStandard ei;
     private static final String configFile = "conf/eismassimconfig.json";
-	// private static final String configFile = "conf/eismassimconfig_connection_test.json";
+	//private static final String configFile = "conf/eismassimconfig_connection_test.json";
 
     private static Map<String, String> connections 	= new HashMap<>();
     private static Map<String, String> entities		= new HashMap<>();
@@ -214,10 +214,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			Set<Percept> allPercepts = new HashSet<>();
 
 			for (Entry<String, String> entry : connections.entrySet())
-			{		
+			{
 				Collection<Percept> percepts = ei.getAllPercepts(entry.getKey()).get(entry.getValue());
-				
-				AgentArtifact.getAgentArtifact(entry.getKey()).perceiveUpdate(percepts);
 
 				allPercepts.addAll(percepts);
 			}
@@ -225,6 +223,15 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			FacilityArtifact	.perceiveUpdate(allPercepts);
 			DynamicInfoArtifact	.perceiveUpdate(allPercepts);
 			JobArtifact			.perceiveUpdate(allPercepts);
+
+
+
+			for (Entry<String, String> entry : connections.entrySet())
+			{
+				Collection<Percept> percepts = ei.getAllPercepts(entry.getKey()).get(entry.getValue());
+
+				AgentArtifact.getAgentArtifact(entry.getKey()).perceiveUpdate(percepts);
+			}
 
 			getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
 			
