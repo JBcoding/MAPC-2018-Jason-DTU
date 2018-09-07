@@ -24,6 +24,7 @@ import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.Facility;
+import massim.scenario.city.data.facilities.ResourceNode;
 
 public class AgentArtifact extends Artifact {
 	
@@ -59,8 +60,8 @@ public class AgentArtifact extends Artifact {
 		this.agentName = this.getId().getName();
 
 		artifacts.put(this.agentName, this);
-		
-		defineObsProperty("inFacility", 		"none");
+
+		defineObsProperty("inFacility", 		"none", "");
         defineObsProperty("speed", 	0);
 		defineObsProperty("charge", 			250);
 		defineObsProperty("load", 				0);                
@@ -274,8 +275,13 @@ public class AgentArtifact extends Artifact {
 			
 			if (!this.getEntity().getFacilityName().equals(facility.getName()))
 			{
-				this.getEntity().setFacility(facility);	
-				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+				this.getEntity().setFacility(facility);
+				if (facility instanceof ResourceNode) {
+					getObsProperty("inFacility").updateValues(this.getEntity().getFacilityName(),
+							((ResourceNode)facility).getResource().getName());
+				} else {
+					getObsProperty("inFacility").updateValues(this.getEntity().getFacilityName(), "");
+				}
 			}
 		}
 		else 
@@ -283,7 +289,7 @@ public class AgentArtifact extends Artifact {
 			if (!this.getEntity().getFacilityName().equals("none"))
 			{
 				this.getEntity().setFacility(null);
-				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+				getObsProperty("inFacility").updateValues(this.getEntity().getFacilityName(), "");
 			}
 		}
 		

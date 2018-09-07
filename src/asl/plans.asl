@@ -23,6 +23,8 @@
 	!buyItems(Items);
 	!buyItems([map(Item, Amount - AmountAvailable)]).
 
++!gather(Item) : inResourceNode
+
 +!gather : inResourceNode	<- !doAction(gather); !gather.
 +!gather 					<-
 	getClosestFacility("resourceNode", F);
