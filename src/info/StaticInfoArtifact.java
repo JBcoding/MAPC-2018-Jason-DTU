@@ -176,8 +176,8 @@ public class StaticInfoArtifact extends Artifact {
 		// Entity has not been made public
 		if (team.equals(StaticInfoArtifact.team))
 		{
-		    name = "agent" + name;
-		    System.out.println(name);
+		    // name = "agent" + name; // TODO
+		    // System.out.println(name);
 			AgentArtifact.addEntity(name, new CEntity(roles.get(role), new Location(lon, lat)));
 		}
 	}
@@ -271,7 +271,6 @@ public class StaticInfoArtifact extends Artifact {
         Object[] args = Translator.perceptToObject(percept);
 
         team = (String) args[0];
-        System.out.println(team);
     }
 
     private static void perceiveUpgrade(Percept percept)

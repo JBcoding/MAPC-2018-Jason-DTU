@@ -30,6 +30,7 @@ import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Shop;
 import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Workshop;
+import massim.scenario.city.data.Item;
 
 public class FacilityArtifact extends Artifact {
 	
@@ -148,7 +149,19 @@ public class FacilityArtifact extends Artifact {
 		
 		distanceToFacility(facility.get(), distance);
 	}
-	
+
+    @OPERATION
+    void getResource(String node, OpFeedbackParam<Item> item) {
+        item.set(resourceNodes.get(node).getResource());
+    }
+
+    @OPERATION
+    void getLocation(String node, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+        Location loc = resourceNodes.get(node).getLocation();
+        lat.set(loc.getLat());
+        lon.set(loc.getLon());
+    }
+
 	/**
 	 * @param l location to search from
 	 * @param facilities to search

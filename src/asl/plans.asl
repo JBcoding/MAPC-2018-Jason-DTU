@@ -8,9 +8,15 @@
 	!doAction(receive);
 	!receiveItems(Items).
 	
-+!retrieveItems(map(Shop, Items)) <-
-	!getToFacility(Shop);
-	!buyItems(Items).
++!retrieveItems(map(Node, Amount)) <-
+    getLocation(Node, Lat, Lon);
+    .print("before !getToLocation");
+	!getToLocation(Node, Lat, Lon);
+	!gatherItem(Node, Amount).
+
++!gatherItem(Node, Amount) : inFacility(Node) & getResource(Node, Item) & not hasItems([map(Item, Amount)]) <-
+	!doAction(gather);
+	!gatherItem(Node, Amount).
 
 +!buyItems([]).
 +!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
@@ -50,6 +56,11 @@
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F) <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
+
++!getToLocation(F, _) : inFacility(F).
++!getToLocation(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocation(F, Lat, Lon).
++!getToLocation(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocation(F, Lat, Lon).
++!getToLocation(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocation(F, Lat, Lon).
 
 +!charge : charge(X) & currentBattery(X).
 +!charge : not canMove <- !doAction(recharge); !charge.

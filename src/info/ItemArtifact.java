@@ -1,15 +1,7 @@
 package info;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -124,11 +116,10 @@ public class ItemArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void getShoppingList(Object[] itemsMap, OpFeedbackParam<Object> ret)
+	void getResourceList(Object[] itemsMap, OpFeedbackParam<Object> ret)
 	{
-		ret.set(getShoppingList(Translator.convertASObjectToMap(itemsMap)).entrySet().stream()
-				.collect(Collectors.toMap(shop -> shop.getKey().getName(), map -> map.getValue().entrySet().stream()
-						.collect(Collectors.toMap(item -> item.getKey().getName(), Entry::getValue)))));
+		ret.set(getResourceList(Translator.convertASObjectToMap(itemsMap)).entrySet().stream()
+				.collect(Collectors.toMap(node -> node.getKey().getName(), Entry::getValue)));
 	}
 	
 	/**
@@ -136,34 +127,39 @@ public class ItemArtifact extends Artifact {
 	 * @param items The items to buy along with the amount
 	 * @return A map of shops and what to buy where
 	 */
-	public static Map<Shop, Map<Item, Integer>> getShoppingList(Map<Item, Integer> items)
+	public static Map<ResourceNode, Integer> getResourceList(Map<Item, Integer> items)
 	{	
-		Map<Shop, Map<Item, Integer>> shoppingList = new HashMap<>();
+		Map<ResourceNode, Integer> resourceList = new HashMap<>();
 
-		/*
 		Map<String, ResourceNode> nodes = FacilityArtifact.getResourceNodes();
 
         for (Entry<Item, Integer> entry : items.entrySet()) {
             Item item = entry.getKey();
             int amount = entry.getValue();
 
-            if (!item.getRequiredItems().isEmpty()) {
+            if (item.needsAssembly()) {
                 // We can only gather base items
                 continue;
             }
 
+            Optional<ResourceNode> best = nodes.values().stream()
+                    .filter(x -> x.getResource().equals(item))
+                    .min(Comparator.comparingInt(ResourceNode::getThreshold));
 
+            if (best.isPresent()) {
+                resourceList.put(best.get(), amount);
+            } else {
+                logger.severe("No known resource node for " + item);
+            }
         }
-        */
 
-		// TODO: This needs to return a map keyed by resource nodes instead.
-
-		return shoppingList;
+		return resourceList;
 	}
 
 	@OPERATION
 	void getClosestFacilitySelling(String item, OpFeedbackParam<String> ret)
 	{
+	    // TODO: don't trust this
 		Location agentLocation = AgentArtifact.getEntity(getOpUserName()).getLocation();
 		
 		Collection<Shop> shops = itemLocations.get(item).values();
