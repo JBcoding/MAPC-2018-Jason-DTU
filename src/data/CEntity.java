@@ -56,8 +56,6 @@ public class CEntity {
         items = new CBoundedItemBox(role.getMaxLoad());
         this.lat = location.getLat();
         this.lon = location.getLon();
-        currentCharge = role.getBaseBattery();
-        currentBattery = role.getBaseBattery();
     }
 
     public Set<String> getPermissions()

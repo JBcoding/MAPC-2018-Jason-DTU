@@ -16,7 +16,8 @@
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); !loop.
-+!loop <- !doAction(recharge); !loop.
+// +!loop <- !doAction(recharge); !loop.
++!loop <- !getToFacility("shop1"); !loop.
 	
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).

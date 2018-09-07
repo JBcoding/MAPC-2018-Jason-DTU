@@ -11,7 +11,7 @@ public class Runner {
 				Server.main(new String[] { "-conf", "conf/SampleConfig.json", "--monitor" });
 			}
 		}).start();
-		
+
 		RunCentralisedMAS.main(new String[] { "src/mas/multiagent_jason.mas2j" });
 	}
 }
