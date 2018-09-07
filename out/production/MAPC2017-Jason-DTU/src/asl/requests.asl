@@ -29,27 +29,25 @@
 	!!assembleRequest(Items, Workshop, TaskId, DeliveryLocation, _, CNPId).
 
 +!assembleRequest(Items, Workshop, TaskId, DeliveryLocation, _, CNPId) 
-	: free & capacity(Capacity) & speed(Speed) <-
-	
+	: free & remainingCapacity(Capacity) & speed(Speed) <-
 	-free;
 	getItemsToCarry(Items, Capacity, ItemsToAssemble, AssembleRest);
 	getBaseItems(ItemsToAssemble, ItemsToRetrieve);
 	getVolume(ItemsToRetrieve, Volume);
-	distanceToFacility(Workshop, Distance);	
-	
+	distanceToFacility(Workshop, Distance);
+
 	// Negative volume since lower is better
-	Bid = math.ceil(Distance/Speed) * 10 - Volume; 
-	
-	if (not ItemsToRetrieve = []) 
-	{ 
+	Bid = math.ceil(Distance/Speed) * 10 - Volume;
+
+	if (not ItemsToRetrieve = []) {
 		bid(Bid)[artifact_id(CNPId)];
 		winner(Won)[artifact_id(CNPId)];
-		
-		if (Won)
-		{		
-			.print(ItemsToAssemble, " - ", AssembleRest);
+
+		if (Won) {
+			.print("To assemble: ", ItemsToAssemble, " - ", AssembleRest);
 			clearAssemble(CNPId);
 			!assemble(ItemsToRetrieve, ItemsToAssemble, AssembleRest, Workshop, TaskId, DeliveryLocation);
+	        .print("==> after assemble");
 		}
 	}
 	+free.
@@ -93,16 +91,23 @@
 	: .my_name(Me) <-
 
 	getShoppingList(ItemsToRetrieve, ShoppingList);
-	ShoppingList = [Shop|RetrieveRest];	
-	
+	.print("getShoppingList");
+	.print(ShoppingList);
+	ShoppingList = [Shop|RetrieveRest];
+	.print("match");
+
 	+assistants([]);
-	
+
 	if (not RetrieveRest = [])
 	{
 		+assistCount(1);
+	    .print("before send");
 		.send(announcer, achieve, announceRetrieve(Me, RetrieveRest, Workshop));
+	    .print("after send");
 	}
-	
+
+	.print("woop");
+
 	if (not AssembleRest = [])
 	{
 		.send(announcer, achieve, announceAssemble(AssembleRest, Workshop, TaskId, DeliveryLocation, "old"));			

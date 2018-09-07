@@ -23,13 +23,7 @@ import eis.iilang.Percept;
 import env.Translator;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
-import massim.scenario.city.data.facilities.ChargingStation;
-import massim.scenario.city.data.facilities.Dump;
-import massim.scenario.city.data.facilities.Facility;
-import massim.scenario.city.data.facilities.ResourceNode;
-import massim.scenario.city.data.facilities.Shop;
-import massim.scenario.city.data.facilities.Storage;
-import massim.scenario.city.data.facilities.Workshop;
+import massim.scenario.city.data.facilities.*;
 
 public class FacilityArtifact extends Artifact {
 	
@@ -41,12 +35,13 @@ public class FacilityArtifact extends Artifact {
 	public static final String STORAGE 				= "storage";
 	public static final String WORKSHOP 			= "workshop";
 	public static final String RESOURCE_NODE		= "resourceNode";
+	private static final String WELL	 			= "well";
 	
 	public static final Set<String>	STATIC_PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(CHARGING_STATION, DUMP, SHOP, STORAGE, WORKSHOP)));
 
 	public static final Set<String>	DYNAMIC_PERCEPTS = Collections.unmodifiableSet(
-		new HashSet<String>(Arrays.asList(RESOURCE_NODE)));
+		new HashSet<String>(Arrays.asList(RESOURCE_NODE, WELL)));
 	
 	private static Map<String, ChargingStation> chargingStations 	= new HashMap<>();
 	private static Map<String, Dump> 			dumps 			 	= new HashMap<>();
@@ -54,9 +49,10 @@ public class FacilityArtifact extends Artifact {
 	private static Map<String, Storage> 		storages 			= new HashMap<>();
 	private static Map<String, Workshop> 		workshops 			= new HashMap<>();
 	private static Map<String, ResourceNode>	resourceNodes		= new HashMap<>();
+	private static Map<String, Well>			wells				= new HashMap<>();
 	
 	private static List<Map<String, ? extends Facility>> allFacilities = new ArrayList<>(
-			Arrays.asList(chargingStations, dumps, shops, storages, workshops, resourceNodes));
+			Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
 	
 	void init()
 	{
@@ -78,6 +74,7 @@ public class FacilityArtifact extends Artifact {
 		case STORAGE:			facilities = storages			.values();  break;
 		case WORKSHOP:			facilities = workshops			.values();  break;
 		case RESOURCE_NODE:		facilities = resourceNodes		.values();  break;
+		case WELL:				facilities = wells				.values();  break;
 		}
 		
 		// What happens if the feedback parameter is null?
@@ -169,6 +166,7 @@ public class FacilityArtifact extends Artifact {
 			case STORAGE:			perceiveStorage			(percept);  break;          
 			case WORKSHOP:			perceiveWorkshop		(percept);  break;
 			case RESOURCE_NODE:		perceiveResourceNode	(percept);	break;
+			case WELL: 				perceiveWell			(percept);	break;
 			}
 		}
 
@@ -179,6 +177,7 @@ public class FacilityArtifact extends Artifact {
 		logFacilities("Storages perceived:"			, storages			.values());
 		logFacilities("Workshops perceived:"		, workshops			.values());
 		logFacilities("Resource nodes perceived:"	, resourceNodes		.values());
+		logFacilities("wells perceived:"	, wells		.values());
 	}
 	
 	private static void logFacilities(String msg, Collection<? extends Facility> facilities)
@@ -262,19 +261,34 @@ public class FacilityArtifact extends Artifact {
 		
 		workshops.put(name, new Workshop(name, new Location(lon, lat)));
 	}
-	
-	// Literal(String, double, double, String)
+
 	private static void perceiveResourceNode(Percept percept)
 	{
 		Object[] args = Translator.perceptToObject(percept);
-		
-		String 	name   	= (String) args[0];
-		double 	lat		= (double) args[1];
-		double 	lon		= (double) args[2];
-		String 	itemId 	= (String) args[3];
+
+		String name = (String) args[0];
+		double lat = (double) args[1];
+		double lon = (double) args[2];
+		String resource = (String) args[3];
+		int threshold = (int) args[4];
 		
 		resourceNodes.put(name, 
-				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(itemId), 0));
+				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(resource), threshold));
+	}
+
+	private static void perceiveWell(Percept percept)
+	{
+		Object[] args = Translator.perceptToObject(percept);
+
+		String name = (String) args[0];
+		double lat = (double) args[1];
+		double lon = (double) args[2];
+		String type = (String) args[3];
+		String team = (String) args[4];
+		int integrity = (int) args[5];
+
+		wells.put(name, new Well(name, team, new Location(lon, lat),
+				StaticInfoArtifact.getWellTypes().stream().filter(well -> well.getName().equals(name)).findFirst().get()));
 	}
 	
 	public static Facility getFacility(String facilityName)
@@ -302,6 +316,7 @@ public class FacilityArtifact extends Artifact {
 		case STORAGE:			facilities = storages			;  break;
 		case WORKSHOP:			facilities = workshops			;  break;
 		case RESOURCE_NODE:		facilities = resourceNodes		;  break;
+		case WELL:				facilities = wells				;  break;
 		}
 		
 		return facilities.get(facilityName);
@@ -315,8 +330,9 @@ public class FacilityArtifact extends Artifact {
 		case DUMP:				return dumps			.values().stream().map(x -> (Facility) x).collect(Collectors.toList());        
 		case SHOP:				return shops			.values().stream().map(x -> (Facility) x).collect(Collectors.toList());           
 		case STORAGE:			return storages			.values().stream().map(x -> (Facility) x).collect(Collectors.toList()); 
-		case WORKSHOP:			return workshops		.values().stream().map(x -> (Facility) x).collect(Collectors.toList()); 
-		case RESOURCE_NODE:		return resourceNodes	.values().stream().map(x -> (Facility) x).collect(Collectors.toList()); 
+		case WORKSHOP:			return workshops		.values().stream().map(x -> (Facility) x).collect(Collectors.toList());
+		case RESOURCE_NODE:		return resourceNodes	.values().stream().map(x -> (Facility) x).collect(Collectors.toList());
+		case WELL:				return wells			.values().stream().map(x -> (Facility) x).collect(Collectors.toList());
 		}
 		return null;
 	}
@@ -333,5 +349,6 @@ public class FacilityArtifact extends Artifact {
 		storages 			= new HashMap<>();
 		workshops 			= new HashMap<>();
 		resourceNodes		= new HashMap<>();
+		wells				= new HashMap<>();
 	}
 }

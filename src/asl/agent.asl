@@ -6,7 +6,7 @@
 { include("requests.asl") }
 
 // Initial beliefs
-free.
+// free.
 
 // Initial goals
 !register.

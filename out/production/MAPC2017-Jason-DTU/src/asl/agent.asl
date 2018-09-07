@@ -6,7 +6,7 @@
 { include("requests.asl") }
 
 // Initial beliefs
-free.
+// free.
 
 // Initial goals
 !register.
@@ -16,7 +16,12 @@ free.
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); !loop.
+<<<<<<< Updated upstream
 +!loop <- !doAction(recharge); !loop.
+=======
+//+!loop <- !doAction(recharge); !loop.
++!loop <- !
+>>>>>>> Stashed changes
 	
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).

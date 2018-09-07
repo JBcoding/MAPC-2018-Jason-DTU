@@ -1,10 +1,6 @@
 package info;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import cartago.Artifact;
@@ -13,6 +9,8 @@ import cartago.OpFeedbackParam;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
+
+import javax.annotation.Resource;
 
 public class DynamicInfoArtifact extends Artifact {
 	
@@ -94,10 +92,10 @@ public class DynamicInfoArtifact extends Artifact {
 		{
 			switch (percept.getName())
 			{
-			case DEADLINE:   perceiveDeadline	(percept);	break;
-			case MONEY:      perceiveMoney		(percept);  break;
-			case STEP:       perceiveStep		(percept);  break;
-			case TIMESTAMP:  perceiveTimestamp	(percept);  break;
+			case DEADLINE:   	perceiveDeadline	(percept);	break;
+			case MONEY:      	perceiveMoney		(percept);  break;
+			case STEP:       	perceiveStep		(percept);  break;
+			case TIMESTAMP:  	perceiveTimestamp	(percept);  break;
 			}
 		}
 
@@ -123,7 +121,7 @@ public class DynamicInfoArtifact extends Artifact {
 	private static void perceiveMoney(Percept percept)
 	{
 		Object[] args = Translator.perceptToObject(percept);
-		
+
 		money = (int) args[0];
 	}
 
@@ -139,7 +137,7 @@ public class DynamicInfoArtifact extends Artifact {
 	private static void perceiveTimestamp(Percept percept)
 	{
 		Object[] args = Translator.perceptToObject(percept);
-		
+
 		timestamp = (long) args[0];
 	}
 

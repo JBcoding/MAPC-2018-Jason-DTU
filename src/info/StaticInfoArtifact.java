@@ -46,7 +46,8 @@ public class StaticInfoArtifact extends Artifact {
     private static final String CENTER_LON 			= "centerLon";
 	
 	public static final Set<String>	PERCEPTS = Collections.unmodifiableSet(
-		new HashSet<>(Arrays.asList(ENTITY, ID, MAP, ROLE, SEED_CAPITAL, STEPS, TEAM)));
+		new HashSet<>(Arrays.asList(ENTITY, ID, MAP, ROLE, SEED_CAPITAL, STEPS, TEAM, UPGRADE, WELL_TYPE, PROXIMITY,
+				CELL_SIZE, MIN_LAT, MIN_LON, MAX_LAT, MAX_LON, CENTER_LAT, CENTER_LON)));
 	
 	// Entities are stored in DynamicInfoArtifact
 	private static String 				    id;
