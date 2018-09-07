@@ -15,16 +15,6 @@
 //+!goToResourceNode(Lat, Lon)
 //+!goToWell(Lat, Lon)
 
-+!gatherItems([]).
-+!gatherItems([map(Item, 	   0)|Items]) <- !gatherItems(Items).
-+!gatherItems([map(Item, Amount)|Items]) : inShop(Shop) <-
-	getAvailableAmount(Item, Amount, Shop, AmountAvailable);
-	!doAction(buy(Item, AmountAvailable));
-	!buyItems(Items);
-	!buyItems([map(Item, Amount - AmountAvailable)]).
-
-+!gather(Item) : inResourceNode
-
 +!gather : inResourceNode	<- !doAction(gather); !gather.
 +!gather 					<-
 	getClosestFacility("resourceNode", F);
