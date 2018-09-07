@@ -79,9 +79,9 @@ public class TaskArtifact extends Artifact {
 	}
 
 	@OPERATION
-	void announceRetrieve(String agent, Object shoppingList, String workshop)
+	void announceRetrieve(String agent, Object resourceList, String workshop)
 	{
-		instance.announce("retrieveRequest", agent, toItemMap(shoppingList), workshop);
+		instance.announce("retrieveRequest", agent, toItemMap(resourceList), workshop);
 	}
 	
 	private void define(String property, Object... args)
@@ -164,7 +164,7 @@ public class TaskArtifact extends Artifact {
 				{
 					terms.add(ASSyntax.parseLiteral((String) item));
 				}
-				
+
 				return Translator.termToObject(terms);
 			} 
 			catch (ParseException e) 
