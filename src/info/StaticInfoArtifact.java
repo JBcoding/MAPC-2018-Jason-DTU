@@ -63,8 +63,6 @@ public class StaticInfoArtifact extends Artifact {
 	private static CCityMap				    cityMap;
     private static CExploredMap exploredMap;
 
-    private static
-
 	@OPERATION
 	void getSimulationData(OpFeedbackParam<String> id, OpFeedbackParam<String> map,
 			OpFeedbackParam<Integer> seedCapital, OpFeedbackParam<Integer> steps, 
@@ -155,6 +153,8 @@ public class StaticInfoArtifact extends Artifact {
                 case PROXIMITY:     perceiveProximity   (percept);  break;
 			}
 		}
+
+		upgrades.forEach((k, v) -> System.out.println(k + " : " + v.getName() + " : " + v.getCost() + " : " + v.getStep()));
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{
@@ -365,6 +365,11 @@ public class StaticInfoArtifact extends Artifact {
             wellType.set("none");
         }
     }
+
+    @OPERATION
+	void getUpgradePrice(String type, OpFeedbackParam<Integer> price) {
+		price.set(upgrades.get(type).getCost());
+	}
 
 	public static void reset()
 	{

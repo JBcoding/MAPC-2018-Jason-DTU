@@ -29,19 +29,13 @@ public class CEntity {
     private Facility facility;
     private AgentArtifact agentArtifact;
 
-    public int getCurrentSpeed() {
-        return currentSpeed;
-    }
-
-    public void setCurrentSpeed(int currentSpeed) {
-        this.currentSpeed = currentSpeed;
-    }
-
     private int currentSpeed;
+    private int currentVision;
+    private int currentSkill;
 
     private int currentCharge;
     private int currentBattery;
-    private int currentCapacity;
+    private int currentCapacity;;
     private CBoundedItemBox items;
 
     private Action lastAction = Action.STD_NO_ACTION;
@@ -64,6 +58,30 @@ public class CEntity {
     public Set<String> getPermissions()
     {
     	return this.permissions;
+    }
+
+    public int getCurrentSpeed() {
+        return currentSpeed;
+    }
+
+    public void setCurrentSpeed(int currentSpeed) {
+        this.currentSpeed = currentSpeed;
+    }
+
+    public int getCurrentVision() {
+        return currentVision;
+    }
+
+    public void setCurrentVision(int currentVision) {
+        this.currentVision = currentVision;
+    }
+
+    public int getCurrentSkill() {
+        return currentSkill;
+    }
+
+    public void setCurrentSkill(int currentSkill) {
+        this.currentSkill = currentSkill;
     }
 
     public int getCurrentCharge(){

@@ -15,11 +15,11 @@
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); !loop.
-// +!loop <- !doAction(recharge); !loop.
-+!loop <- !buildWell; !loop.
+//+!loop <- !doAction(recharge); !loop.
++!loop <- !dismantleEnemyWell.
 	
 // Percepts	
-+!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
++!doAction(Action) : .my_name(Me) <- jia.action(Me, Action).
 
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
 +step(X) : lastAction("give") 		 & lastActionResult("successful") <- .print("Give successful!").

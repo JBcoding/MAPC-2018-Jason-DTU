@@ -22,19 +22,66 @@
 //+!goToResourceNode(Lat, Lon)
 //+!goToWell(Lat, Lon)
 
-+!buildWell : inWell <- !doAction(build); !buildWell.
++!buildWell :
+    inOwnWell &
+    inFacility(F)
+    <-
+    wellHasFullIntegrity(F, X);
+    if (not X) {
+        !doAction(build);
+        !buildWell;
+    }
+    else {
+        .print("Done building well");
+    }.
 +!buildWell :
     atPeriphery
     <-
     getMoney(Money);
     bestWellType(Money, WellType);
-    !doAction(build(WellType));
-    !buildWell.
+    if (not (WellType == "none")) {
+        !doAction(build(WellType));
+        !buildWell;
+    } else {
+        .print("Not enough massium to build any well");
+    }.
 +!buildWell
     <-
     closestPeriphery(Lat, Lon);
-    !doAction(goto(Lat, Lon));
+    !getToPeripheryLocation(Lat, Lon);
     !buildWell.
+
++!dismantleOwnWell : inOwnWell <- !doAction(dismantle); !dismantleOwnWell.
+
++!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell.
++!dismantleEnemyWell
+    <-
+    getEnemyWell(F, Lat, Lon);
+    // TODO: What to do if there is no known enemy well?
+    !getToLocation(F, Lat, Lon);
+    !dismantleEnemyWell.
+
++!upgrade(Type) :
+    inShop
+    <-
+    getMoney(Money);
+    getUpgradePrice(Type, Price);
+// TODO: Possibly decide whether upgrading is worth the cost
+    if (Price <= Money) {
+        !doAction(upgrade(Type));
+    } else {
+        .print("Not enough money to upgrade");
+    }.
++!upgrade(Type) <-
+    getClosestFacility("shop", F);
+    !getToFacility(F);
+    !upgrade(Type).
+
++!upgradeSpeed <- !upgrade("speed").
++!upgradeVision <- !upgrade("vision").
++!upgradeSkill <- !upgrade("skill").
++!upgradeCapacity <- !upgrade("load").
++!upgradeBattery <- !upgrade("battery").
 
 +!gather : inResourceNode	<- !doAction(gather); !gather.
 +!gather 					<-
@@ -82,14 +129,20 @@
 
 +!getToFacility(F) : inFacility(F).
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
-+!getToFacility(F) : not enoughCharge & not isChargingStation(F) <- !charge; !getToFacility(F).
++!getToFacility(F) : not enoughCharge & not isChargingStation(F)    <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
-// Meant for getting to resource nodes
+// Meant for getting to resource nodes and wells
 +!getToLocation(F, _, _) : inFacility(F).
 +!getToLocation(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocation(F, Lat, Lon).
+
+// Gets close to this location
++!getToPeripheryLocation(Lat, Lon) : atPeriphery.
++!getToPeripheryLocation(Lat, Lon) : not canMove <- !doAction(recharge); !getToPeripheryLocation(Lat, Lon).
++!getToPeripheryLocation(Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToPeripheryLocation(Lat, Lon).
++!getToPeripheryLocation(Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocation(Lat, Lon).
 
 +!charge : charge(X) & currentBattery(X).
 +!charge : not canMove <- !doAction(recharge); !charge.

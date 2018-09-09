@@ -1,5 +1,6 @@
 package data;
 
+import cartago.OpFeedbackParam;
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.routing.util.EdgeFilter;
@@ -7,6 +8,8 @@ import com.graphhopper.storage.index.QueryResult;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
 import com.graphhopper.util.shapes.GHPoint3D;
+import info.FacilityArtifact;
+import info.StaticInfoArtifact;
 import massim.protocol.scenario.city.util.LocationUtil;
 import massim.util.Log;
 import massim.util.RNG;
@@ -17,6 +20,7 @@ import massim.scenario.city.util.GraphHopperManager;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CCityMap implements Serializable {
 
@@ -262,6 +266,29 @@ public class CCityMap implements Serializable {
 	}
 
 	/**
+	 * Checks if a location is visible from another.
+	 * @param from the location to check
+	 * @param to the roads that may be used
+	 * @param vision the vision of the agent checking visibility
+	 * @return true if the location is visible
+	 */
+	public boolean isVisible(Location from, Location to, int vision) {
+		return Math.abs(distanceBetween(from, to)) <= vision;
+	}
+
+	public double distanceBetween(Location l1, Location l2) {
+		double R = 6378.137; // Radius of earth in KM
+		double dLat = l2.getLat() * Math.PI / 180 - l1.getLat() * Math.PI / 180;
+		double dLon = l2.getLon() * Math.PI / 180 - l1.getLon() * Math.PI / 180;
+		double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+				Math.cos(l1.getLat() * Math.PI / 180) * Math.cos(l2.getLat() * Math.PI / 180) *
+						Math.sin(dLon/2) * Math.sin(dLon/2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		double d = R * c;
+		return d * 1000; // meters
+	}
+
+	/**
 	 * @param loc the location to check
 	 * @return true if the location is within map bounds
 	 */
@@ -285,5 +312,42 @@ public class CCityMap implements Serializable {
 	public String toString() {
 		return String.format("Map of %s. Min lat: %f Min lon: %f Max lat: %f Max lon: %f Center: (%f, %f).",
                 mapName, minLat, minLon, maxLat, maxLon, center.getLat(), center.getLon());
+	}
+
+	public Location getClosestPeriphery(Location l, double epsilon) {
+		double newLat;
+		double newLon;
+		double latDiff;
+		double lonDiff;
+
+		if (l.getLat() - minLat < maxLat - l.getLat()) {
+			latDiff = l.getLat() - minLat;
+			newLat = minLat + epsilon;
+		} else {
+			latDiff = maxLat - l.getLat();
+			newLat = maxLat - epsilon;
+		}
+
+		if (l.getLon() - minLon < maxLon - l.getLon()) {
+			lonDiff = l.getLon() - minLon;
+			newLon = minLon + epsilon;
+		} else {
+			lonDiff = maxLon - l.getLon();
+			newLon = maxLon - epsilon;
+		}
+
+		Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
+
+		// If we can't find a route to the nearest periphery, we just want to go towards anything reachable in that general direction
+		if (!existsRoute(l, loc)) {
+		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
+		    loc = FacilityArtifact.getFacility(facility).getLocation();
+        }
+
+		//Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
+		//Location loc = getNearestRoad(latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat()));
+
+		//System.out.println(String.format("Current location: %f, %f Goal location: %f, %f", l.getLat(), l.getLon(), loc.getLat(), loc.getLon()));
+		return loc;
 	}
 }

@@ -20,13 +20,12 @@ import eis.iilang.Percept;
 import eis.iilang.PrologVisitor;
 import env.EIArtifact;
 import env.Translator;
-import mapc2017.env.info.StaticInfo;
 import massim.protocol.messagecontent.Action;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.Facility;
-import massim.scenario.city.data.facilities.ResourceNode;
+import massim.scenario.city.data.facilities.Well;
 
 public class AgentArtifact extends Artifact {
 	
@@ -45,19 +44,21 @@ public class AgentArtifact extends Artifact {
 	private static final String ROUTE 				= "route";
 	private static final String ROUTE_LENGTH 		= "routeLength";
     private static final String CURRENT_BATTERY     = "maxBattery";
-    private static final String CURRENT_CAPACITY = "maxLoad";
-	private static final String SPEED = "speed";
+    private static final String CURRENT_CAPACITY 	= "maxLoad";
+	private static final String SPEED 				= "speed";
+	private static final String VISION 				= "vision";
+	private static final String SKILL 				= "skill";
 
 	public static final Set<String>	PERCEPTS = Collections.unmodifiableSet(
-		new HashSet<String>(Arrays.asList(ACTION_ID, CHARGE, FACILITY, HAS_ITEM, LAST_ACTION, LAST_ACTION_PARAMS, 
-				LAST_ACTION_RESULT, LAT, LON, LOAD, ROUTE, ROUTE_LENGTH)));
+		new HashSet<String>(Arrays.asList(ACTION_ID, CHARGE, FACILITY, HAS_ITEM, LAST_ACTION, LAST_ACTION_PARAMS,
+				LAST_ACTION_RESULT, LAT, LON, LOAD, ROUTE, ROUTE_LENGTH, CURRENT_BATTERY, CURRENT_CAPACITY, SPEED, VISION, SKILL)));
 	
 	private static Map<String, CEntity> entities = new HashMap<>();
 	private static Map<String, AgentArtifact> artifacts = new HashMap<>();
 	
 	private String agentName;
 
-	private static final double epsilon = 1E-5;
+	private static final double EPSILON = 1E-3;
 	
 	void init()
 	{
@@ -66,7 +67,9 @@ public class AgentArtifact extends Artifact {
 		artifacts.put(this.agentName, this);
 
 		defineObsProperty("inFacility", 		"none");
-        defineObsProperty("speed", 	0);
+		defineObsProperty("speed", 	0);
+		defineObsProperty("vision", 	0);
+		defineObsProperty("skill", 	0);
 		defineObsProperty("charge", 			250);
 		defineObsProperty("load", 				0);                
 		defineObsProperty("routeLength", 		0);                
@@ -77,6 +80,7 @@ public class AgentArtifact extends Artifact {
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
+		defineObsProperty("inOwnWell", 		false);
     }
 
 	/**
@@ -135,42 +139,10 @@ public class AgentArtifact extends Artifact {
 	void closestPeriphery(OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon)
 	{
 		Location l = this.getEntity().getLocation();
+		l = StaticInfoArtifact.getMap().getClosestPeriphery(l, EPSILON);
 
-		CCityMap map = StaticInfoArtifact.getMap();
-
-		double minLat = map.getMinLat();
-		double maxLat = map.getMaxLat();
-		double minLon = map.getMinLon();
-		double maxLon = map.getMaxLon();
-
-		double newLat;
-		double newLon;
-		double latDiff;
-		double lonDiff;
-
-		if (l.getLat() - minLat < maxLat - l.getLat()) {
-			latDiff = l.getLat() - minLat;
-			newLat = minLat + epsilon;
-		} else {
-			latDiff = maxLat - l.getLat();
-			newLat = maxLat - epsilon;
-		}
-
-		if (l.getLon() - minLon < maxLon - l.getLon()) {
-			lonDiff = l.getLon() - minLon;
-			newLon = minLon + epsilon;
-		} else {
-			lonDiff = maxLon - l.getLon();
-			newLon = maxLon - epsilon;
-		}
-
-		//Location loc = map.getNearestRoad(latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat()));
-		Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
-
-		lat.set(loc.getLat());
-		lon.set(loc.getLon());
-
-//		logger.info(String.format("Current location: %f, %f Goal location: %f, %f", l.getLat(), l.getLon(), loc.getLat(), loc.getLon()));
+		lat.set(l.getLat());
+		lon.set(l.getLon());
 	}
 
 	@OPERATION
@@ -226,6 +198,8 @@ public class AgentArtifact extends Artifact {
             case CURRENT_BATTERY:       perceiveCurrentBattery(percept); break;
             case CURRENT_CAPACITY: perceiveCurrentCapacity(percept); break;
 			case SPEED: perceiveSpeed(percept); break;
+			case VISION: perceiveVision(percept); break;
+			case SKILL: perceiveSkill(percept); break;
 			}
 		}
 
@@ -250,17 +224,15 @@ public class AgentArtifact extends Artifact {
 	}
 
 	private void updateAtPeriphery() {
+		int vision = getEntity().getCurrentVision();
 		CCityMap m = StaticInfoArtifact.getMap();
 		Location l = getEntity().getLocation();
 		getObsProperty("atPeriphery").updateValue(
-				doubleEquals(l.getLat(), m.getMinLat(), epsilon) ||
-				doubleEquals(l.getLat(), m.getMaxLat(), epsilon) ||
-				doubleEquals(l.getLon(), m.getMinLon(), epsilon) ||
-				doubleEquals(l.getLon(), m.getMaxLon(), epsilon)
+			m.isVisible(l, new Location(m.getMinLon(), l.getLat()), vision) ||
+			m.isVisible(l, new Location(m.getMaxLon(), l.getLat()), vision) ||
+			m.isVisible(l, new Location(l.getLon(), m.getMinLat()), vision) ||
+			m.isVisible(l, new Location(l.getLon(), m.getMaxLat()), vision)
 		);
-
-		//if ((boolean)getObsProperty("atPeriphery").getValue())
-		//	logger.info(String.format("At periphery: %f, %f", l.getLat(), l.getLon()));
 	}
 
 	private boolean doubleEquals(double a, double b, double epsilon) {
@@ -308,6 +280,38 @@ public class AgentArtifact extends Artifact {
 
 	/**
 	 * Literal(int)
+	 * @param percept
+	 */
+	@OPERATION
+	private void perceiveVision(Percept percept)
+	{
+		int vision = (int) Translator.perceptToObject(percept)[0];
+
+		if (vision != this.getEntity().getCurrentVision())
+		{
+			this.getEntity().setCurrentVision(vision);
+			getObsProperty("vision").updateValue(this.getEntity().getCurrentVision());
+		}
+	}
+
+	/**
+	 * Literal(int)
+	 * @param percept
+	 */
+	@OPERATION
+	private void perceiveSkill(Percept percept)
+	{
+		int skill = (int) Translator.perceptToObject(percept)[0];
+
+		if (skill != this.getEntity().getCurrentSkill())
+		{
+			this.getEntity().setCurrentSkill(skill);
+			getObsProperty("skill").updateValue(this.getEntity().getCurrentSkill());
+		}
+	}
+
+	/**
+	 * Literal(int)
 	 * Battery is the amount of charge when the agent is fully charged
 	 * @param percept
 	 */
@@ -350,7 +354,11 @@ public class AgentArtifact extends Artifact {
 
 			if (!this.getEntity().getFacilityName().equals(facility.getName())) {
 				this.getEntity().setFacility(facility);
-                getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+
+				if (facility instanceof Well) {
+					getObsProperty("inOwnWell").updateValue(((Well)facility).getTeam().equals(StaticInfoArtifact.getTeam()));
+				}
 			}
 		}
 		else 
@@ -359,6 +367,7 @@ public class AgentArtifact extends Artifact {
 			{
 				this.getEntity().setFacility(null);
 				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+				getObsProperty("inOwnWell").updateValue(false);
 			}
 		}
 		

@@ -1,26 +1,20 @@
 package info;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import cnp.TaskArtifact;
+import data.CCityMap;
 import data.CEntity;
 import eis.iilang.Percept;
 import env.Translator;
+import mapc2017.env.info.StaticInfo;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
@@ -51,7 +45,11 @@ public class FacilityArtifact extends Artifact {
 	private static Map<String, Workshop> 		workshops 			= new HashMap<>();
 	private static Map<String, ResourceNode>	resourceNodes		= new HashMap<>();
 	private static Map<String, Well>			wells				= new HashMap<>();
-	
+
+	public static List<Map<String, ? extends Facility>> getAllFacilities() {
+		return allFacilities;
+	}
+
 	private static List<Map<String, ? extends Facility>> allFacilities = new ArrayList<>(
 			Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
 	
@@ -115,13 +113,24 @@ public class FacilityArtifact extends Artifact {
 		
 		ret.set(getClosestFacility(agentLoc, facilities));
 	}
-	
+
 	@OPERATION
 	void getClosestWorkshopToStorage(String storage, OpFeedbackParam<String> workshop)
 	{
 		Location storageLoc = ((Storage) getFacility("storage", storage)).getLocation();
-		
+
 		workshop.set(getClosestFacility(storageLoc, workshops.values()));
+	}
+
+	@OPERATION
+	void wellHasFullIntegrity(String wellName, OpFeedbackParam<Boolean> hasFullIntegrity)
+	{
+		if (wells.containsKey(wellName)) {
+			Well well = wells.get(wellName);
+			hasFullIntegrity.set(well.getIntegrity() == well.getMaxIntegrity());
+		} else {
+			hasFullIntegrity.set(false);
+		}
 	}
 	
 	@OPERATION
@@ -155,12 +164,29 @@ public class FacilityArtifact extends Artifact {
         item.set(resourceNodes.get(node).getResource().getName());
     }
 
-    @OPERATION
-    void getLocation(String node, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
-        Location loc = resourceNodes.get(node).getLocation();
-        lat.set(loc.getLat());
-        lon.set(loc.getLon());
-    }
+	@OPERATION
+	void getLocation(String node, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+		Location loc = resourceNodes.get(node).getLocation();
+		lat.set(loc.getLat());
+		lon.set(loc.getLon());
+	}
+
+	@OPERATION
+	void getEnemyWell(OpFeedbackParam<String> name, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+		Location agentLoc = AgentArtifact.getEntity(getOpUserName()).getLocation();
+		try {
+			Well w = wells.values().stream()
+					.filter(well -> !well.getTeam().equals(StaticInfoArtifact.getTeam()))
+					.min(Comparator.comparingDouble(well -> euclideanDistance(well.getLocation(), agentLoc))).get();
+			name.set(w.getName());
+			lat.set(w.getLocation().getLat());
+			lon.set(w.getLocation().getLon());
+		} catch (NoSuchElementException | NullPointerException e) {
+			// TODO: What to do if there is no known enemy well?
+			//lat.set(loc.getLat());
+			//lon.set(loc.getLon());
+		}
+	}
 
 	/**
 	 * @param l location to search from
@@ -313,13 +339,17 @@ public class FacilityArtifact extends Artifact {
 		String team = (String) args[4];
 		int integrity = (int) args[5];
 
-
-		Well well = new Well(name, team, new Location(lon, lat),
-                StaticInfoArtifact.getWellTypes().stream().filter(w -> w.getName().equals(type)).findFirst().get());
-		wells.put(name, well);
-        allFacilities = new ArrayList<>(
-                Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
+		if (wells.containsKey(name)) {
+			Well well = wells.get(name);
+			well.build(integrity - well.getIntegrity());
+		} else {
+			Well well = new Well(name, team, new Location(lon, lat),
+					StaticInfoArtifact.getWellTypes().stream().filter(w -> w.getName().equals(type)).findFirst().get());
+			wells.put(name, well);
+			allFacilities = new ArrayList<>(
+					Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
 //		allFacilities.get(allFacilities.size()-1).put(name, well);
+		}
 	}
 	
 	public static Facility getFacility(String facilityName)

@@ -2,7 +2,7 @@
 
 maxSpeed(S)		:- myRole(Role) & role(Role, S, _, _, _).
 maxLoad(L)		:- myRole(Role) & role(Role, _, L, _, _).
-//maxBattery(C)	:- myRole(Role) & role(Role, _, _, C, _).
+maxBattery(C)	:- myRole(Role) & role(Role, _, _, C, _).
 canUseTool(T)	:- .print("can use Tool").
 routeDuration(D)	:- routeLength(L) & speed(S) & D = math.ceil(L / S).
 
@@ -26,6 +26,8 @@ inShop	    		:- inFacility(F) & isShop(F).
 inShop(F)			:- inFacility(F) & inShop.
 inResourceNode      :- inFacility(F) & isResourceNode(F).
 inWell              :- inFacility(F) & isWell(F).
+inOwnWell           :- inWell & inOwnWell(X) & X.
+inEnemyWell         :- not inOwnWell.
 
 atPeriphery         :- atPeriphery(X) & X.
 
