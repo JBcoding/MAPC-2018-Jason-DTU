@@ -32,7 +32,7 @@ public class CExploredMap {
         latSquare = Math.min(Math.max(latSquare, 0), SQUARE_WIDTH - 1);
         lonSquare = Math.min(Math.max(lonSquare, 0), SQUARE_WIDTH - 1);
 
-        explored[latSquare][lonSquare] = true; // TODO: TSH received ArrayIndexOutOfBounds (-1)
+        explored[latSquare][lonSquare] = true;
         int range = 1;
         boolean change = true;
         while (change) {
@@ -76,6 +76,7 @@ public class CExploredMap {
     private Location isLocationGood(int lat, int lon) {
         if (lat >= 1 && lon >= 1 && lat < SQUARE_WIDTH && lon < SQUARE_WIDTH) {
             if (!explored[lat][lon]) {
+                //System.out.println(lat + "    " + lon);
                 return squarePosToLocation(lat, lon);
             }
         }

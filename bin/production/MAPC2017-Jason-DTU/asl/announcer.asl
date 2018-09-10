@@ -18,8 +18,8 @@
 +!announceAssemble(Items, Workshop, TaskId, Storage, Type) <-
     announceAssemble(Items, Workshop, TaskId, Storage, Type).
 
-+!announceRetrieve(Agent, [map(Shop,[])|Rest], Workshop) <- !announceRetrieve(Agent, Rest, Workshop).
-+!announceRetrieve(Agent, ShoppingList		 , Workshop) <- announceRetrieve(Agent, ShoppingList, Workshop).
++!announceRetrieve(Agent, [map(_,[])|Rest], Workshop) <- !announceRetrieve(Agent, Rest, Workshop).
++!announceRetrieve(Agent, ResourceList, Workshop) <- announceRetrieve(Agent, ResourceList, Workshop).
 	
 +assembleRequest(_, _, TaskId, _, "new", CNPId) <-
 	takeTask(CanTake)[artifact_id(CNPId)];

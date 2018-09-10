@@ -14,7 +14,6 @@ import data.CCityMap;
 import data.CEntity;
 import eis.iilang.Percept;
 import env.Translator;
-import mapc2017.env.info.StaticInfo;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;

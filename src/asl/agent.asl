@@ -14,8 +14,9 @@
 
 !startLoop.
 
-+!startLoop <- .wait({+step(_)}); !loop.
++!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 //+!loop <- !doAction(recharge); !loop.
++!loop : scout <- !scoutt.
 +!loop <- !buildWell.
 	
 // Percepts	

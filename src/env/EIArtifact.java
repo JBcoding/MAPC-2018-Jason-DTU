@@ -208,16 +208,18 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 	void perceiveUpdate() 
 	{		
 		logger.finest("perceiveUpdate");
-		
+
 		try 
 		{
 			Set<Percept> allPercepts = new HashSet<>();
+			Map<String, Collection<Percept>> allPerceptsMap = new HashMap<>();
 
 			for (Entry<String, String> entry : connections.entrySet())
 			{
 				Collection<Percept> percepts = ei.getAllPercepts(entry.getKey()).get(entry.getValue());
 
 				allPercepts.addAll(percepts);
+                allPerceptsMap.put(entry.getKey(), percepts);
 			}
 			
 			FacilityArtifact	.perceiveUpdate(allPercepts);
@@ -226,11 +228,9 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 
 
 
-			for (Entry<String, String> entry : connections.entrySet())
+			for (Entry<String, Collection<Percept>> entry : allPerceptsMap.entrySet())
 			{
-				Collection<Percept> percepts = ei.getAllPercepts(entry.getKey()).get(entry.getValue());
-
-				AgentArtifact.getAgentArtifact(entry.getKey()).perceiveUpdate(percepts);
+				AgentArtifact.getAgentArtifact(entry.getKey()).perceiveUpdate(entry.getValue());
 			}
 
 			getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
@@ -243,7 +243,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 		{
 			logger.log(Level.SEVERE, "Failure in perceive: " + e.getMessage(), e);
 		}
-	}	
+	}
 
 	private void reset() 
 	{

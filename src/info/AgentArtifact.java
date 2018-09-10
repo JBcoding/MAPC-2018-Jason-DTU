@@ -56,7 +56,7 @@ public class AgentArtifact extends Artifact {
 	private static Map<String, CEntity> entities = new HashMap<>();
 	private static Map<String, AgentArtifact> artifacts = new HashMap<>();
 	
-	private String agentName;
+	public String agentName;
 
 	private static final double EPSILON = 1E-3;
 	
@@ -172,11 +172,12 @@ public class AgentArtifact extends Artifact {
 	@OPERATION
 	private void update(Collection<Percept> percepts)
 	{
+
 		int load = this.getEntity().getCurrentLoad();
 
 		this.getEntity().clearInventory();
 
-		boolean positionChange = false;
+		boolean positionChange = true;
 		for (Percept percept : percepts)
 		{
 		    if (percept.getName().equals(LAT) || percept.getName().equals(LON)) {
