@@ -9,5 +9,6 @@ src/mas/bin
 *.iml
 .project
 out/
+*.class
 
 # Runner.jar
