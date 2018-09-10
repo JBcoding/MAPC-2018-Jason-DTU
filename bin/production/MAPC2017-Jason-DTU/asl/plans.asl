@@ -32,7 +32,7 @@
         !buildWell;
     }
     else {
-        .print("Done building well");
+        //.print("Done building well");
     }.
 +!buildWell :
     atPeriphery
@@ -141,14 +141,14 @@
 // Gets close to this location
 +!getToPeripheryLocation(Lat, Lon) : atPeriphery.
 +!getToPeripheryLocation(Lat, Lon) : not canMove <- !doAction(recharge); !getToPeripheryLocation(Lat, Lon).
-+!getToPeripheryLocation(Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToPeripheryLocation(Lat, Lon).
++!getToPeripheryLocation(Lat, Lon) : not enoughCharge <- !charge; !getToPeripheryLocation(Lat, Lon).
 +!getToPeripheryLocation(Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocation(Lat, Lon).
 
-+!charge : charge(X) & currentBattery(X).
-+!charge : not canMove <- !doAction(recharge); !charge.
++!charge : charge(X) & .print(X) & currentBattery(X).
 +!charge : inChargingStation <-
     !doAction(charge);
     !charge.
++!charge : not canMove <- !doAction(recharge); !charge.
 +!charge <-
 	getClosestFacility("chargingStation", F);
 	!getToFacility(F);

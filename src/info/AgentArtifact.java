@@ -257,7 +257,6 @@ public class AgentArtifact extends Artifact {
 		{
 			this.getEntity().setCurrentCharge(charge);
 			getObsProperty("charge").updateValue(this.getEntity().getCurrentCharge());
-			System.out.println("Perceived charge: " + charge);
 		}
 	}
 
@@ -485,7 +484,7 @@ public class AgentArtifact extends Artifact {
 	    lat.set(l.getLat());
 	    lon.set(l.getLon());
 
-        System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource nodes");
+        System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource node(s)");
 	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
 	        for (String scout : scouts) {
                 AgentArtifact.getAgentArtifact(scout).stopScouting();
@@ -495,8 +494,7 @@ public class AgentArtifact extends Artifact {
     }
 
     private void stopScouting() {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
-        //getObsProperty("scout").updateValue(false);
+        getObsProperty("scout").updateValue(false);
     }
 
     /**

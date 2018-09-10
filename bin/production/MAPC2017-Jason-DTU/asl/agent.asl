@@ -20,7 +20,7 @@
 +!loop <- !buildWell.
 	
 // Percepts	
-+!doAction(Action) : .my_name(Me) <- jia.action(Me, Action).
++!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
 +step(X) : lastAction("give") 		 & lastActionResult("successful") <- .print("Give successful!").
