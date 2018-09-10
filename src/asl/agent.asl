@@ -6,13 +6,15 @@
 { include("requests.asl") }
 
 // Initial beliefs
-// free.
+free.
 
 // Initial goals
 !register.
 !focusArtifacts.
 
-!startLoop.
+// +step(0) <- !scoutt.
+
+// !startLoop.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 //+!loop <- !doAction(recharge); !loop.

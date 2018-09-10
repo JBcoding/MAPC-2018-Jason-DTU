@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import cartago.Artifact;
+import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import data.CUtil;
@@ -71,7 +72,7 @@ public class ItemArtifact extends Artifact {
     @OPERATION
     void getRequiredItems(Object itemName, OpFeedbackParam<Object> ret) {
         ret.set(items.get(itemName).getRequiredItems().stream()
-                .collect(Collectors.toMap(Item::getName, x -> x)));
+                .collect(Collectors.toMap(Item::getName, x -> 1)));
     }
 
     /**
@@ -111,13 +112,21 @@ public class ItemArtifact extends Artifact {
                 .collect(Collectors.toMap(node -> node.getKey().getName(), Entry::getValue)));
     }
 
+    @GUARD
+    private boolean doneScouting() {
+        return !AgentArtifact.isScouting;
+    }
+
     /**
      * Converts a map of items to buy into a shopping list
      *
      * @param items The items to buy along with the amount
      * @return A map of shops and what to buy where
      */
-    public static Map<ResourceNode, Integer> getResourceList(Map<Item, Integer> items) {
+    public Map<ResourceNode, Integer> getResourceList(Map<Item, Integer> items) {
+        // TODO: be more eager than this.
+        await("doneScouting");
+
         Map<ResourceNode, Integer> resourceList = new HashMap<>();
 
         Map<String, ResourceNode> nodes = FacilityArtifact.getResourceNodes();
@@ -138,7 +147,7 @@ public class ItemArtifact extends Artifact {
             if (best.isPresent()) {
                 resourceList.put(best.get(), amount);
             } else {
-                // TODO: maybe fail entirely if this is the case? Or await it being available?
+                // This probably means something is wrong with scouting.
                 logger.severe("No known resource node for " + item);
             }
         }
@@ -238,6 +247,20 @@ public class ItemArtifact extends Artifact {
 		retRetrieve.set(retrieve);
 		retRest.set(rest);
 	}
+
+	@OPERATION
+    void getRequiredRoles(Object[] items, OpFeedbackParam<Object> ret) {
+        Set<String> roles = new HashSet<>();
+
+        for (Entry<Item, Integer> entry : Translator.convertASObjectToMap(items).entrySet()) {
+            Item item = entry.getKey();
+            for (Role role : item.getRequiredRoles()) {
+                roles.add(role.getName());
+            }
+        }
+
+        ret.set(roles);
+    }
 	
 	public static void perceiveInitial(Collection<Percept> percepts)
 	{		
@@ -248,7 +271,7 @@ public class ItemArtifact extends Artifact {
 		
 		// TODO: Tools and items that require assembly have a volume of 0. -- AHF: Still relevant?
 
-        // This is hella annoying since we cannot add parts to items after the fact.
+        // This is annoying since we cannot add parts to items after the fact.
         // Loop through the requirements map until empty and add an item to `items` if all
         // requirements are already in `items`.
 

@@ -154,9 +154,9 @@
 	!getToFacility(F);
 	!charge.
 
-+!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); .print("Scouting"); !scout(Lat, Lon).
++!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); /* .print("Scouting"); */ !scout(Lat, Lon).
 +!scoutt.
 
-+!scout(Lat, Lon) : not canMove									<- !doAction(recharge); !scout(Lat, Lon).
-+!scout(Lat, Lon) : not enoughCharge                            <- !charge; !scout(Lat, Lon).
-+!scout(Lat, Lon) 												<- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
++!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
++!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.

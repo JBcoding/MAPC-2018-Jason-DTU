@@ -170,8 +170,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			}
 			
 			// Perceive static info
-			ItemArtifact        .perceiveInitial(allPercepts);
 			StaticInfoArtifact  .perceiveInitial(allPercepts);
+			ItemArtifact        .perceiveInitial(allPercepts);
 			// Perceive dynamic info
 			FacilityArtifact	.perceiveUpdate(allPercepts);
 			DynamicInfoArtifact	.perceiveUpdate(allPercepts);

@@ -1,10 +1,12 @@
 package info;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import cartago.Artifact;
+import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import data.CCityMap;
@@ -51,10 +53,11 @@ public class AgentArtifact extends Artifact {
 	private static Map<String, AgentArtifact> artifacts = new HashMap<>();
 	
 	public String agentName;
+	public static boolean isScouting = true;
 
 	private static final double EPSILON = 1E-3;
 
-	private static List<String> scouts = new ArrayList<>();
+	private static ConcurrentLinkedDeque<String> scouts = new ConcurrentLinkedDeque<>();
 	
 	void init()
 	{
@@ -484,12 +487,17 @@ public class AgentArtifact extends Artifact {
 	    lat.set(l.getLat());
 	    lon.set(l.getLon());
 
-        System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource nodes");
+	    if (agentName.equals("agent1")) {
+            System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource nodes");
+        }
+
 	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
 	        for (String scout : scouts) {
                 AgentArtifact.getAgentArtifact(scout).stopScouting();
             }
             scouts.clear();
+
+	        isScouting = false;
         }
     }
 
