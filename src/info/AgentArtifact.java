@@ -257,6 +257,7 @@ public class AgentArtifact extends Artifact {
 		{
 			this.getEntity().setCurrentCharge(charge);
 			getObsProperty("charge").updateValue(this.getEntity().getCurrentCharge());
+			System.out.println("Perceived charge: " + charge);
 		}
 	}
 
