@@ -185,7 +185,7 @@ public class StaticInfoArtifact extends Artifact {
 		// Entity has not been made public
 		if (team.equals(StaticInfoArtifact.team))
 		{
-		    name = "agent" + name;
+		    //name = "agent" + name;
 		    //System.out.println(name);
 			AgentArtifact.addEntity(name, new CEntity(roles.get(role), new Location(lon, lat)));
 		}

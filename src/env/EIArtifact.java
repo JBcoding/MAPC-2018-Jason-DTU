@@ -37,8 +37,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     public static final boolean LOGGING_ENABLED = false;
     
     private static EnvironmentInterfaceStandard ei;
-    //private static final String configFile = "conf/eismassimconfig.json";
-	private static final String configFile = "conf/eismassimconfig_connection_test.json";
+    private static final String configFile = "conf/eismassimconfig.json";
+	//private static final String configFile = "conf/eismassimconfig_connection_test.json";
 
     private static Map<String, String> connections 	= new HashMap<>();
     private static Map<String, String> entities		= new HashMap<>();
