@@ -1,12 +1,6 @@
 package info;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -59,6 +53,8 @@ public class AgentArtifact extends Artifact {
 	public String agentName;
 
 	private static final double EPSILON = 1E-3;
+
+	private static List<String> scouts = new ArrayList<>();
 	
 	void init()
 	{
@@ -77,6 +73,7 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("lastActionResult", 	"successful");
 		defineObsProperty("lastActionParam", 	"[]");
 		defineObsProperty("atPeriphery", 	false);
+        defineObsProperty("scout", false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -486,9 +483,22 @@ public class AgentArtifact extends Artifact {
 	    Location l = StaticInfoArtifact.getExploredMap().getClosestUnxploredLocation(getEntity().getLocation());
 	    lat.set(l.getLat());
 	    lon.set(l.getLon());
+
+        System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource nodes");
+	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
+	        for (String scout : scouts) {
+                AgentArtifact.getAgentArtifact(scout).stopScouting();
+            }
+            scouts.clear();
+        }
     }
 
-	/**
+    private void stopScouting() {
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
+        getObsProperty("scout").updateValue(false);
+    }
+
+    /**
 	 * Resets the agent artifact
 	 */
 	public void reset()
@@ -497,6 +507,7 @@ public class AgentArtifact extends Artifact {
 	}
 
     public void setToScout() {
-	    defineObsProperty("scout");
+        getObsProperty("scout").updateValue(true);
+        scouts.add(this.agentName);
     }
 }

@@ -328,13 +328,10 @@ public class CEntity {
 	}
 
 
-	public static int scoutCount;
     public void addAgentArtifact(AgentArtifact agentArtifact) {
         this.agentArtifact = agentArtifact;
-        if (this.role.getName().equals("drone") && scoutCount == 0) {
+        if (this.role.getName().equals("drone")) {
             this.agentArtifact.setToScout();
-            scoutCount ++;
-            FacilityArtifact.calculateMissingResourceNodes();
         }
     }
 

@@ -63,7 +63,7 @@ public class StaticInfoArtifact extends Artifact {
 	private static CCityMap				    cityMap;
     private static CExploredMap exploredMap;
 
-	@OPERATION
+    @OPERATION
 	void getSimulationData(OpFeedbackParam<String> id, OpFeedbackParam<String> map,
 			OpFeedbackParam<Integer> seedCapital, OpFeedbackParam<Integer> steps, 
 			OpFeedbackParam<String> team)
