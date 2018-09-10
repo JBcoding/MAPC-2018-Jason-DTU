@@ -144,7 +144,7 @@
 +!getToPeripheryLocation(Lat, Lon) : not enoughCharge <- !charge; !getToPeripheryLocation(Lat, Lon).
 +!getToPeripheryLocation(Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocation(Lat, Lon).
 
-+!charge : charge(X) & .print(X) & currentBattery(X).
++!charge : charge(X) & currentBattery(X).
 +!charge : inChargingStation <-
     !doAction(charge);
     !charge.

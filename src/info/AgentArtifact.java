@@ -257,7 +257,6 @@ public class AgentArtifact extends Artifact {
 		{
 			this.getEntity().setCurrentCharge(charge);
 			getObsProperty("charge").updateValue(this.getEntity().getCurrentCharge());
-			System.out.println("Perceived charge: " + charge);
 		}
 	}
 
@@ -496,7 +495,7 @@ public class AgentArtifact extends Artifact {
 
     private void stopScouting() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
-        //getObsProperty("scout").updateValue(false);
+        getObsProperty("scout").updateValue(false);
     }
 
     /**
