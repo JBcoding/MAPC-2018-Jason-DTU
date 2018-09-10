@@ -1,28 +1,31 @@
-+retrieveRequest(AgentStr, [map(Shop,Items)|Shops], Workshop, CNPId) : free <-
-	!!retrieveRequest(AgentStr, [map(Shop,Items)|Shops], Workshop, CNPId). 
++retrieveRequest(AgentStr, [map(Node,Amount)|Shops], Workshop, CNPId) : free <-
+	!!retrieveRequest(AgentStr, [map(Node,Amount)|Shops], Workshop, CNPId).
 
-+!retrieveRequest(AgentStr, [map(Shop,Items)|Shops], Workshop, CNPId) 
-	: free & capacity(Capacity) & speed(Speed) <-
++!retrieveRequest(AgentStr, [map(Node,Amount)|Nodes], Workshop, CNPId)
+	: free & remainingCapacity(Capacity) & speed(Speed) <-
 	
 	-free;
-	getItemsToCarry(Items, Capacity, ItemsToRetrieve, Rest);	
-	getVolume(ItemsToRetrieve, Volume);	
-	distanceToFacility(Shop, Distance);	
+	getResource(Node, Item);
+	getAmountToCarry(Item, Amount, Capacity, AmountToRetrieve, Rest);
+	getVolume([map(Item, AmountToRetrieve)], Volume);
+	distanceToFacility(Node, Distance);
 	
 	// Negative volume since lower is better
-	Bid = math.ceil(Distance/Speed) * 10 - Volume; 
+	Bid = math.ceil(Distance/Speed) * 10 - Volume; // TODO: Should this be 10?
 	
-	if (not ItemsToRetrieve = []) 
+	if (not AmountToRetrieve = 0)
 	{ 
-		bid(Bid)[artifact_id(CNPId)]; 
+		bid(Bid)[artifact_id(CNPId)];
 		winner(Won)[artifact_id(CNPId)];
-		
+
 		if (Won)
 		{
 			clearRetrieve(CNPId);
-			!retrieve(AgentStr, ItemsToRetrieve, Workshop, [map(Shop,Rest)|Shops]);		
+			!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Workshop, [map(Node, Rest)|Nodes]);
+	        .print("after !retrieve");
 		}
 	}
+
 	+free.
 
 +assembleRequest(Items, Workshop, TaskId, DeliveryLocation, _, CNPId) : free <-
@@ -62,22 +65,22 @@
 	}
 	+free.
 	
-+!retrieve(_, [], _, _).
-+!retrieve(AgentStr, ItemsToRetrieve, Workshop, ToAnnounce) 
++!retrieve(_, _, map(_, 0), _, _).
++!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Workshop, ToAnnounce)
 	: .my_name(Me) & .term2string(Agent, AgentStr) <-
 	
-	if (ToAnnounce = [map(Shop,Rest)|Shops] & not (Rest = [] & Shops = []))
+	if (ToAnnounce = [map(Node,Rest)|Nodes] & not (Rest = 0 & Shops = []))
 	{
 		.send(Agent,   tell, assistNeeded);
 		.send(Agent, untell, assistNeeded); // Simulates a signal
-		.send(announcer, achieve, announceRetrieve(Agent, [map(Shop,Rest)|Shops], Workshop));
+		.send(announcer, achieve, announceRetrieve(Agent, [map(Node,Rest)|Nodes], Workshop));
 	}
 	
-	!retrieveItems(map(Shop, ItemsToRetrieve));
+	!retrieveItems(map(Node, AmountToRetrieve));
 
 	!getToFacility(Workshop);
 	
-	.send(Agent,   tell, assistReady(Me));
+	.send(Agent, tell, assistReady(Me));
 	
 	.wait(assembleReady(ReadyStep));
 	.wait(step(ReadyStep));
@@ -90,30 +93,25 @@
 +!assemble(ItemsToRetrieve, ItemsToAssemble, AssembleRest, Workshop, TaskId, DeliveryLocation) 
 	: .my_name(Me) <-
 
-	getShoppingList(ItemsToRetrieve, ShoppingList);
-	.print("getShoppingList");
+	getResourceList(ItemsToRetrieve, ResourceList);
 	.print(ShoppingList);
-	ShoppingList = [Shop|RetrieveRest];
-	.print("match");
+	ResourceList = [Node|RetrieveRest];
 
 	+assistants([]);
 
 	if (not RetrieveRest = [])
 	{
 		+assistCount(1);
-	    .print("before send");
 		.send(announcer, achieve, announceRetrieve(Me, RetrieveRest, Workshop));
-	    .print("after send");
 	}
-
-	.print("woop");
 
 	if (not AssembleRest = [])
 	{
 		.send(announcer, achieve, announceAssemble(AssembleRest, Workshop, TaskId, DeliveryLocation, "old"));			
 	}
-	
-	!retrieveItems(Shop);
+
+	!retrieveItems(Node);
+
 	!getToFacility(Workshop);
 	
 	.wait(assistCount(N) & assistants(L) & .length(L, N));
@@ -135,12 +133,13 @@
 	!deliverItems(TaskId, DeliveryLocation).
 
 	
-+free : retrieveRequest(AgentStr, [map(Shop,Items)|Shops], Workshop, CNPId) 
-		& capacity(Capacity) <-
++free : retrieveRequest(AgentStr, [map(Node,Amount)|Nodes], Workshop, CNPId)
+		& remainingCapacity(Capacity) <-
 		
-	getItemsToCarry(Items, Capacity, ItemsToRetrieve, Rest);
-	
-	if (not ItemsToRetrieve = [])
+	getResource(Node, Item);
+	getAmountToCarry(Item, Amount, Capacity, AmountToRetrieve, Rest);
+
+	if (not AmountToRetrieve = 0)
 	{
 		takeTask(CanTake)[artifact_id(CNPId)];
 		
@@ -154,8 +153,8 @@
 	}.
 	
 +free : assembleRequest(Items, Workshop, TaskId, DeliveryLocation, _, CNPId)
-		& capacity(Capacity) <-
-		
+		& remainingCapacity(Capacity) <-
+
 	getItemsToCarry(Items, Capacity, ItemsToAssemble, AssembleRest);
 	getBaseItems(ItemsToAssemble, ItemsToRetrieve);
 	

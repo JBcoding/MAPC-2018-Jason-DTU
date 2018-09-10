@@ -12,16 +12,15 @@
 !register.
 !focusArtifacts.
 
-
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
-// +!loop <- !doAction(recharge); !loop.
-+!loop : scout <- !scoutt; !loop.
-+!loop <- !getToFacility("shop1"); !loop.
+//+!loop <- !doAction(recharge); !loop.
++!loop : scout(X) & X <- !scoutt; !loop.
++!loop <- !buildWell.
 	
 // Percepts	
-+!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
++!doAction(Action) : .my_name(Me) <- jia.action(Me, Action).
 
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
 +step(X) : lastAction("give") 		 & lastActionResult("successful") <- .print("Give successful!").

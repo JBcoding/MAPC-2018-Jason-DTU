@@ -154,7 +154,7 @@ public class StaticInfoArtifact extends Artifact {
 			}
 		}
 
-		upgrades.forEach((k, v) -> System.out.println(k + " : " + v.getName() + " : " + v.getCost() + " : " + v.getStep()));
+		upgrades.forEach((k, v) -> System.out.println("Upgrade available: " + k + " : " + v.getName() + " : " + v.getCost() + " : " + v.getStep()));
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{

@@ -32,7 +32,8 @@ import massim.scenario.city.data.Role;
 public class EIArtifact extends Artifact implements AgentListener, EnvironmentListener {
 
     private static final Logger logger = Logger.getLogger(EIArtifact.class.getName());
-    
+
+	private static final boolean LOG_TO_FILE = false;
     public static final boolean LOGGING_ENABLED = false;
     
     private static EnvironmentInterfaceStandard ei;
@@ -59,8 +60,9 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			// Get the team name from EI. Should be a better way
 			this.team = ((String) (ei.getEntities().toArray())[0]).substring(10, 11);
 
-			fileLogger = LoggerFactory.createFileLogger(team);
-			
+			if (LOG_TO_FILE) {
+				fileLogger = LoggerFactory.createFileLogger(team);
+			}
 			ei.start();
 		}
 		catch (Throwable e) 
@@ -234,7 +236,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			}
 
 			getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
-			
+
 			logData();
 
 			JobArtifact.announceJobs();
@@ -259,9 +261,11 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 		{
 			AgentArtifact.getAgentArtifact(entry.getKey()).reset();
 		}
-		
-		fileLogger = LoggerFactory.createFileLogger(team);
-		
+
+		if (LOG_TO_FILE) {
+			fileLogger = LoggerFactory.createFileLogger(team);
+		}
+
 		removeObsProperty("step");
 		for (Role role : StaticInfoArtifact.getRoles())
 		{
@@ -285,11 +289,12 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 	
 	private void logData()
 	{
-		fileLogger.info("Step: " + DynamicInfoArtifact.getStep() + " - Money: " + DynamicInfoArtifact.getMoney());
-		
-		if (DynamicInfoArtifact.getStep() == StaticInfoArtifact.getSteps() - 1)
-		{
-			fileLogger.info("Completed jobs: " + DynamicInfoArtifact.getJobsCompleted());
+		if (LOG_TO_FILE) {
+			fileLogger.info("Step: " + DynamicInfoArtifact.getStep() + " - Money: " + DynamicInfoArtifact.getMoney());
+
+			if (DynamicInfoArtifact.getStep() == StaticInfoArtifact.getSteps() - 1) {
+				fileLogger.info("Completed jobs: " + DynamicInfoArtifact.getJobsCompleted());
+			}
 		}
 	}
 

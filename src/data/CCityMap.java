@@ -273,19 +273,7 @@ public class CCityMap implements Serializable {
 	 * @return true if the location is visible
 	 */
 	public boolean isVisible(Location from, Location to, int vision) {
-		return Math.abs(distanceBetween(from, to)) <= vision;
-	}
-
-	public double distanceBetween(Location l1, Location l2) {
-		double R = 6378.137; // Radius of earth in KM
-		double dLat = l2.getLat() * Math.PI / 180 - l1.getLat() * Math.PI / 180;
-		double dLon = l2.getLon() * Math.PI / 180 - l1.getLon() * Math.PI / 180;
-		double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-				Math.cos(l1.getLat() * Math.PI / 180) * Math.cos(l2.getLat() * Math.PI / 180) *
-						Math.sin(dLon/2) * Math.sin(dLon/2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-		double d = R * c;
-		return d * 1000; // meters
+		return Math.abs(getLength(from, to)) <= vision;
 	}
 
 	/**

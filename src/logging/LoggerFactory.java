@@ -1,5 +1,6 @@
 package logging;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.logging.FileHandler;
@@ -21,18 +22,22 @@ public class LoggerFactory {
 		Handler handler;
 		try {
 			LocalDateTime date = LocalDateTime.now();
-			
-			String dateString = date.getYear() + "-" + date.getMonthValue() + "-" 
-					+ date.getDayOfMonth() + " " 
+
+			String dateString = date.getYear() + "-" + date.getMonthValue() + "-"
+					+ date.getDayOfMonth() + " "
 					+ date.getHour() + "-" + date.getMinute();
 
 			char delim = System.getProperty("os.name").contains("Windows") ? '\\' : '/';
-			handler = new FileHandler("logs" + delim + "client" + delim + "results-team-" + team + "-" + dateString + ".log");
-			
+			String dir = "logs" + delim + "client" + delim;
+			if (!new File(dir).exists()) {
+				new File(dir).mkdirs();
+			}
+
+			handler = new FileHandler(dir + "results-team-" + team + "-" + dateString + ".log");
+
 			handler.setLevel(Level.ALL);
-			
+
 			handler.setFormatter(new LoggingFormatter());
-			
 			logger.addHandler(handler);
 		} 
 		catch (SecurityException | IOException e) 
