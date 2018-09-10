@@ -25,8 +25,9 @@ public class LoggerFactory {
 			String dateString = date.getYear() + "-" + date.getMonthValue() + "-" 
 					+ date.getDayOfMonth() + " " 
 					+ date.getHour() + "-" + date.getMinute();
-			
-			handler = new FileHandler("logs\\client\\results-team-" + team + "-" + dateString + ".log");
+
+			char delim = System.getProperty("os.name").contains("Windows") ? '\\' : '/';
+			handler = new FileHandler("logs" + delim + "client" + delim + "results-team-" + team + "-" + dateString + ".log");
 			
 			handler.setLevel(Level.ALL);
 			
