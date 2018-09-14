@@ -175,6 +175,14 @@
 +!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
++!emptyInventory : inStorage & load(L) & L >= 1 <-
+    getItemNameAndQuantity(Item, Quantity);
+    if (not Quantity == -1) {
+        !doAction(store(Item, Quantity));
+        !emptyInventory;
+    }.
++!emptyInventory.
+
 +!gatherRole: gather(X) & X <-
     getResourceNode(F);
     getFacilityName(F, N);
@@ -184,7 +192,5 @@
     !gatherUntilFull(V);
     getMainStorageFacility(S);
     !getToFacility(S);
-    getItemNameAndQuantity(Item, Quantity);
-    .print(store(Item, Quantity));
-    !doAction(store(Item, Quantity));
+    !emptyInventory;
     !gatherRole.

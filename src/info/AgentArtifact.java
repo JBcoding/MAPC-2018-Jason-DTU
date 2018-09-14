@@ -532,9 +532,14 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     void getItemNameAndQuantity(OpFeedbackParam<String> name, OpFeedbackParam<Integer> quantity) {
-	    Item item = getEntity().getInventory().getStoredTypes().iterator().next();
-        name.set(item.getName());
-        quantity.set(getEntity().getInventory().getItemCount(item));
+	    try {
+            Item item = getEntity().getInventory().getStoredTypes().iterator().next();
+            name.set(item.getName());
+            quantity.set(getEntity().getInventory().getItemCount(item));
+        } catch (Exception e) {
+	        name.set("No go");
+	        quantity.set(-1);
+        }
     }
 
     private void stopScouting() {
