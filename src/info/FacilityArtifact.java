@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import cartago.Artifact;
+import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import cnp.TaskArtifact;
@@ -135,16 +136,25 @@ public class FacilityArtifact extends Artifact {
 	@OPERATION
 	void distanceToFacility(String facilityName, OpFeedbackParam<Integer> distance)
 	{
-		Route route = StaticInfoArtifact.getRoute(getOpUserName(), getFacility(facilityName).getLocation());
-		if (route != null)	distance.set(route.getRouteLength());
-		else 				distance.set(0);
+	    Facility fac = getFacility(facilityName);
+	    if (fac == null) {
+	        // TODO: idk
+	        distance.set(0);
+        } else {
+            Route route = StaticInfoArtifact.getRoute(getOpUserName(),fac.getLocation());
+            if (route != null) {
+                distance.set(route.getRouteLength());
+            } else {
+                distance.set(0);
+            }
+        }
 	}
 	
 	@OPERATION
 	void durationToFacility(String facilityName, OpFeedbackParam<Integer> duration)
 	{
 		CEntity agent = AgentArtifact.getEntity(getOpUserName());
-		
+
 		duration.set(StaticInfoArtifact.getRoute(getOpUserName(), getFacility(facilityName).getLocation()).getRouteDuration(agent.getCurrentSpeed()));
 	}
 	
@@ -350,7 +360,7 @@ public class FacilityArtifact extends Artifact {
 //		allFacilities.get(allFacilities.size()-1).put(name, well);
 		}
 	}
-	
+
 	public static Facility getFacility(String facilityName)
 	{
 		if (facilityName.equals("none")) return null;

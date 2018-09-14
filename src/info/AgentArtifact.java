@@ -492,18 +492,22 @@ public class AgentArtifact extends Artifact {
         }
 
 	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
+	        /*
 	        for (String scout : scouts) {
                 AgentArtifact.getAgentArtifact(scout).stopScouting();
             }
             scouts.clear();
+            */
+	        stopScouting();
 
 	        isScouting = false;
         }
     }
 
     private void stopScouting() {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
+        // System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
         getObsProperty("scout").updateValue(false);
+        // TODO: remove !scout(t) intention??
     }
 
     /**

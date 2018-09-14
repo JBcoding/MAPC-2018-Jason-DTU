@@ -13,6 +13,8 @@ import data.CUtil;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
+import jason.asSyntax.ASSyntax;
+import jason.asSyntax.Atom;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Role;
@@ -249,7 +251,7 @@ public class ItemArtifact extends Artifact {
 	}
 
 	@OPERATION
-    void getRequiredRoles(Object[] items, OpFeedbackParam<Object> ret) {
+    void getRequiredRoles(Object[] items, OpFeedbackParam<Object[]> ret) {
         Set<String> roles = new HashSet<>();
 
         for (Entry<Item, Integer> entry : Translator.convertASObjectToMap(items).entrySet()) {
@@ -259,7 +261,7 @@ public class ItemArtifact extends Artifact {
             }
         }
 
-        ret.set(roles);
+        ret.set(roles.toArray());
     }
 	
 	public static void perceiveInitial(Collection<Percept> percepts)

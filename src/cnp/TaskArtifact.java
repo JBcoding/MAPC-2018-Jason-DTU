@@ -8,11 +8,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import cartago.Artifact;
-import cartago.ArtifactConfig;
-import cartago.ArtifactId;
-import cartago.OPERATION;
+import cartago.*;
 import env.Translator;
+import info.AgentArtifact;
 import jason.asSyntax.ASSyntax;
 import jason.asSyntax.ListTerm;
 import jason.asSyntax.parser.ParseException;
@@ -79,11 +77,17 @@ public class TaskArtifact extends Artifact {
 	}
 
 	@OPERATION
-	void announceRetrieve(String agent, Object resourceList, String workshop)
+	void announceRetrieve(String agent, Object resourceList, Object roles, String workshop)
 	{
-		instance.announce("retrieveRequest", agent, toItemMap(resourceList), workshop);
+		instance.announce("retrieveRequest", agent, toItemMap(resourceList), roles, workshop);
 	}
-	
+
+	@OPERATION
+	void announceAssist(String agent, Object roles, String workshop)
+	{
+		instance.announce("assistRequest", agent, roles, workshop);
+	}
+
 	private void define(String property, Object... args)
 	{
 		defineObsProperty(property, args);
@@ -131,9 +135,15 @@ public class TaskArtifact extends Artifact {
 	@OPERATION
 	void clearRetrieve(Object cnpId)
 	{
-		instance.clear("retrieveRequest", null, null, null, cnpId);
+		instance.clear("retrieveRequest", null, null, null, null, cnpId);
 	}
-	
+
+	@OPERATION
+	void clearAssist(Object cnpId)
+	{
+		instance.clear("assistRequest", null, null, null, cnpId);
+	}
+
 	@OPERATION
 	private void clear(String property, Object... args)
 	{

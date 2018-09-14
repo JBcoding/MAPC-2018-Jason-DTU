@@ -113,13 +113,18 @@
 	!assembleItems([map(Item, Amount - 1) | Items]).
 
 // Recursively assemble required items
-+!assembleItem(	  _, 	   []).
-+!assembleItem(Item, ReqItems) <-
++!assembleItem(_, []).
++!assembleItem(Item, ReqItems) : myRole(Role) <-
 	!assembleItems(ReqItems);
+	getRequiredRoles([map(Item, 1)], Roles);
+	.print("assemble ", Item, " <-- ", Roles, " - ", Role);
 	!doAction(assemble(Item)).
 
-+!assistAssemble(Agent) : load(0) | assembleComplete.
-+!assistAssemble(Agent) <- !doAction(assist_assemble(Agent)); !assistAssemble(Agent).
++!assistAssemble(Agent) : assembleComplete.
++!assistAssemble(Agent) : myRole(Role) & .term2string(Role, RoleStr) <-
+    .print("assist_assemble ", Agent, " <- ", RoleStr);
+    !doAction(assist_assemble(Agent));
+    !assistAssemble(Agent).
 
 +!retrieveTools([]).
 +!retrieveTools([Tool | Tools]) : have(Tool) 	<- !retrieveTools(Tools).
@@ -160,3 +165,4 @@
 +!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
 +!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
 +!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(_, _) : scout(X) & not X.

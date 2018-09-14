@@ -12,7 +12,7 @@ free.
 !register.
 !focusArtifacts.
 
-// +step(0) <- !scoutt.
++step(0) <- !scoutt.
 
 // !startLoop.
 
