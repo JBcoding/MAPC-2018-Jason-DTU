@@ -16,6 +16,7 @@ import data.CEntity;
 import eis.iilang.Percept;
 import env.Translator;
 import massim.scenario.city.data.Item;
+import massim.scenario.city.data.ItemBox;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.*;
@@ -306,10 +307,30 @@ public class FacilityArtifact extends Artifact {
 		double 	lat			= (double) args[1];
 		double 	lon			= (double) args[2];
 		int 	capacity	= (int)    args[3];
-		// Set<String> teamNames?
-		
-		storages.put(name, 
-				new Storage(name, new Location(lon, lat), capacity, Collections.emptySet()));
+		int usedCap = (int) args[4];
+        Object[] items = (Object[]) args[5];
+
+        if (StaticInfoArtifact.getStorage() != null && name.equals(StaticInfoArtifact.getStorage().getMainStorageFacility().getName())) {
+            StaticInfoArtifact.getStorage().clearItemsCount();
+        }
+
+        ItemBox itemBox = new ItemBox();
+        for (Object tuple : items) {
+            Object[] tup = (Object[])tuple;
+            itemBox.store(ItemArtifact.getItem((String)tup[0]), (int) tup[1]);
+            if (StaticInfoArtifact.getStorage() != null && name.equals(StaticInfoArtifact.getStorage().getMainStorageFacility().getName())) {
+                StaticInfoArtifact.getStorage().updateItemCount((String)tup[0], (Integer) tup[1]);
+            }
+        }
+
+
+        // Set<String> teamNames?
+
+        Storage s = new Storage(name, new Location(lon, lat), capacity, Collections.emptySet());
+        s.addDelivered(itemBox, StaticInfoArtifact.getTeam());
+
+		storages.put(name, s);
+
 	}
 
 	// Literal(String, double, double)

@@ -18,7 +18,8 @@ free.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 //+!loop <- !doAction(recharge); !loop.
-//+!loop : scout(X) & X <- !scoutt; !loop.
++!loop : scout(X) & X <- !scoutt; !loop.
++!loop : gather(X) & X <- -free; !gatherRole; !loop.
 +!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
 	
 // Percepts	

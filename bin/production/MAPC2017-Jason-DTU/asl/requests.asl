@@ -12,7 +12,7 @@
 	
 	// Negative volume since lower is better
 	Bid = math.ceil(Distance/Speed) * 10 - Volume; // TODO: Should this be 10?
-	
+
 	if (not AmountToRetrieve = 0)
 	{ 
 		bid(Bid)[artifact_id(CNPId)];
@@ -22,7 +22,6 @@
 		{
 			clearRetrieve(CNPId);
 			!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Workshop, [map(Node, Rest)|Nodes]);
-	        .print("after !retrieve");
 		}
 	}
 
@@ -34,6 +33,9 @@
 +!assembleRequest(Items, Workshop, TaskId, DeliveryLocation, _, CNPId) 
 	: free & remainingCapacity(Capacity) & speed(Speed) <-
 	-free;
+
+    getRequiredRoles(Items, Roles);
+
 	getItemsToCarry(Items, Capacity, ItemsToAssemble, AssembleRest);
 	getBaseItems(ItemsToAssemble, ItemsToRetrieve);
 	getVolume(ItemsToRetrieve, Volume);
@@ -50,7 +52,6 @@
 			.print("To assemble: ", ItemsToAssemble, " - ", AssembleRest);
 			clearAssemble(CNPId);
 			!assemble(ItemsToRetrieve, ItemsToAssemble, AssembleRest, Workshop, TaskId, DeliveryLocation);
-	        .print("==> after assemble");
 		}
 	}
 	+free.
@@ -68,7 +69,7 @@
 +!retrieve(_, _, map(_, 0), _, _).
 +!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Workshop, ToAnnounce)
 	: .my_name(Me) & .term2string(Agent, AgentStr) <-
-	
+
 	if (ToAnnounce = [map(Node,Rest)|Nodes] & not (Rest = 0 & Shops = []))
 	{
 		.send(Agent,   tell, assistNeeded);
@@ -94,7 +95,7 @@
 	: .my_name(Me) <-
 
 	getResourceList(ItemsToRetrieve, ResourceList);
-	.print(ShoppingList);
+	.print(ResourceList);
 	ResourceList = [Node|RetrieveRest];
 
 	+assistants([]);
@@ -123,6 +124,8 @@
 	{
 		.send(A,   tell, assembleReady(ReadyStep));
 	}
+
+	.print("Waiting for step ", ReadyStep);
 	
 	.wait(step(ReadyStep));
 	
@@ -132,7 +135,6 @@
 	!getToFacility(DeliveryLocation);
 	!deliverItems(TaskId, DeliveryLocation).
 
-	
 +free : retrieveRequest(AgentStr, [map(Node,Amount)|Nodes], Workshop, CNPId)
 		& remainingCapacity(Capacity) <-
 		
@@ -147,7 +149,7 @@
 		{
 			-free;
 			clearRetrieve(CNPId);			
-			!retrieve(AgentStr, ItemsToRetrieve, Workshop, [map(Shop,Rest)|Shops]);			
+			!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Workshop, [map(Shop,Rest)|Shops]);
 			+free;
 		}
 	}.

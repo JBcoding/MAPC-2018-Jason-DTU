@@ -34,6 +34,10 @@ public class ItemArtifact extends Artifact {
     private static Map<String, Item> items = new HashMap<>();
     private static Map<String, Map<String, Shop>> itemLocations = new HashMap<>();
 
+    public static Iterable<? extends Item> getAllItems() {
+        return items.values();
+    }
+
     @OPERATION
     void getItems(OpFeedbackParam<Collection<Item>> ret) {
         ret.set(items.values());
