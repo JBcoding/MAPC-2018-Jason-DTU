@@ -16,11 +16,13 @@ import cartago.OpFeedbackParam;
 import data.CCityMap;
 import data.CEntity;
 import data.CExploredMap;
+import data.CStorage;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
 import massim.protocol.scenario.city.data.RoleData;
 import massim.scenario.city.data.*;
+import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.WellType;
 
 public class StaticInfoArtifact extends Artifact {
@@ -62,6 +64,16 @@ public class StaticInfoArtifact extends Artifact {
 	private static int                      proximity;
 	private static CCityMap				    cityMap;
     private static CExploredMap exploredMap;
+
+    private static CStorage storage;
+
+    public static CStorage getStorage() {
+        return storage;
+    }
+
+    public static void createCStorage() {
+        storage = new CStorage();
+    }
 
     @OPERATION
 	void getSimulationData(OpFeedbackParam<String> id, OpFeedbackParam<String> map,
@@ -168,7 +180,7 @@ public class StaticInfoArtifact extends Artifact {
             logger.info("Perceived upgrades:\t" 		+ upgrades);
             logger.info("Perceived well types:\t" 		+ wellTypes);
             logger.info("Perceived proximity:\t" 		+ proximity);
-		}		
+		}
 	}
 	
 	// Literal(String, String, double, double, String)

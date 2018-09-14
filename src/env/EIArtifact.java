@@ -204,6 +204,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 		}
 		
 		logger.finest("Perceive initial done");
+
+		StaticInfoArtifact.createCStorage();
 	}
 	
 	@INTERNAL_OPERATION

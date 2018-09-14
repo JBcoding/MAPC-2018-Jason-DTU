@@ -144,7 +144,7 @@
 +!getToPeripheryLocation(Lat, Lon) : not enoughCharge <- !charge; !getToPeripheryLocation(Lat, Lon).
 +!getToPeripheryLocation(Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocation(Lat, Lon).
 
-+!charge : charge(X) & .print(X) & currentBattery(X).
++!charge : charge(X) & currentBattery(X).
 +!charge : inChargingStation <-
     !doAction(charge);
     !charge.
@@ -154,9 +154,37 @@
 	!getToFacility(F);
 	!charge.
 
-+!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); .print("Scouting"); !scout(Lat, Lon).
++!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); /* .print("Scouting"); */ !scout(Lat, Lon).
 +!scoutt.
 
-+!scout(Lat, Lon) : not canMove									<- !doAction(recharge); !scout(Lat, Lon).
-+!scout(Lat, Lon) : not enoughCharge                            <- !charge; !scout(Lat, Lon).
-+!scout(Lat, Lon) 												<- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
++!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
++!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
+
+
+
+
+
+
+
+
+
+
+
+
++!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
++!gatherUntilFull(V).
+
++!gatherRole: gather(X) & X <-
+    getResourceNode(F);
+    getFacilityName(F, N);
+    getCoords(F, Lat, Lon);
+    !getToLocation(N, Lat, Lon);
+    getItemVolume(F, V);
+    !gatherUntilFull(V);
+    getMainStorageFacility(S);
+    !getToFacility(S);
+    getItemNameAndQuantity(Item, Quantity);
+    .print(store(Item, Quantity));
+    !doAction(store(Item, Quantity));
+    !gatherRole.

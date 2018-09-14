@@ -160,3 +160,30 @@
 +!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
 +!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
 +!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
+
+
+
+
+
+
+
+
+
+
+
+
++!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
++!gatherUntilFull(V).
+
++!gatherRole: gather(X) & X <-
+    getResourceNode(F);
+    getFacilityName(F, N);
+    getCoords(F, Lat, Lon);
+    !getToLocation(N, Lat, Lon);
+    getItemVolume(F, V);
+    !gatherUntilFull(V);
+    getMainStorageFacility(S);
+    !getToFacility(S);
+    getItemNameAndQuantity(Item, Quantity);
+    !doAction(store(Item, Quantity));
+    !gatherRole.

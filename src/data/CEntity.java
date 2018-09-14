@@ -330,9 +330,11 @@ public class CEntity {
 
     public void addAgentArtifact(AgentArtifact agentArtifact) {
         this.agentArtifact = agentArtifact;
-        // if (this.role.getName().equals("drone")) {
+        if (this.role.getName().equals("drone")) {
             this.agentArtifact.setToScout();
-        // }
+        } else if (this.role.getName().equals("car") || this.role.getName().equals("motorcycle")) {
+            this.agentArtifact.setToGather();
+        }
     }
 
 }

@@ -21,6 +21,8 @@ import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.Facility;
+import massim.scenario.city.data.facilities.ResourceNode;
+import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Well;
 
 public class AgentArtifact extends Artifact {
@@ -76,7 +78,8 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("lastActionResult", 	"successful");
 		defineObsProperty("lastActionParam", 	"[]");
 		defineObsProperty("atPeriphery", 	false);
-        defineObsProperty("scout", false);
+		defineObsProperty("scout", false);
+		defineObsProperty("gather", false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -482,27 +485,59 @@ public class AgentArtifact extends Artifact {
 	}
 
 	@OPERATION
-    void getClosestUnexploredPosition(OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
-	    Location l = StaticInfoArtifact.getExploredMap().getClosestUnxploredLocation(getEntity().getLocation());
-	    lat.set(l.getLat());
-	    lon.set(l.getLon());
+	void getClosestUnexploredPosition(OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+		Location l = StaticInfoArtifact.getExploredMap().getClosestUnxploredLocation(getEntity().getLocation());
+		lat.set(l.getLat());
+		lon.set(l.getLon());
 
-	    if (agentName.equals("agent1")) {
-            System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource nodes");
-        }
+		if (agentName.equals("agent1")) {
+			System.out.println("Missing " + FacilityArtifact.calculateMissingResourceNodes().size() + " resource nodes");
+		}
 
-	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
-	        for (String scout : scouts) {
-                AgentArtifact.getAgentArtifact(scout).stopScouting();
-            }
-            scouts.clear();
+		if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
+			for (String scout : scouts) {
+				AgentArtifact.getAgentArtifact(scout).stopScouting();
+			}
+			scouts.clear();
 
-	        isScouting = false;
-        }
+			isScouting = false;
+		}
+	}
+
+    @OPERATION
+    void getResourceNode(OpFeedbackParam<Facility> f) {
+        f.set(StaticInfoArtifact.getStorage().getLowestResourceNode());
+    }
+
+    @OPERATION
+    void getFacilityName(ResourceNode facility, OpFeedbackParam<String> name) {
+        name.set(facility.getName());
+    }
+
+	@OPERATION
+	void getCoords(ResourceNode facility, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+		lat.set(facility.getLocation().getLat());
+		lon.set(facility.getLocation().getLon());
+	}
+
+	@OPERATION
+	void getItemVolume(ResourceNode facility, OpFeedbackParam<Integer> v) {
+		v.set(facility.getResource().getVolume());
+	}
+
+    @OPERATION
+    void getMainStorageFacility(OpFeedbackParam<String> v) {
+        v.set(StaticInfoArtifact.getStorage().getMainStorageFacility().getName());
+    }
+
+    @OPERATION
+    void getItemNameAndQuantity(OpFeedbackParam<String> name, OpFeedbackParam<Integer> quantity) {
+	    Item item = getEntity().getInventory().getStoredTypes().iterator().next();
+        name.set(item.getName());
+        quantity.set(getEntity().getInventory().getItemCount(item));
     }
 
     private void stopScouting() {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
         getObsProperty("scout").updateValue(false);
     }
 
@@ -518,4 +553,8 @@ public class AgentArtifact extends Artifact {
         getObsProperty("scout").updateValue(true);
         scouts.add(this.agentName);
     }
+
+	public void setToGather() {
+		getObsProperty("gather").updateValue(true);
+	}
 }
