@@ -69,10 +69,17 @@ public class TaskArtifact extends Artifact {
 	{
 		instance.announce("buyRequest", item, amount, shop);
 	}
-	
+
+    @GUARD
+    private boolean doneScouting() {
+        return !AgentArtifact.isScouting;
+    }
+
 	@OPERATION
 	void announceAssemble(Object items, String workshop, String taskId, String deliveryLocation, String type)
 	{
+	    // TODO: be more eager than this, but causes some problems right now
+	    await("doneScouting");
 		instance.announce("assembleRequest", items, workshop, taskId, deliveryLocation, type);
 	}
 

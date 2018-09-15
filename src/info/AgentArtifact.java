@@ -59,8 +59,6 @@ public class AgentArtifact extends Artifact {
 
 	private static final double EPSILON = 1E-3;
 
-	private static ConcurrentLinkedDeque<String> scouts = new ConcurrentLinkedDeque<>();
-	
 	void init()
 	{
 		this.agentName = this.getId().getName();
@@ -495,14 +493,7 @@ public class AgentArtifact extends Artifact {
 		}
 
 	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
-	        /*
-	        for (String scout : scouts) {
-                AgentArtifact.getAgentArtifact(scout).stopScouting();
-            }
-            scouts.clear();
-            */
 	        stopScouting();
-
 			isScouting = false;
 		}
 	}
@@ -546,9 +537,7 @@ public class AgentArtifact extends Artifact {
     }
 
     private void stopScouting() {
-        // System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.agentName);
         getObsProperty("scout").updateValue(false);
-        // TODO: remove !scout(t) intention??
     }
 
     /**
@@ -561,7 +550,6 @@ public class AgentArtifact extends Artifact {
 
     public void setToScout() {
         getObsProperty("scout").updateValue(true);
-        scouts.add(this.agentName);
     }
 
 	public void setToGather() {

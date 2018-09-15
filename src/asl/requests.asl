@@ -17,8 +17,7 @@
 		bid(Bid)[artifact_id(CNPId)];
 		winner(Won)[artifact_id(CNPId)];
 
-		if (Won)
-		{
+		if (Won) {
 			clearRetrieve(CNPId);
 			!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Roles, Workshop, [map(Node, Rest)|Nodes]);
 		}
@@ -79,7 +78,7 @@
 		}
 	}
 	+free.
-	
+
 +auction(TaskId, CNPId) : free <- 
 	-free;
 	takeTask(Can)[artifact_id(CNPId)];
@@ -128,8 +127,6 @@
 	: .my_name(Me) & .term2string(Agent, AgentStr)
 	& myRole(Role) & deleteAny(Role, Roles, RolesRest)
 	<-
-
-	.print("HELPING ", AgentStr, "!!!");
 
 	if (not RolesRest = []) {
 		.send(Agent,   tell, assistNeeded);
@@ -189,18 +186,19 @@
 	.print("Waiting for step ", ReadyStep);
 	
 	.wait(step(ReadyStep));
+
+	.print("Commencing assemble: ", ItemsToAssemble);
 	
 	!assembleItems(ItemsToAssemble);	
 	!!assembleComplete;
 
 	.print("Assemble complete");
 	
-	!getToFacility(DeliveryLocation);
 	!deliverItems(TaskId, DeliveryLocation).
 
+/*
 +free : retrieveRequest(AgentStr, [map(Node,Amount)|Nodes], Roles, Workshop, CNPId)
 		& remainingCapacity(Capacity) <-
-		
 	getResource(Node, Item);
 	getAmountToCarry(Item, Amount, Capacity, AmountToRetrieve, Rest);
 
@@ -208,10 +206,10 @@
 		takeTask(CanTake)[artifact_id(CNPId)];
 		
 		if (CanTake) {
-			-free;
-			clearRetrieve(CNPId);			
+	        -free;
+			clearRetrieve(CNPId);
 			!retrieve(AgentStr, Node, map(Item, AmountToRetrieve), Roles, Workshop, [map(Node,Rest)|Nodes]);
-			+free;
+        	+free;
 		}
 	}.
 
@@ -238,16 +236,17 @@
 		takeTask(CanTake)[artifact_id(CNPId)];
 		
 		if (CanTake) {
-			-free;
+            -free;
 			clearAssemble(CNPId);
 			getRequiredRoles(ItemsToAssemble, Roles);
 			!assemble(ItemsToRetrieve, ItemsToAssemble, Roles, AssembleRest, Workshop, TaskId, DeliveryLocation);
 			+free;
 		}
 	}.
-	
+*/
+
 @assistCount[atomic]
-+assistNeeded : assistCount(N) <- .print("Assist count: ", N + 1); -+assistCount(N + 1).
++assistNeeded : assistCount(N) <- -+assistCount(N + 1).
 
 @assistants[atomic]
 +assistReady(A) : assistants(L) & assistCount(M) <-

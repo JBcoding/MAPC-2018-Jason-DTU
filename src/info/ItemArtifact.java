@@ -114,8 +114,10 @@ public class ItemArtifact extends Artifact {
 
     @OPERATION
     void getResourceList(Object[] itemsMap, OpFeedbackParam<Object> ret) {
+        // TODO: I put this in announceAssemble instead...
+        // await("doneScouting");
         ret.set(getResourceList(Translator.convertASObjectToMap(itemsMap)).entrySet().stream()
-                .collect(Collectors.toMap(node -> node.getKey().getName(), Entry::getValue)));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
     }
 
     @GUARD
@@ -123,17 +125,8 @@ public class ItemArtifact extends Artifact {
         return !AgentArtifact.isScouting;
     }
 
-    /**
-     * Converts a map of items to buy into a shopping list
-     *
-     * @param items The items to buy along with the amount
-     * @return A map of shops and what to buy where
-     */
-    public Map<ResourceNode, Integer> getResourceList(Map<Item, Integer> items) {
-        // TODO: be more eager than this.
-        await("doneScouting");
-
-        Map<ResourceNode, Integer> resourceList = new HashMap<>();
+    public Map<String, Integer> getResourceList(Map<Item, Integer> items) {
+        Map<String, Integer> resourceList = new HashMap<>();
 
         Map<String, ResourceNode> nodes = FacilityArtifact.getResourceNodes();
 
@@ -145,17 +138,14 @@ public class ItemArtifact extends Artifact {
                 throw new IllegalArgumentException("Received non-base items");
             }
 
-            // TODO: threshold is probably always 0
-            Optional<ResourceNode> best = nodes.values().stream()
+            ArrayList<ResourceNode> candidates = nodes.values().stream()
                     .filter(x -> x.getResource().equals(item))
-                    .min(Comparator.comparingInt(ResourceNode::getThreshold));
+                    .collect(Collectors.toCollection(ArrayList::new));
 
-            if (best.isPresent()) {
-                resourceList.put(best.get(), amount);
-            } else {
-                // This probably means something is wrong with scouting.
-                logger.severe("No known resource node for " + item);
-            }
+            Location agentLocation = AgentArtifact.getEntity(getOpUserName()).getLocation();
+            String best = FacilityArtifact.getClosestFacility(agentLocation, candidates);
+
+            resourceList.put(best, amount);
         }
 
         return resourceList;
@@ -163,7 +153,6 @@ public class ItemArtifact extends Artifact {
 
     @OPERATION
     void getClosestFacilitySelling(String item, OpFeedbackParam<String> ret) {
-        // TODO: don't trust this
         Location agentLocation = AgentArtifact.getEntity(getOpUserName()).getLocation();
 
         Collection<Shop> shops = itemLocations.get(item).values();
@@ -260,14 +249,28 @@ public class ItemArtifact extends Artifact {
 
         for (Entry<Item, Integer> entry : Translator.convertASObjectToMap(items).entrySet()) {
             Item item = entry.getKey();
-            for (Role role : item.getRequiredRoles()) {
-                roles.add(role.getName());
-            }
+            roles.addAll(getRequiredRoles(item));
         }
 
         ret.set(roles.toArray());
     }
-	
+
+    private Set<String> getRequiredRoles(Item item) {
+        Set<String> roles = new HashSet<>();
+
+        for (Role role : item.getRequiredRoles()) {
+            roles.add(role.getName());
+        }
+
+        if (item.needsAssembly()) {
+            for (Item part : item.getRequiredItems()) {
+                roles.addAll(getRequiredRoles(part));
+            }
+        }
+
+        return roles;
+    }
+
 	public static void perceiveInitial(Collection<Percept> percepts)
 	{		
 		Map<Item, Set<String>> requirements = new HashMap<>();
@@ -313,6 +316,13 @@ public class ItemArtifact extends Artifact {
             if (finished != null) {
                 requirements.remove(finished);
             }
+        }
+
+        for (Item item : items.values()) {
+            System.out.println(item.getName() + " <-- "
+                    + item.getRequiredRoles().stream().map(Role::getName).collect(Collectors.toSet()) + " <== "
+                    + item.getRequiredItems().stream().map(Item::getName).collect(Collectors.toSet()) + " : "
+                    + item.needsAssembly());
         }
 
 		if (EIArtifact.LOGGING_ENABLED)

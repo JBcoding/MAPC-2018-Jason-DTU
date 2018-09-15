@@ -140,17 +140,17 @@ public class FacilityArtifact extends Artifact {
 	    Facility fac = getFacility(facilityName);
 	    if (fac == null) {
 	        // TODO: idk
-	        distance.set(0);
+	        distance.set(Integer.MAX_VALUE);
         } else {
             Route route = StaticInfoArtifact.getRoute(getOpUserName(),fac.getLocation());
             if (route != null) {
                 distance.set(route.getRouteLength());
             } else {
-                distance.set(0);
+                distance.set(Integer.MAX_VALUE);
             }
         }
 	}
-	
+
 	@OPERATION
 	void durationToFacility(String facilityName, OpFeedbackParam<Integer> duration)
 	{

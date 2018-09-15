@@ -4,7 +4,10 @@
 
 !focusArtifacts.
 
-+step(X) <- .print(""); .print("STEP ", X); .print("").
++step(X) <- // .print(""); .print("STEP ", X); .print("").
+    .print("---------------------------------------------------------",
+           "---------------------------------------------------------",
+           "------------------------------------------------------> ", X).
 
 +task(TaskId, Type) : Type \== "auction" <-
 	getJob(TaskId, Storage, Items);

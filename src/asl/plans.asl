@@ -93,36 +93,33 @@
 	}
 	else { .print("Can not find any resource nodes"); }.
 
-+!buyItems([]).
-+!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
-+!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <-
-	getAvailableAmount(Item, Amount, Shop, AmountAvailable);
-	!doAction(buy(Item, AmountAvailable));
-	!buyItems(Items);
-	!buyItems([map(Item, Amount - AmountAvailable)]).
-
 +!deliverItems(TaskId, Facility) <-
 	!getToFacility(Facility);
  	!doAction(deliver_job(TaskId)).
 
 +!assembleItems([]).
-+!assembleItems([map(	_, 		0) | Items]) <- !assembleItems(Items).
++!assembleItems([map(Item, Amount) | Items])
+    : lastAction("assemble") & not lastActionResult("successful") <-
+    // The last assemble failed, so don't decrement again
+    .print("Retrying assemble(", Item, ")");
+    !doAction(assemble(Item));
+    !assembleItems([map(Item, Amount) | Items]).
++!assembleItems([map(Item, 0) | Items]) <-
+    !assembleItems(Items).
 +!assembleItems([map(Item, Amount) | Items]) <-
 	getRequiredItems(Item, ReqItems);
-	!assembleItem(Item, ReqItems);
-	!assembleItems([map(Item, Amount - 1) | Items]).
+    !assembleItem(Item, ReqItems);
+    !assembleItems([map(Item, Amount - 1) | Items]).
 
 // Recursively assemble required items
-+!assembleItem(_, []).
++!assembleItem(_, []). // Item is a base item.
 +!assembleItem(Item, ReqItems) : myRole(Role) <-
 	!assembleItems(ReqItems);
-	getRequiredRoles([map(Item, 1)], Roles);
-	.print("assemble ", Item, " <-- ", Roles, " - ", Role);
+	.print("assemble(", Item, ") <-- ", Role);
 	!doAction(assemble(Item)).
 
 +!assistAssemble(Agent) : assembleComplete.
-+!assistAssemble(Agent) : myRole(Role) & .term2string(Role, RoleStr) <-
-    .print("assist_assemble ", Agent, " <- ", RoleStr);
++!assistAssemble(Agent) : myRole(Role) <-
     !doAction(assist_assemble(Agent));
     !assistAssemble(Agent).
 
