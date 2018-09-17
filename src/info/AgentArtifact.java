@@ -636,7 +636,7 @@ public class AgentArtifact extends Artifact {
 
 			artifacts.values().stream()
 					.filter(a ->
-							a != null && a.getEntity() != null &&
+							a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 							a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("destroy").getValue()))
 					.sorted(
 							Comparator.comparingDouble(a ->
@@ -649,7 +649,7 @@ public class AgentArtifact extends Artifact {
 					.limit(DynamicInfoArtifact.getMoney() / wellPrice)
 					.forEach(AgentArtifact::setToBuild);
 		} catch (NullPointerException e) {
-			System.out.println(e);
+			//e.printStackTrace();
 			// Do nothing
 		}
 	}
@@ -658,12 +658,12 @@ public class AgentArtifact extends Artifact {
 		try {
 			artifacts.values().stream()
 					.filter(a ->
-							a != null && a.getEntity() != null &&
+							a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 							a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("build").getValue()))
 					.limit(MAX_DESTROYERS)
 					.forEach(AgentArtifact::setToDestroy);
 		} catch (NullPointerException e) {
-			System.out.println(e);
+			//e.printStackTrace();
 			// Do nothing
 		}
 	}
@@ -672,7 +672,7 @@ public class AgentArtifact extends Artifact {
 		try {
 			setToBuild(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getName(), new OpFeedbackParam<>());
 		} catch (NullPointerException e) {
-			System.out.println(e);
+			System.out.println(e.getMessage());
 			// Do nothing
 		}
 	}

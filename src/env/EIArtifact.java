@@ -36,8 +36,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     public static final boolean LOGGING_ENABLED = false;
     
     private static EnvironmentInterfaceStandard ei;
-    private static final String configFile = "conf/eismassimconfig.json";
-	//private static final String configFile = "conf/eismassimconfig_connection_test.json";
+    //private static final String configFile = "conf/eismassimconfig.json";
+	private static final String configFile = "conf/eismassimconfig_connection_test.json";
 	//private static final String configFile = "conf/eismassimconfig_team_B.json";
 
     private static Map<String, String> connections 	= new HashMap<>();
@@ -76,7 +76,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
         String agentName = getOpUserName();
         String id = agentName.substring(5);
         String connection = "connection" + team + id;
-        String entity = "agent" + team + id;
+        String entity = /*"agent" + */team + id;
 
         logger.fine("register " + agentName + " on " + connection);
 
