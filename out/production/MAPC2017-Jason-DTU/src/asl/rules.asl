@@ -27,9 +27,13 @@ inShop(F)			:- inFacility(F) & inShop.
 inResourceNode      :- inFacility(F) & isResourceNode(F).
 inWell              :- inFacility(F) & isWell(F).
 inOwnWell           :- inWell & inOwnWell(X) & X.
-inEnemyWell         :- not inOwnWell.
+inEnemyWell         :- inWell & not inOwnWell.
 
 atPeriphery         :- atPeriphery(X) & X.
+
+enoughMoneyForWell  :- enoughMoneyForWell(X) & X.
+build               :- build(X) & X.
+destroy             :- destroy(X) & X.
 
 contains(map(Item, X), [map(Item, Y) | _]) 	:- X <= Y. 		// There is a .member function, but we need to unwrap the objects
 contains(Item, [_ | Inventory]) 		    :- contains(Item, Inventory).

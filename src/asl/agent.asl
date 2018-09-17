@@ -12,16 +12,18 @@ free.
 !register.
 !focusArtifacts.
 
-!startLoop.
-//+free : scout(X) & X <- -free; !scoutt; +free.
+// +step(0) <- !scoutt.
 
+!startLoop.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
-//+!loop <- !doAction(recharge); !loop.
-+!loop : scout(X) & X <- !scoutt; !loop.
-+!loop : gather(X) & X <- -free; !gatherRole; !loop.
-+!loop : builder(X) & X <- -free; !builderRole; !loop.
+//+!loop : scout(X) & X <- .print("Scouting"); -free; !scoutt; +free; !loop.
+//+!loop : build(X) & X <- .print("Building well"); -free; !buildWell; +free; !loop.
+//+!loop : destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
+//+!loop : gather(X) & X <- -free; !gatherRole; +free; !loop.
+//+!loop : builder(X) & X <- -free; !builderRole; +free; !loop.
 +!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
+//+!loop <- !startLoop.
 	
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
@@ -35,7 +37,7 @@ free.
     <- .print("   ~~~ DELIVER JOB: ", R, " ", P, " ~~~   ").
 //+step(X) : lastAction("bid_for_job") & lastActionResult("successful") & .print("Bid on job successful ") & false.
 +step(X) : lastAction("gather") & lastActionResult("successful_partial").
-+step(X) : lastActionResult(R) &   not lastActionResult("successful") 
++step(X) : lastActionResult(R) &   not lastActionResult("successful")
 		 & lastAction(A) & lastActionParam(P) <- .print(R, " ", A, " ", P).
 		 
 +reset <- .print("resetting"); .drop_all_desires; .drop_all_events; .drop_all_intentions; -reset.

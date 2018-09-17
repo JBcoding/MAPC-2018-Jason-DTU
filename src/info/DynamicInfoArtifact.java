@@ -33,6 +33,8 @@ public class DynamicInfoArtifact extends Artifact {
 	void init()
 	{
 		defineObsProperty("step", 0);
+		defineObsProperty("money", 0);
+		defineObsProperty("enoughMoneyForWell", false);
 	}	
 	
 	@OPERATION
@@ -45,6 +47,11 @@ public class DynamicInfoArtifact extends Artifact {
 	void getMoney(OpFeedbackParam<Integer> ret)
 	{
 		ret.set(money);
+	}
+
+	@OPERATION
+	void enoughMoneyForWell(OpFeedbackParam<Boolean> ret) {
+		ret.set(!StaticInfoArtifact.getBestWellType(money).equals("none"));
 	}
 	
 	@OPERATION

@@ -117,9 +117,9 @@
 
 	.wait(assembleReady(ReadyStep));
 	.wait(step(ReadyStep));
-	
+
 	!assistAssemble(Agent);
-	
+
 	.send(Agent, untell, assistReady(Me)).
 
 +!assist(_, [], _).
@@ -188,16 +188,21 @@
 	.wait(step(ReadyStep));
 
 	.print("Commencing assemble: ", ItemsToAssemble);
-	
+
 	!assembleItems(ItemsToAssemble);	
 	!!assembleComplete;
 
 	.print("Assemble complete");
-	
+
 	!deliverItems(TaskId, DeliveryLocation).
 
-/*
-+free : retrieveRequest(AgentStr, [map(Node,Amount)|Nodes], Roles, Workshop, CNPId)
+//+free : scout(X) & X <- -free; !scoutt; +free.
+
+//+free : build <- .print("Building"); -free; !buildWell; +free.
+
+//+free : destroy <- .print("Destroying"); -free; !dismantleEnemyWell; +free.
+
++free : retrieveRequest(AgentStr, [map(Node,Amount)|Nodes], Workshop, CNPId)
 		& remainingCapacity(Capacity) <-
 	getResource(Node, Item);
 	getAmountToCarry(Item, Amount, Capacity, AmountToRetrieve, Rest);
@@ -243,7 +248,6 @@
 			+free;
 		}
 	}.
-*/
 
 @assistCount[atomic]
 +assistNeeded : assistCount(N) <- -+assistCount(N + 1).

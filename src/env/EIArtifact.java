@@ -36,8 +36,9 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     public static final boolean LOGGING_ENABLED = false;
     
     private static EnvironmentInterfaceStandard ei;
-    private static final String configFile = "conf/eismassimconfig.json";
-	//private static final String configFile = "conf/eismassimconfig_connection_test.json";
+    //private static final String configFile = "conf/eismassimconfig.json";
+	private static final String configFile = "conf/eismassimconfig_connection_test.json";
+	//private static final String configFile = "conf/eismassimconfig_team_B.json";
 
     private static Map<String, String> connections 	= new HashMap<>();
     private static Map<String, String> entities		= new HashMap<>();
@@ -48,7 +49,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
      * Instantiates and starts the environment interface.
      */
     void init() 
-    {    	
+    {
     	logger.setLevel(Level.SEVERE);
 		logger.info("init");
 		
@@ -175,6 +176,9 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			FacilityArtifact	.perceiveUpdate(allPercepts);
 			DynamicInfoArtifact	.perceiveUpdate(allPercepts);
 			JobArtifact			.perceiveUpdate(allPercepts);
+
+			AgentArtifact.setBuilders();
+			AgentArtifact.setInitialDestroyers();
 			
 			// Define roles
 			// TODO:
@@ -194,6 +198,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			
 			// Define step
 			defineObsProperty("step", DynamicInfoArtifact.getStep());
+			defineObsProperty("money", DynamicInfoArtifact.getMoney());
+			defineObsProperty("enoughMoneyForWell", !StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getName().equals("none"));
 			
 			FacilityArtifact.announceShops();
 		}
@@ -229,7 +235,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			DynamicInfoArtifact	.perceiveUpdate(allPercepts);
 			JobArtifact			.perceiveUpdate(allPercepts);
 
-
+			AgentArtifact.setBuilders();
 
 			for (Entry<String, Collection<Percept>> entry : allPerceptsMap.entrySet())
 			{
@@ -237,6 +243,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			}
 
 			getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
+			getObsProperty("money").updateValue(DynamicInfoArtifact.getMoney());
+			getObsProperty("enoughMoneyForWell").updateValue(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()) != null);
 
 			logData();
 

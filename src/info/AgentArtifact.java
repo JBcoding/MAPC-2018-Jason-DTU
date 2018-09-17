@@ -2,6 +2,7 @@ package info;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,15 @@ public class AgentArtifact extends Artifact {
 
 	private static final double EPSILON = 1E-3;
 
+	private static Deque<String> scouts = new ConcurrentLinkedDeque<String>();
+	private static Deque<String> wellBuilders = new ConcurrentLinkedDeque<String>();
+	private static Deque<String> destroyers = new ConcurrentLinkedDeque<String>();
+
+	private static final int MAX_DESTROYERS = 3;
+
+	private static Semaphore buildSemaphore = new Semaphore(1);
+	private static Semaphore destroySemaphore = new Semaphore(1);
+
 	void init()
 	{
 		this.agentName = this.getId().getName();
@@ -80,6 +90,8 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("scout", false);
         defineObsProperty("gather", false);
         defineObsProperty("builder", false);
+		defineObsProperty("build", false);
+		defineObsProperty("destroy", false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -495,10 +507,15 @@ public class AgentArtifact extends Artifact {
 		}
 
 	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
-	        stopScouting();
-			isScouting = false;
-		}
-	}
+            stopScouting(); // TODO: We might want to keep 1 scout
+        }
+    }
+
+    public void setToScout() {
+        getObsProperty("scout").updateValue(true);
+        isScouting = true;
+        scouts.add(this.agentName);
+    }
 
     @OPERATION
     void getResourceNode(OpFeedbackParam<Facility> f) {
@@ -583,23 +600,128 @@ public class AgentArtifact extends Artifact {
         quantity.set(-1);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
+        scouts.remove(this.agentName);
+        isScouting = false;
     }
+
+	public static void setBuilders() {
+		try {
+			int wellPrice = StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getCost();
+
+			artifacts.values().stream()
+					.filter(a ->
+							a != null && a.getEntity() != null &&
+							a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("destroy").getValue()))
+					.sorted(
+							Comparator.comparingDouble(a ->
+									FacilityArtifact.euclideanDistance(
+											a.getEntity().getLocation(),
+											StaticInfoArtifact.getMap().getClosestPeriphery(a.getEntity().getLocation(), EPSILON)
+									)
+							)
+					)
+					.limit(DynamicInfoArtifact.getMoney() / wellPrice)
+					.forEach(AgentArtifact::setToBuild);
+		} catch (NullPointerException e) {
+			System.out.println(e);
+			// Do nothing
+		}
+	}
+
+	public static void setInitialDestroyers() {
+		try {
+			artifacts.values().stream()
+					.filter(a ->
+							a != null && a.getEntity() != null &&
+							a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("build").getValue()))
+					.limit(MAX_DESTROYERS)
+					.forEach(AgentArtifact::setToDestroy);
+		} catch (NullPointerException e) {
+			System.out.println(e);
+			// Do nothing
+		}
+	}
+
+    public void setToBuild() {
+		try {
+			setToBuild(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getName(), new OpFeedbackParam<>());
+		} catch (NullPointerException e) {
+			System.out.println(e);
+			// Do nothing
+		}
+	}
+
+    @OPERATION
+    void setToBuild(String wellType, OpFeedbackParam<Boolean> canBuild) {
+		try {
+			buildSemaphore.acquire();
+			try {
+				int price = StaticInfoArtifact.getWellTypes().stream().filter(x -> x.getName().equals(wellType)).findFirst().get().getCost();
+				if (DynamicInfoArtifact.getMoney() / price > wellBuilders.size()) {
+					getObsProperty("build").updateValue(true);
+					wellBuilders.add(this.agentName);
+				}
+			} catch (NoSuchElementException e) {
+				System.out.println(e);
+			}
+			buildSemaphore.release();
+		} catch (InterruptedException e) {
+			logger.warning("Thread interrupted in setToBuild");
+		}
+		canBuild.set(wellBuilders.contains(this.agentName)); // Only set false if not already a builder
+    }
+
+    @OPERATION
+    void stopBuilding() {
+		try {
+			buildSemaphore.acquire();
+			try {
+				getObsProperty("build").updateValue(false);
+				wellBuilders.remove(this.agentName);
+				int price = StaticInfoArtifact.getWellTypes().stream().findFirst().get().getCost();
+				buildSemaphore.release();
+			} catch (NoSuchElementException e) {
+				buildSemaphore.release();
+			}
+		} catch (InterruptedException e) {
+			logger.warning("Thread interrupted in stopBuilding");
+		}
+    }
+
+	@OPERATION
+    void setToDestroy() {
+		try {
+			destroySemaphore.acquire();
+			if (destroyers.size() < MAX_DESTROYERS) {
+				getObsProperty("destroy").updateValue(true);
+				destroyers.add(this.agentName);
+			}
+			destroySemaphore.release();
+		} catch (InterruptedException e) {
+			logger.warning("Thread interrupted in setToDestroy");
+		}
+    }
+
+    @OPERATION
+    void stopDestroying() {
+		try {
+			destroySemaphore.acquire();
+			getObsProperty("destroy").updateValue(false);
+			destroyers.remove(this.agentName);
+			destroySemaphore.release();
+		} catch (InterruptedException e) {
+			logger.warning("Thread interrupted in stopDestroying");
+		}
+    }
+/*
+    private void setGlobalProperty(String property, Object value) {
+		for (AgentArtifact artifact : artifacts.values()) {
+			artifact.getObsProperty(property).updateValue(value);
+		}
+	}
+	*/
 
     /**
 	 * Resets the agent artifact
@@ -608,10 +730,6 @@ public class AgentArtifact extends Artifact {
 	{
 		
 	}
-
-    public void setToScout() {
-        getObsProperty("scout").updateValue(true);
-    }
 
 	public void setToGather() {
 		getObsProperty("gather").updateValue(true);

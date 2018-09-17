@@ -1,5 +1,6 @@
 package data;
 
+import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
@@ -300,6 +301,17 @@ public class CCityMap implements Serializable {
 	public String toString() {
 		return String.format("Map of %s. Min lat: %f Min lon: %f Max lat: %f Max lon: %f Center: (%f, %f).",
                 mapName, minLat, minLon, maxLat, maxLon, center.getLat(), center.getLon());
+	}
+
+	@OPERATION
+	void getRandomPeripheralLocation(OpFeedbackParam<Double> Lat, OpFeedbackParam<Double> Lon) {
+		if (RNG.nextInt() % 2 == 0) {
+			Lat.set(RNG.nextInt() % 2 == 0 ? minLat : maxLat);
+			Lon.set(minLon + (maxLon - minLon) * RNG.nextDouble());
+		} else {
+			Lat.set(minLat + (maxLat - minLat) * RNG.nextDouble());
+			Lon.set(RNG.nextInt() % 2 == 0 ? minLon : maxLon);
+		}
 	}
 
 	public Location getClosestPeriphery(Location l, double epsilon) {

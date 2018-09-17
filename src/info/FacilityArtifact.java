@@ -11,7 +11,6 @@ import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import cnp.TaskArtifact;
-import data.CCityMap;
 import data.CEntity;
 import eis.iilang.Percept;
 import env.Translator;
@@ -193,6 +192,7 @@ public class FacilityArtifact extends Artifact {
 			lon.set(w.getLocation().getLon());
 		} catch (NoSuchElementException | NullPointerException e) {
 			// TODO: What to do if there is no known enemy well?
+			name.set("none");
 			//lat.set(loc.getLat());
 			//lon.set(loc.getLon());
 		}
@@ -209,7 +209,7 @@ public class FacilityArtifact extends Artifact {
 				.comparingDouble(f -> euclideanDistance(f.getLocation(), l))).get().getName();
 	}
 	
-	private static double euclideanDistance(Location l1, Location l2)
+	public static double euclideanDistance(Location l1, Location l2)
 	{
 		double dLon = l1.getLon() - l2.getLon();
 		double dLat = l1.getLat() - l2.getLat();

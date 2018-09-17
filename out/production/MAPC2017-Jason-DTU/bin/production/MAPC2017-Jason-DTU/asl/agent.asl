@@ -6,28 +6,35 @@
 { include("requests.asl") }
 
 // Initial beliefs
-// free.
+free.
 
 // Initial goals
 !register.
 !focusArtifacts.
 
 !startLoop.
+//+free : scout(X) & X <- -free; !scoutt; +free.
+
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 //+!loop <- !doAction(recharge); !loop.
 +!loop : scout(X) & X <- !scoutt; !loop.
-+!loop <- !buildWell.
++!loop : gather(X) & X <- -free; !gatherRole; !loop.
++!loop : builder(X) & X <- -free; !builderRole; !loop.
++!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
 	
 // Percepts	
-+!doAction(Action) : .my_name(Me) <- jia.action(Me, Action).
++!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
 +step(X) : lastAction("give") 		 & lastActionResult("successful") <- .print("Give successful!").
 +step(X) : lastAction("receive") 	 & lastActionResult("successful") <- .print("Receive successful!").
 +step(X) : lastAction("deliver_job") & lastActionResult("successful") & lastActionParam([Id])
 	<- .print("Job successful! ID: ", Id); incJobCompletedCount; completeJob(Id).
++step(X) : lastAction("deliver_job") & lastActionResult(R) & lastActionParam(P)
+    <- .print("   ~~~ DELIVER JOB: ", R, " ", P, " ~~~   ").
 //+step(X) : lastAction("bid_for_job") & lastActionResult("successful") & .print("Bid on job successful ") & false.
++step(X) : lastAction("gather") & lastActionResult("successful_partial").
 +step(X) : lastActionResult(R) &   not lastActionResult("successful") 
 		 & lastAction(A) & lastActionParam(P) <- .print(R, " ", A, " ", P).
 		 

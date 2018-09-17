@@ -373,14 +373,19 @@ public class StaticInfoArtifact extends Artifact {
         return proximity;
     }
 
+    public static WellType getBestWellType(int money) {
+		try {
+    	return wellTypes.values().stream().filter(wt -> wt.getCost() <= money).max((wt1, wt2) -> wt1.getEfficiency() - wt2.getEfficiency()).get();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
     @OPERATION
     void bestWellType(int money, OpFeedbackParam<String> wellType)
     {
-        try {
-            wellType.set(wellTypes.values().stream().filter(wt -> wt.getCost() <= money).max((wt1, wt2) -> wt1.getEfficiency() - wt2.getEfficiency()).get().getName());
-        } catch (Exception e) {
-            wellType.set("none");
-        }
+    	WellType wt = getBestWellType(money);
+            wellType.set(wt == null ? "none" : wt.getName());
     }
 
     @OPERATION

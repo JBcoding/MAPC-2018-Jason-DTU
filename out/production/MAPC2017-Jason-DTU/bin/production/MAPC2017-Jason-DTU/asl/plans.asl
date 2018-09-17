@@ -32,7 +32,7 @@
         !buildWell;
     }
     else {
-        .print("Done building well");
+        //.print("Done building well");
     }.
 +!buildWell :
     atPeriphery
@@ -93,33 +93,35 @@
 	}
 	else { .print("Can not find any resource nodes"); }.
 
-+!buyItems([]).
-+!buyItems([map(Item, 	   0)|Items]) <- !buyItems(Items).
-+!buyItems([map(Item, Amount)|Items]) : inShop(Shop) <-
-	getAvailableAmount(Item, Amount, Shop, AmountAvailable);
-	!doAction(buy(Item, AmountAvailable));
-	!buyItems(Items);
-	!buyItems([map(Item, Amount - AmountAvailable)]).
-
 +!deliverItems(TaskId, Facility) <-
 	!getToFacility(Facility);
  	!doAction(deliver_job(TaskId)).
 
 +!assembleItems([]).
-+!assembleItems([map(	_, 		0) | Items]) <- !assembleItems(Items).
++!assembleItems([map(Item, Amount) | Items])
+    : lastAction("assemble") & not lastActionResult("successful") <-
+    // The last assemble failed, so don't decrement again
+    .print("Retrying assemble(", Item, ")");
+    !doAction(assemble(Item));
+    !assembleItems([map(Item, Amount) | Items]).
++!assembleItems([map(Item, 0) | Items]) <-
+    !assembleItems(Items).
 +!assembleItems([map(Item, Amount) | Items]) <-
 	getRequiredItems(Item, ReqItems);
-	!assembleItem(Item, ReqItems);
-	!assembleItems([map(Item, Amount - 1) | Items]).
+    !assembleItem(Item, ReqItems);
+    !assembleItems([map(Item, Amount - 1) | Items]).
 
 // Recursively assemble required items
-+!assembleItem(	  _, 	   []).
-+!assembleItem(Item, ReqItems) <-
++!assembleItem(_, []). // Item is a base item.
++!assembleItem(Item, ReqItems) : myRole(Role) <-
 	!assembleItems(ReqItems);
+	.print("assemble(", Item, ") <-- ", Role);
 	!doAction(assemble(Item)).
 
-+!assistAssemble(Agent) : load(0) | assembleComplete.
-+!assistAssemble(Agent) <- !doAction(assist_assemble(Agent)); !assistAssemble(Agent).
++!assistAssemble(Agent) : assembleComplete.
++!assistAssemble(Agent) : myRole(Role) <-
+    !doAction(assist_assemble(Agent));
+    !assistAssemble(Agent).
 
 +!retrieveTools([]).
 +!retrieveTools([Tool | Tools]) : have(Tool) 	<- !retrieveTools(Tools).
@@ -141,22 +143,108 @@
 // Gets close to this location
 +!getToPeripheryLocation(Lat, Lon) : atPeriphery.
 +!getToPeripheryLocation(Lat, Lon) : not canMove <- !doAction(recharge); !getToPeripheryLocation(Lat, Lon).
-+!getToPeripheryLocation(Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToPeripheryLocation(Lat, Lon).
++!getToPeripheryLocation(Lat, Lon) : not enoughCharge <- !charge; !getToPeripheryLocation(Lat, Lon).
 +!getToPeripheryLocation(Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocation(Lat, Lon).
 
 +!charge : charge(X) & currentBattery(X).
-+!charge : not canMove <- !doAction(recharge); !charge.
 +!charge : inChargingStation <-
     !doAction(charge);
     !charge.
++!charge : not canMove <- !doAction(recharge); !charge.
 +!charge <-
 	getClosestFacility("chargingStation", F);
 	!getToFacility(F);
 	!charge.
 
-+!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); .print("Scouting"); !scout(Lat, Lon).
++!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); /* .print("Scouting"); */ !scout(Lat, Lon).
 +!scoutt.
 
-+!scout(Lat, Lon) : not canMove									<- !doAction(recharge); !scout(Lat, Lon).
-+!scout(Lat, Lon) : not enoughCharge                            <- !charge; !scout(Lat, Lon).
-+!scout(Lat, Lon) 												<- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
++!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
++!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(_, _) : scout(X) & not X.
+
+
+
+
+
+
+
+
+
+
+
+
++!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
++!gatherUntilFull(V).
+
++!emptyInventory : inStorage & load(L) & L >= 1 <-
+    getItemNameAndQuantity(Item, Quantity);
+    if (not Quantity == -1) {
+        !doAction(store(Item, Quantity));
+        !emptyInventory;
+    }.
++!emptyInventory.
+
++!gatherRole: gather(X) & X <-
+    getResourceNode(F);
+    getFacilityName(F, N);
+    getCoords(F, Lat, Lon);
+    !getToLocation(N, Lat, Lon);
+    getItemVolume(F, V);
+    !gatherUntilFull(V);
+    getMainStorageFacility(S);
+    !getToFacility(S);
+    !emptyInventory;
+    !gatherRole.
+
+
+
+
+
+
++!assembleItem(Item) <-
+    haveItem(Item, X);
+    if (not X) {
+        !doAction(assemble(Item));
+    }.
+
++!getItemsToBuildItem(Item) <-
+    getMissingItemToBuildItem(Item, ItemToRetrieve, Quantity);
+    if (not Quantity == -1) {
+        !doAction(retrieve(ItemToRetrieve, Quantity));
+        !getItemsToBuildItem(Item);
+    }.
+
++!builderRole: builder(X) & X <-
+    getMainTruckName(T);
+    getWorkShop(W);
+    getMyName(N);
+    if (not N == T) {
+        !getToFacility(W);
+        !doAction(assist_assemble(T));
+    } else {
+        getMainStorageFacility(S);
+        !getToFacility(S);
+        somethingToBuild(Y);
+        if (Y) {
+            getItemToBuild(Item);
+
+            // Below is a 5 step plan to build anything !!!
+            // 1. Take needed items out
+            !getItemsToBuildItem(Item);
+            // 2. go to workshop
+            !getToFacility(W);
+            // 3. assemble
+            !assembleItem(Item);
+            // 4. go to storage
+            !getToFacility(S);
+            // 5. empty inventory
+            !emptyInventory;
+
+        } else {
+            .print("Currently nothing to build");
+            .wait({+step(_)});
+        }
+    }
+    !builderRole.
