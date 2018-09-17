@@ -5,6 +5,7 @@ import java.util.Set;
 
 import info.AgentArtifact;
 import info.FacilityArtifact;
+import info.StaticInfoArtifact;
 import massim.protocol.messagecontent.Action;
 import massim.scenario.city.ActionExecutor;
 import massim.scenario.city.data.Entity;
@@ -327,10 +328,13 @@ public class CEntity {
 		return this.lastActionParam;
 	}
 
-
+	private static Set<String> buldingTeam = new HashSet<>();
     public void addAgentArtifact(AgentArtifact agentArtifact) {
         this.agentArtifact = agentArtifact;
-        if (this.role.getName().equals("drone")) {
+        if (buldingTeam.add(this.role.getName())) {
+            this.agentArtifact.setToBuilder();
+            StaticInfoArtifact.getBuildTeam().addAgent(this.agentArtifact.agentName);
+        } else if (this.role.getName().equals("drone")) {
             this.agentArtifact.setToScout();
         } else if (this.role.getName().equals("car") || this.role.getName().equals("motorcycle")) {
             this.agentArtifact.setToGather();

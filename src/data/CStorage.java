@@ -7,6 +7,7 @@ import massim.scenario.city.data.Item;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Storage;
+import massim.scenario.city.data.facilities.Workshop;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 public class CStorage {
 
     Storage storage;
+    Workshop mainWorkshop;
 
     Map<String, Double> itemsVar;
     Map<String, Integer> items;
@@ -22,6 +24,7 @@ public class CStorage {
         Collection<Facility> storages = FacilityArtifact.getFacilities(FacilityArtifact.STORAGE);
         Collection<Facility> workshops = FacilityArtifact.getFacilities(FacilityArtifact.WORKSHOP);
         Facility bestStorage = null;
+        Workshop bestWorkshop = null;
         double bestDistance = Double.MAX_VALUE;
         for (Facility storage : storages) {
             for (Facility workshop : workshops) {
@@ -29,10 +32,12 @@ public class CStorage {
                 if (dist < bestDistance) {
                     bestDistance = dist;
                     bestStorage = storage;
+                    bestWorkshop = (Workshop) workshop;
                 }
             }
         }
         storage = (Storage) bestStorage;
+        mainWorkshop = bestWorkshop;
         items = new HashMap<>();
         itemsVar = new HashMap<>();
         for (Item item : ItemArtifact.getAllItems()) {
@@ -74,5 +79,9 @@ public class CStorage {
         for (String key : items.keySet()) {
             items.put(key, 0);
         }
+    }
+
+    public String getMainWorkShop() {
+        return mainWorkshop.getName();
     }
 }

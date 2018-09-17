@@ -197,3 +197,54 @@
     !getToFacility(S);
     !emptyInventory;
     !gatherRole.
+
+
+
+
+
+
++!assembleItem(Item) <-
+    haveItem(Item, X);
+    if (not X) {
+        !doAction(assemble(Item));
+    }.
+
++!getItemsToBuildItem(Item) <-
+    getMissingItemToBuildItem(Item, ItemToRetrieve, Quantity);
+    if (not Quantity == -1) {
+        !doAction(retrieve(ItemToRetrieve, Quantity));
+        !getItemsToBuildItem(Item);
+    }.
+
++!builderRole: builder(X) & X <-
+    getMainTruckName(T);
+    getWorkShop(W);
+    getMyName(N);
+    if (not N == T) {
+        !getToFacility(W);
+        !doAction(assist_assemble(T));
+    } else {
+        getMainStorageFacility(S);
+        !getToFacility(S);
+        somethingToBuild(Y);
+        if (Y) {
+            getItemToBuild(Item);
+
+            // Below is a 5 step plan to build anything !!!
+            // 1. Take needed items out
+            !getItemsToBuildItem(Item);
+            // 2. go to workshop
+            !getToFacility(W);
+            // 3. assemble
+            !assembleItem(Item);
+            // 4. go to storage
+            !getToFacility(S);
+            // 5. empty inventory
+            !emptyInventory;
+
+        } else {
+            .print("Currently nothing to build");
+            .wait({+step(_)});
+        }
+    }
+    !builderRole.

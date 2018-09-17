@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -205,7 +204,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 		
 		logger.finest("Perceive initial done");
 
-		StaticInfoArtifact.createCStorage();
+		StaticInfoArtifact.donePerceiving();
 	}
 	
 	@INTERNAL_OPERATION

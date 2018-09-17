@@ -13,10 +13,7 @@ import java.util.stream.Collectors;
 import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
-import data.CCityMap;
-import data.CEntity;
-import data.CExploredMap;
-import data.CStorage;
+import data.*;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
@@ -66,13 +63,21 @@ public class StaticInfoArtifact extends Artifact {
     private static CExploredMap exploredMap;
 
     private static CStorage storage;
+    private static CBuildTeam buildTeam;
 
     public static CStorage getStorage() {
         return storage;
     }
 
-    public static void createCStorage() {
+    public static void donePerceiving() {
         storage = new CStorage();
+    }
+
+    public static CBuildTeam getBuildTeam() {
+        if (buildTeam == null) {
+            buildTeam = new CBuildTeam();
+        }
+        return buildTeam;
     }
 
     @OPERATION

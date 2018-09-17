@@ -76,8 +76,10 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("lastActionResult", 	"successful");
 		defineObsProperty("lastActionParam", 	"[]");
 		defineObsProperty("atPeriphery", 	false);
+
 		defineObsProperty("scout", false);
-		defineObsProperty("gather", false);
+        defineObsProperty("gather", false);
+        defineObsProperty("builder", false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -536,6 +538,65 @@ public class AgentArtifact extends Artifact {
         }
     }
 
+    @OPERATION
+    void getWorkShop(OpFeedbackParam<String> v) {
+        v.set(StaticInfoArtifact.getStorage().getMainWorkShop());
+    }
+
+    @OPERATION
+    void getMainTruckName(OpFeedbackParam<String> v) {
+        v.set(StaticInfoArtifact.getBuildTeam().getTruckName());
+    }
+
+    @OPERATION
+    void getMyName(OpFeedbackParam<String> v) {
+        v.set(this.agentName);
+    }
+
+    @OPERATION
+    void somethingToBuild(OpFeedbackParam<Boolean> x) {
+        x.set(StaticInfoArtifact.getBuildTeam().thingsToBuild().size() != 0);
+    }
+
+    @OPERATION
+    void getItemToBuild(OpFeedbackParam<String> item) {
+        item.set(StaticInfoArtifact.getBuildTeam().thingsToBuild().get(0));
+    }
+
+    @OPERATION
+    void haveItem(String item, OpFeedbackParam<Boolean> x) {
+        x.set(getEntity().getInventory().getItemCount(ItemArtifact.getItem(item)) > 0);
+    }
+
+    @OPERATION
+    void getMissingItemToBuildItem(String item, OpFeedbackParam<String> itemToRetrive, OpFeedbackParam<Integer> quantity) {
+        Item mainItem = ItemArtifact.getItem(item);
+        Set<Item> parts = mainItem.getRequiredItems();
+        for (Item i : parts) {
+            if (this.getEntity().getInventory().getItemCount(i) == 0) {
+                itemToRetrive.set(i.getName());
+                quantity.set(1);
+                return;
+            }
+        }
+        itemToRetrive.set("Nothings missing");
+        quantity.set(-1);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
     }
@@ -555,4 +616,8 @@ public class AgentArtifact extends Artifact {
 	public void setToGather() {
 		getObsProperty("gather").updateValue(true);
 	}
+
+    public void setToBuilder() {
+        getObsProperty("builder").updateValue(true);
+    }
 }
