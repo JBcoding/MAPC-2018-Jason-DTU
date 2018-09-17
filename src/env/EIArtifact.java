@@ -76,7 +76,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
         String agentName = getOpUserName();
         String id = agentName.substring(5);
         String connection = "connection" + team + id;
-        String entity = /*"agent" + */team + id;
+        String entity = "agent" + team + id;
 
         logger.fine("register " + agentName + " on " + connection);
 

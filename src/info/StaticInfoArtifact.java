@@ -194,7 +194,7 @@ public class StaticInfoArtifact extends Artifact {
 		Object[] args = Translator.perceptToObject(percept);
 
 		String team = (String) args[1];
-		String name = ((String) args[0]).replaceAll(team, "");
+		String name = ((String) args[0]);//.replaceAll(team, "");
 		double lon 	= (double) args[2];
 		double lat 	= (double) args[3];
 		String role = (String) args[4];
