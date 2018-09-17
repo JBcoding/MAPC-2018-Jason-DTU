@@ -52,14 +52,12 @@ public class CBuildTeam {
     }
 
     public String thingToBuild(String agentName) {
-        // TODO: REMOVE THIS IS ONLY A TEST
+        // If we have nothing to build, build op some level 1 stuff
         if (toBuild.size() == 0) {
             build("item9");
             System.out.println("HEREEER________ " + toBuild);
         }
 
-        // Normal code from here
-        // TODO: make sure toBuild never is empty
         if (!thingsBeingBuild.containsKey(agentName)) {
             thingsBeingBuild.put(agentName, toBuild.get(0));
             toBuild.remove(0);
