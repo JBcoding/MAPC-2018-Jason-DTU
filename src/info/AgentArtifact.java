@@ -90,8 +90,6 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("scout", false);
         defineObsProperty("gather", false);
         defineObsProperty("builder", false);
-		defineObsProperty("build", false);
-		defineObsProperty("destroy", false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -566,18 +564,24 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
+    void isTruck(OpFeedbackParam<Boolean> v) {
+        v.set(this.getEntity().getRole().getName().equals("truck"));
+    }
+
+    @OPERATION
     void getMyName(OpFeedbackParam<String> v) {
         v.set(this.agentName);
     }
 
     @OPERATION
     void somethingToBuild(OpFeedbackParam<Boolean> x) {
-        x.set(StaticInfoArtifact.getBuildTeam().thingsToBuild().size() != 0);
+	    StaticInfoArtifact.getBuildTeam().iAmDone(agentName);
+        x.set(StaticInfoArtifact.getBuildTeam().thingToBuild(agentName) != null);
     }
 
     @OPERATION
     void getItemToBuild(OpFeedbackParam<String> item) {
-        item.set(StaticInfoArtifact.getBuildTeam().thingsToBuild().get(0));
+        item.set(StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName));
     }
 
     @OPERATION
@@ -599,6 +603,26 @@ public class AgentArtifact extends Artifact {
         itemToRetrive.set("Nothings missing");
         quantity.set(-1);
     }
+
+    @OPERATION
+    void requestHelp() {
+        StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
@@ -730,6 +754,10 @@ public class AgentArtifact extends Artifact {
 	{
 		
 	}
+
+    public void setToScout() {
+        getObsProperty("scout").updateValue(true);
+    }
 
 	public void setToGather() {
 		getObsProperty("gather").updateValue(true);

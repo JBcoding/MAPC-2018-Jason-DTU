@@ -404,4 +404,21 @@ public class ItemArtifact extends Artifact {
         }
         return baseItems;
     }
+
+    public static Set<Item> getLevel1Items() {
+        Set<Item> level0Items = getLevel0Items();
+        Set<Item> level1Items = new HashSet<>();
+        main: for (Item item : getAllItems()) {
+            if (level0Items.contains(item)) {
+                continue;
+            }
+            for (Item part : item.getRequiredItems()) {
+                if (!level0Items.contains(part)) {
+                    continue main;
+                }
+            }
+            level1Items.add(item);
+        }
+        return level1Items;
+    }
 }
