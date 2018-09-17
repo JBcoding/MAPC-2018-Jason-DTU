@@ -1,6 +1,8 @@
 package data;
 
 import info.AgentArtifact;
+import info.ItemArtifact;
+import massim.scenario.city.data.Item;
 
 import java.util.*;
 
@@ -10,22 +12,38 @@ public class CBuildTeam {
 
     private List<String> toBuild;
 
+    private Map<String, String> thingsBeingBuild;
+
+    private Map<String, Integer> missingAgents = new HashMap<>();
+
     public CBuildTeam() {
         agents = new HashSet<>();
         toBuild = new ArrayList<>();
+        thingsBeingBuild = new HashMap<>();
 
-        // TODO: REMOVE THIS IS ONLY A TEST
-        build("item5");
+        missingAgents = new HashMap<>();
+        missingAgents.put("drone", 1);
+        missingAgents.put("motorcycle", 1);
+        missingAgents.put("car", 1);
+        missingAgents.put("truck", 3);
     }
 
     public void addAgent(String agentName) {
         if (AgentArtifact.getEntity(agentName).getRole().getName().equals("truck")) {
             truckName = agentName;
         }
+        String agentRole = AgentArtifact.getEntity(agentName).getRole().getName();
+        missingAgents.replace(agentRole, missingAgents.get(agentRole) - 1);
         agents.add(agentName);
     }
 
     public void build(String itemName) {
+        Item item = ItemArtifact.getItem(itemName);
+        for (Item part : item.getRequiredItems()) {
+            if (part.needsAssembly()) {
+                build(part.getName());
+            }
+        }
         toBuild.add(itemName);
     }
 
@@ -33,7 +51,31 @@ public class CBuildTeam {
         return truckName;
     }
 
-    public List<String> thingsToBuild() {
-        return toBuild;
+    public String thingToBuild(String agentName) {
+        // TODO: REMOVE THIS IS ONLY A TEST
+        if (toBuild.size() == 0) {
+            build("item9");
+            System.out.println("HEREEER________ " + toBuild);
+        }
+
+        // Normal code from here
+        // TODO: make sure toBuild never is empty
+        if (!thingsBeingBuild.containsKey(agentName)) {
+            thingsBeingBuild.put(agentName, toBuild.get(0));
+            toBuild.remove(0);
+        }
+        return thingsBeingBuild.get(agentName);
+    }
+
+    public void iAmDone(String agentName) {
+        thingsBeingBuild.remove(agentName);
+    }
+
+    public boolean needThis(String roleName) {
+        return missingAgents.get(roleName) > 0;
+    }
+
+    public void requestHelp(String agentName) {
+        truckName = agentName;
     }
 }

@@ -1,12 +1,10 @@
 package info;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import cartago.Artifact;
-import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import data.CCityMap;
@@ -22,7 +20,6 @@ import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
-import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Well;
 
 public class AgentArtifact extends Artifact {
@@ -549,18 +546,19 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void getMyName(OpFeedbackParam<String> v) {
-        v.set(this.agentName);
+    void isTruck(OpFeedbackParam<Boolean> v) {
+        v.set(this.getEntity().getRole().getName().equals("truck"));
     }
 
     @OPERATION
     void somethingToBuild(OpFeedbackParam<Boolean> x) {
-        x.set(StaticInfoArtifact.getBuildTeam().thingsToBuild().size() != 0);
+	    StaticInfoArtifact.getBuildTeam().iAmDone(agentName);
+        x.set(StaticInfoArtifact.getBuildTeam().thingToBuild(agentName) != null);
     }
 
     @OPERATION
     void getItemToBuild(OpFeedbackParam<String> item) {
-        item.set(StaticInfoArtifact.getBuildTeam().thingsToBuild().get(0));
+        item.set(StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName));
     }
 
     @OPERATION
@@ -582,6 +580,12 @@ public class AgentArtifact extends Artifact {
         itemToRetrive.set("Nothings missing");
         quantity.set(-1);
     }
+
+    @OPERATION
+    void requestHelp() {
+        StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
+    }
+
 
 
 

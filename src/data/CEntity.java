@@ -328,10 +328,9 @@ public class CEntity {
 		return this.lastActionParam;
 	}
 
-	private static Set<String> buldingTeam = new HashSet<>();
     public void addAgentArtifact(AgentArtifact agentArtifact) {
         this.agentArtifact = agentArtifact;
-        if (buldingTeam.add(this.role.getName())) {
+        if (StaticInfoArtifact.getBuildTeam().needThis(this.role.getName())) {
             this.agentArtifact.setToBuilder();
             StaticInfoArtifact.getBuildTeam().addAgent(this.agentArtifact.agentName);
         } else if (this.role.getName().equals("drone")) {
