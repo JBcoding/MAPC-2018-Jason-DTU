@@ -210,7 +210,9 @@
 +!assembleItem(Item) <-
     haveItem(Item, X);
     if (not X) {
+        requestHelp;
         !doAction(assemble(Item));
+        !assembleItem(Item);
     }.
 
 +!getItemsToBuildItem(Item) <-
@@ -223,8 +225,8 @@
 +!builderRole: builder(X) & X <-
     getMainTruckName(T);
     getWorkShop(W);
-    getMyName(N);
-    if (not N == T) {
+    isTruck(N);
+    if (not N) {
         !getToFacility(W);
         !doAction(assist_assemble(T));
     } else {

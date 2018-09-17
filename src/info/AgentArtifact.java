@@ -755,10 +755,6 @@ public class AgentArtifact extends Artifact {
 		
 	}
 
-    public void setToScout() {
-        getObsProperty("scout").updateValue(true);
-    }
-
 	public void setToGather() {
 		getObsProperty("gather").updateValue(true);
 	}
