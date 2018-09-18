@@ -7,16 +7,12 @@ import cartago.LINK;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-public class CNPArtifact extends Artifact {
+public class 	CNPArtifact extends Artifact {
 	
 	private Bid 		bestBid;
 	private boolean 	isOpen;
 	private String 		winner;
-	
-	/**
-	 * 
-	 * @param duration
-	 */
+
 	void init()
 	{		
 		execInternalOp("awaitBids", 500);
@@ -41,7 +37,6 @@ public class CNPArtifact extends Artifact {
 	 * as a feedback parameter. If the bid is better than previous
 	 * bids, the bestBid is updated.
 	 * @param bid - An agent's bid.
-	 * @param id - ID of the bid.
 	 */
 	@OPERATION
 	void bid(int bid)
@@ -68,7 +63,6 @@ public class CNPArtifact extends Artifact {
 	/**
 	 * Sets the ID of the best bid as a feedback parameter when the
 	 * bidding is closed.
-	 * @param id - ID of the best bid.
 	 */
 	@OPERATION
 	void winner(OpFeedbackParam<Boolean> won)
