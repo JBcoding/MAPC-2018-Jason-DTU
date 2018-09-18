@@ -25,6 +25,7 @@ import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Well;
+import massim.util.RNG;
 
 public class AgentArtifact extends Artifact {
 	
@@ -89,7 +90,10 @@ public class AgentArtifact extends Artifact {
 
 		defineObsProperty("scout", false);
         defineObsProperty("gather", false);
-        defineObsProperty("builder", false);
+		defineObsProperty("builder", false);
+
+		defineObsProperty("build", false);
+		defineObsProperty("destroy", false);
 
         defineObsProperty("currentBattery", 	250);
         defineObsProperty("currentCapacity", 	0);
@@ -159,6 +163,24 @@ public class AgentArtifact extends Artifact {
 	}
 
 	@OPERATION
+	void getRandomPeripheralLocation(OpFeedbackParam<Double> Lat, OpFeedbackParam<Double> Lon) {
+		CCityMap cityMap = StaticInfoArtifact.getMap();
+		double lat, lon;
+
+		if (RNG.nextInt() % 2 == 0) {
+			lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
+			lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
+		} else {
+			lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
+			lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
+		}
+
+		Location l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
+		Lat.set(l.getLat());
+		Lon.set(l.getLon());
+	}
+
+	@OPERATION
 	void getAgentInventory(OpFeedbackParam<Object> ret)
 	{
 		ret.set(getAgentInventory(getOpUserName()));
@@ -220,7 +242,14 @@ public class AgentArtifact extends Artifact {
 		if (positionChange) {
 		    StaticInfoArtifact.getExploredMap().updateExplored(this.getEntity().getLocation(), this.getEntity().getRole().getBaseVision(), this.agentName);
         }
-		
+
+        // If agent is where a well should be, but it no longer is.
+		if (FacilityArtifact.getFacilities("well").stream().filter(w -> w.getLocation().inRange(getEntity().getLocation())).count() > 0 &&
+				percepts.stream().filter(p ->
+					p.getName().equals(FacilityArtifact.WELL) && new Location((double)Translator.perceptToObject(p)[2], (double)Translator.perceptToObject(p)[1]).inRange(getEntity().getLocation())
+				).count() == 0) {
+			markWellDestroyed();
+		}
 
 		if (load != this.getEntity().getCurrentLoad())
 		{
@@ -609,20 +638,18 @@ public class AgentArtifact extends Artifact {
         StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
     }
 
+    @OPERATION
+	void canSee(double lat, double lon, OpFeedbackParam<Boolean> canSee) {
+		canSee.set(StaticInfoArtifact.getMap().isVisible(getEntity().getLocation(), new Location(lon, lat), this.getEntity().getCurrentVision()));
+	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	@OPERATION
+	void markWellDestroyed() {
+		System.out.println("Marking well destroyed");
+		FacilityArtifact.destroyWell(getEntity().getLocation());
+		getObsProperty("inFacility").updateValue("none");
+		getObsProperty("inOwnWell").updateValue(false);
+	}
 
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
@@ -631,13 +658,17 @@ public class AgentArtifact extends Artifact {
     }
 
 	public static void setBuilders() {
+		int wellPrice;
 		try {
-			int wellPrice = StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getCost();
+			wellPrice = StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getCost();
+		} catch (NullPointerException e) {
+			return;
+		}
 
 			artifacts.values().stream()
 					.filter(a ->
 							a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
-							a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("destroy").getValue()))
+							a.getEntity().getRole().getName().equals("truck") &&  !((boolean)a.getObsProperty("destroy").getValue()))
 					.sorted(
 							Comparator.comparingDouble(a ->
 									FacilityArtifact.euclideanDistance(
@@ -648,31 +679,21 @@ public class AgentArtifact extends Artifact {
 					)
 					.limit(DynamicInfoArtifact.getMoney() / wellPrice)
 					.forEach(AgentArtifact::setToBuild);
-		} catch (NullPointerException e) {
-			//e.printStackTrace();
-			// Do nothing
-		}
 	}
 
 	public static void setInitialDestroyers() {
-		try {
-			artifacts.values().stream()
-					.filter(a ->
-							a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
-							a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("build").getValue()))
-					.limit(MAX_DESTROYERS)
-					.forEach(AgentArtifact::setToDestroy);
-		} catch (NullPointerException e) {
-			//e.printStackTrace();
-			// Do nothing
-		}
+		artifacts.values().stream()
+				.filter(a ->
+						a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
+						a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("build").getValue()))
+				.limit(MAX_DESTROYERS)
+				.forEach(AgentArtifact::setToDestroy);
 	}
 
     public void setToBuild() {
 		try {
 			setToBuild(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getName(), new OpFeedbackParam<>());
 		} catch (NullPointerException e) {
-			System.out.println(e.getMessage());
 			// Do nothing
 		}
 	}
@@ -688,13 +709,13 @@ public class AgentArtifact extends Artifact {
 					wellBuilders.add(this.agentName);
 				}
 			} catch (NoSuchElementException e) {
-				System.out.println(e);
+				//e.printStackTrace();
 			}
 			buildSemaphore.release();
 		} catch (InterruptedException e) {
 			logger.warning("Thread interrupted in setToBuild");
 		}
-		canBuild.set(wellBuilders.contains(this.agentName)); // Only set false if not already a builder
+		canBuild.set((boolean)getObsProperty("build").getValue()); // Only set false if not already a builder
     }
 
     @OPERATION

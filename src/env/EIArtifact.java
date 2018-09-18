@@ -34,11 +34,11 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 
 	private static final boolean LOG_TO_FILE = false;
     public static final boolean LOGGING_ENABLED = false;
-    
+
     private static EnvironmentInterfaceStandard ei;
-    private static final String configFile = "conf/eismassimconfig.json";
+    //private static final String configFile = "conf/eismassimconfig.json";
 	//private static final String configFile = "conf/eismassimconfig_connection_test.json";
-	//private static final String configFile = "conf/eismassimconfig_team_B.json";
+	private static final String configFile = "conf/eismassimconfig_team_B.json";
 
     private static Map<String, String> connections 	= new HashMap<>();
     private static Map<String, String> entities		= new HashMap<>();
@@ -130,11 +130,11 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 				String name = PrologVisitor.staticVisit(action.getParameters().get(0));
 				
 				LinkedList<Parameter> params = new LinkedList<>();
-				params.add(new Identifier(EIArtifact.getAgentName(name)));
+				params.add(new Identifier(EIArtifact.getAgentName(name).replace("agent", "")));
 				
 				action.setParameters(params);
 			}
-			
+
 			ei.performAction(agentName, action);
 		} 
 		catch (Throwable e) 

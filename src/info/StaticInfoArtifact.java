@@ -21,6 +21,7 @@ import massim.protocol.scenario.city.data.RoleData;
 import massim.scenario.city.data.*;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.WellType;
+import massim.util.RNG;
 
 public class StaticInfoArtifact extends Artifact {
 	
