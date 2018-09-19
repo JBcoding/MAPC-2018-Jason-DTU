@@ -1,7 +1,5 @@
 package data;
 
-import cartago.OPERATION;
-import cartago.OpFeedbackParam;
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.routing.util.EdgeFilter;
@@ -10,7 +8,6 @@ import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
 import com.graphhopper.util.shapes.GHPoint3D;
 import info.FacilityArtifact;
-import info.StaticInfoArtifact;
 import massim.protocol.scenario.city.util.LocationUtil;
 import massim.util.Log;
 import massim.util.RNG;
@@ -19,6 +16,7 @@ import massim.scenario.city.data.Route;
 import massim.scenario.city.util.GraphHopperManager;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -127,7 +125,7 @@ public class CCityMap implements Serializable {
 	private boolean existsRoute(Location from, Location to) 
 	{
 		GHResponse rsp = queryGH(from, to);
-		rsp.getErrors().forEach(error -> System.out.println(error.getMessage()));
+		rsp.getErrors().forEach(error -> System.out.println("Error from rsp: " + error.getMessage()));
 		return !rsp.hasErrors() && rsp.getBest().getPoints().size() > 0;
 	}
 
@@ -303,17 +301,6 @@ public class CCityMap implements Serializable {
                 mapName, minLat, minLon, maxLat, maxLon, center.getLat(), center.getLon());
 	}
 
-	@OPERATION
-	void getRandomPeripheralLocation(OpFeedbackParam<Double> Lat, OpFeedbackParam<Double> Lon) {
-		if (RNG.nextInt() % 2 == 0) {
-			Lat.set(RNG.nextInt() % 2 == 0 ? minLat : maxLat);
-			Lon.set(minLon + (maxLon - minLon) * RNG.nextDouble());
-		} else {
-			Lat.set(minLat + (maxLat - minLat) * RNG.nextDouble());
-			Lon.set(RNG.nextInt() % 2 == 0 ? minLon : maxLon);
-		}
-	}
-
 	public Location getClosestPeriphery(Location l, double epsilon) {
 		double newLat;
 		double newLon;
@@ -342,8 +329,13 @@ public class CCityMap implements Serializable {
 		if (!existsRoute(l, loc)) {
 		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
 		    loc = FacilityArtifact.getFacility(facility).getLocation();
+		    Set<String> roadTypes = new HashSet<String>();
+		    roadTypes.add("road");
+		    int iterations = 10;
+			for (int i = 0; i < iterations && !existsRoute(l, loc); i++) {
+				loc = getRandomLocation(roadTypes, iterations);
+			}
         }
-
 		//Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
 		//Location loc = getNearestRoad(latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat()));
 

@@ -191,10 +191,24 @@ public class FacilityArtifact extends Artifact {
 			lat.set(w.getLocation().getLat());
 			lon.set(w.getLocation().getLon());
 		} catch (NoSuchElementException | NullPointerException e) {
-			// TODO: What to do if there is no known enemy well?
 			name.set("none");
 			//lat.set(loc.getLat());
 			//lon.set(loc.getLon());
+		}
+	}
+
+	public static void destroyWell(Location loc) {
+		try {
+			System.out.println("Known wells: ");
+			wells.keySet().forEach(name -> System.out.println(name));
+			Well well = wells.values().stream().filter(w -> w.getLocation().inRange(loc)).findFirst().get();
+			wells.remove(well.getName());
+			System.out.println("REMOVED WELL: " + well.getName());
+			System.out.println("Known wells: ");
+			wells.keySet().forEach(name -> System.out.println(name));
+		} catch (NoSuchElementException | NullPointerException e) {
+			// Already destroyed
+			System.out.println("Already destroyed well");
 		}
 	}
 

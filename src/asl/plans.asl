@@ -54,23 +54,23 @@
     setToBuild(WellType, CanBuild);
     if (not (WellType == "none") & CanBuild) {
         closestPeriphery(Lat, Lon);
-        !getToPeripheryLocation(Lat, Lon);
+        !getToPeripheryLocationStart(Lat, Lon);
         !buildWell;
     } else {
         .print("Not enough massium to build any well (2)");
     }.
 
-+!dismantleOwnWell : inOwnWell <- !doAction(dismantle); !dismantleOwnWell.
+//+!dismantleOwnWell : inOwnWell <- !doAction(dismantle); !dismantleOwnWell.
 
-+!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell.
++!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell; markWellDestroyed.
 +!dismantleEnemyWell
     <-
     getEnemyWell(F, Lat, Lon);
     if (not (F == "none")) {
         !getToLocation(F, Lat, Lon);
     } else {
-        getRandomPeripheralLocation(Lat, Lon);
-        getToPeripheryLocation(Lat, Lon);
+        getRandomPeripheralLocation(PerLat, PerLon);
+        !getToPeripheryLocationStart(PerLat, PerLon);
     }
     !dismantleEnemyWell.
 
@@ -158,14 +158,16 @@
 +!getToPeripheryLocationStart(Lat, Lon) :
     destroy
     <-
-    getEnemyWell(F, Lat, Lon);
+    getEnemyWell(F, _, _);
     if (F == "none") {
-        !getToPeripheryLocation(Lat, Lon);
+        canSee(Lat, Lon, CanSee);
+        !getToPeripheryLocation(Lat, Lon, CanSee);
     }.
-+!getToPeripheryLocation(Lat, Lon) : atPeriphery.
-+!getToPeripheryLocation(Lat, Lon) : not canMove <- !doAction(recharge); !getToPeripheryLocationStart(Lat, Lon).
-+!getToPeripheryLocation(Lat, Lon) : not enoughCharge <- !charge; !getToPeripheryLocationStart(Lat, Lon).
-+!getToPeripheryLocation(Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocationStart(Lat, Lon).
++!getToPeripheryLocationStart(Lat, Lon) <- !getToPeripheryLocation(Lat, Lon, true).
++!getToPeripheryLocation(Lat, Lon, CanSee) : atPeriphery & CanSee.
++!getToPeripheryLocation(Lat, Lon, CanSee) : not canMove <- !doAction(recharge); !getToPeripheryLocationStart(Lat, Lon).
++!getToPeripheryLocation(Lat, Lon, CanSee) : not enoughCharge <- !charge; !getToPeripheryLocationStart(Lat, Lon).
++!getToPeripheryLocation(Lat, Lon, CanSee) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocationStart(Lat, Lon).
 
 +!charge : charge(X) & currentBattery(X).
 +!charge : inChargingStation <-
