@@ -108,6 +108,7 @@
 
 +!deliverItems(TaskId, Facility) <-
 	!getToFacility(Facility);
+	.print("At facility. Delivering.");
  	!doAction(deliver_job(TaskId)).
 
 +!assembleItems([]).

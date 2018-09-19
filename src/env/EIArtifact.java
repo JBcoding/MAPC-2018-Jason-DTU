@@ -130,7 +130,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 				String name = PrologVisitor.staticVisit(action.getParameters().get(0));
 				
 				LinkedList<Parameter> params = new LinkedList<>();
-				params.add(new Identifier(EIArtifact.getAgentName(name)));
+				params.add(new Identifier(EIArtifact.getAgentName(name).replace("agent", "")));
 				
 				action.setParameters(params);
 			}

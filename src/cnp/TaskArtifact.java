@@ -23,6 +23,8 @@ public class TaskArtifact extends Artifact {
 
 	private static TaskArtifact instance;
 	private static int 			cnpId;
+
+	private boolean haveWaited = false;
 	
 	void init()
 	{
@@ -45,7 +47,7 @@ public class TaskArtifact extends Artifact {
 				
 		instance.execInternalOp("announceShops", shopNames);
 	}
-	
+
 	@OPERATION
 	void announceJobOp(String taskId, String type)
 	{
@@ -79,7 +81,12 @@ public class TaskArtifact extends Artifact {
 	void announceAssemble(Object items, String workshop, String taskId, String deliveryLocation, String type)
 	{
 	    // TODO: be more eager than this, but causes some problems right now
-	    await("doneScouting");
+		if (!haveWaited) {
+			System.out.println("Waiting");
+			await("doneScouting");
+			haveWaited = true;
+		}
+
 		instance.announce("assembleRequest", items, workshop, taskId, deliveryLocation, type);
 	}
 

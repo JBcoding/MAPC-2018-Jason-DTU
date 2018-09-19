@@ -12,18 +12,19 @@ free.
 !register.
 !focusArtifacts.
 
-// +step(0) <- !scoutt.
-
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
-//+!loop : scout(X) & X <- .print("Scouting"); -free; !scoutt; +free; !loop.
-//+!loop : build(X) & X <- .print("Building well"); -free; !buildWell; +free; !loop.
-//+!loop : destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
-//+!loop : gather(X) & X <- -free; !gatherRole; +free; !loop.
-//+!loop : builder(X) & X <- -free; !builderRole; +free; !loop.
-+!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
++!loop : free & scout(X) & X <- .print("Scouting"); -free; !scoutt; +free; !loop.
+//+!loop : free & build(X) & X <- .print("Building well"); -free; !buildWell; +free; !loop.
+//+!loop : free & destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
+//+!loop : free & gather(X) & X <- -free; !gatherRole; +free; !loop.
+//+!loop : free & builder(X) & X <- -free; !builderRole; +free; !loop.
+//+!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
 //+!loop <- !startLoop.
+
+// Andreas uses this one
++!loop : scout(X) & not X.
 	
 // Percepts	
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).

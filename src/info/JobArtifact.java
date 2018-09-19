@@ -98,6 +98,7 @@ public class JobArtifact extends Artifact {
 	 */
 	public static int estimateSteps(Job job)
 	{
+		// TODO
 		return 1;
 	}
 	

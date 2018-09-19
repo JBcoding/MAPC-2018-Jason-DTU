@@ -170,6 +170,12 @@ public class ItemArtifact extends Artifact {
                 .sum();
     }
 
+    public static int getVolume(Set<Item> items) {
+        return items.stream()
+                .mapToInt(Item::getVolume)
+                .sum();
+    }
+
     /**
      * Format: [map("item1", 10),...]
      *
@@ -215,33 +221,45 @@ public class ItemArtifact extends Artifact {
     }
 
 	@OPERATION
-	void getItemsToCarry(Object[] items, int capacity, OpFeedbackParam<Object> retRetrieve, OpFeedbackParam<Object> retRest)
-	{
-		Map<String, Integer> retrieve 	= new HashMap<>();
-		Map<String, Integer> rest		= new HashMap<>();
+	void getItemsToCarry(Object[] items, int capacity, OpFeedbackParam<Object> retAssemble, OpFeedbackParam<Object> retRest) {
+        Map<String, Integer> assemble = new HashMap<>();
+        Map<String, Integer> rest = new HashMap<>();
 
-		for (Entry<Item, Integer> entry : Translator.convertASObjectToMap(items).entrySet()) {
-			Item 	item 	= entry.getKey();
-			int 	amount 	= entry.getValue();
-			int		volume	= capacity + 1;
+        for (Entry<Item, Integer> entry : Translator.convertASObjectToMap(items).entrySet()) {
+            Item item = entry.getKey();
+            int amount = entry.getValue();
+            int volume;
 
-			if (item.getRequiredBaseItems().isEmpty())	volume = item.getVolume() * amount;
-			else										volume = ItemArtifact.getVolume(item.getRequiredBaseItems()) * amount;
+            if (item.needsAssembly()) {
+                // We need to have space to hold the parts as we assemble those ourselves.
+                volume = getVolume(item.getRequiredItems());
+            } else {
+                volume = item.getVolume();
+            }
 
-			if (volume <= capacity)
-			{
-				capacity -= volume;
-				retrieve.put(item.getName(), amount);
-			}
-			else
-			{
-				rest.put(item.getName(), amount);
-			}
-		}
+            int retAmount = 0;
 
-		retRetrieve.set(retrieve);
-		retRest.set(rest);
-	}
+            for (int i = 0; i < amount; i++) {
+                if (volume <= capacity) {
+                    retAmount++;
+                    capacity -= volume;
+                }
+            }
+
+            if (retAmount > 0) {
+                assemble.put(item.getName(), retAmount);
+            }
+
+            int restAmount = amount - retAmount;
+
+            if (restAmount > 0) {
+                rest.put(item.getName(), restAmount);
+            }
+        }
+
+        retAssemble.set(assemble);
+        retRest.set(rest);
+    }
 
 	@OPERATION
     void getRequiredRoles(Object[] items, OpFeedbackParam<Object[]> ret) {
