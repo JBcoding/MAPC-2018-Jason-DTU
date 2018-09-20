@@ -63,7 +63,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			if (configFile.equals("")) {
 				BufferedReader br = new BufferedReader(new FileReader(configFilePath));
 				configFile = br.readLine();
-				this.team = br.readLine().trim();
+				team = br.readLine().trim();
 				br.close();
 			}
 
