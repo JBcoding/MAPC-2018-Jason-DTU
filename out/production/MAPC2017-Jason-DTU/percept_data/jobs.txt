@@ -1,2 +1,0 @@
-[EIArtifact] job(job4,storage5,117,5,205,[required(item13,3)])
-[EIArtifact] auction(job1,storage0,600,5,205,1000,0,5,[required(item10,3)])

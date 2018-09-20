@@ -13,7 +13,7 @@
 +task(TaskId, Type) : Type \== "auction" <-
 	getJob(TaskId, Storage, Items);
 	.print("New task: ", TaskId, " - ", Items, " - Type: ", Type);
-	getClosestWorkshopToStorage(Storage, Workshop);
+	getClosestWorkshopToStorage(Storage, Workshop); // TODO: Do we need this?
     // TODO: Consider waiting with announcing until we are done scouting
 	if (Type = "mission") {
 	    !announceAssemble(Items, Workshop, TaskId, Storage, "mission");

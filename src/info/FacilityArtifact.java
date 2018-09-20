@@ -101,6 +101,10 @@ public class FacilityArtifact extends Artifact {
 	    return new HashMap<>(resourceNodes);
     }
 
+	static Map<String, Storage> getStorages() {
+		return new HashMap<>(storages);
+	}
+
 
 	@OPERATION
 	void getClosestShop(Object[] shopNames, OpFeedbackParam<String> ret)

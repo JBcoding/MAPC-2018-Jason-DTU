@@ -21,10 +21,7 @@ free.
 +!loop : free & gather(X) & X <- .print("Gathering items"); -free; !gatherRole; +free; !loop.
 +!loop : free & builder(X) & X <- .print("Creating items"); -free; !builderRole; +free; !loop.
 +!loop : not fullCharge <- .print("Nothing to do, charging"); !charge; !loop.
-+!loop <- doAction("continue").
-
-// Andreas uses this one
-+!loop : scout(X) & not X.
++!loop <- !doAction(continue).
 
 // Percepts
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).

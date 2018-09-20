@@ -114,8 +114,6 @@ public class ItemArtifact extends Artifact {
 
     @OPERATION
     void getResourceList(Object[] itemsMap, OpFeedbackParam<Object> ret) {
-        // TODO: I put this in announceAssemble instead...
-        // await("doneScouting");
         ret.set(getResourceList(Translator.convertASObjectToMap(itemsMap)).entrySet().stream()
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
     }
@@ -133,10 +131,6 @@ public class ItemArtifact extends Artifact {
         for (Entry<Item, Integer> entry : items.entrySet()) {
             Item item = entry.getKey();
             int amount = entry.getValue();
-
-            if (item.needsAssembly()) {
-                throw new IllegalArgumentException("Received non-base items");
-            }
 
             ArrayList<ResourceNode> candidates = nodes.values().stream()
                     .filter(x -> x.getResource().equals(item))
