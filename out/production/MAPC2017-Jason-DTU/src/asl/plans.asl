@@ -45,6 +45,7 @@
         !doAction(build(WellType));
         !buildWell;
     } else {
+        stopBuilding;
         .print("Not enough massium to build any well (1)");
     }.
 +!buildWell
@@ -57,6 +58,7 @@
         !getToPeripheryLocationStart(Lat, Lon);
         !buildWell;
     } else {
+        stopBuilding;
         .print("Not enough massium to build any well (2)");
     }.
 
@@ -168,7 +170,7 @@
 +!getToPeripheryLocation(Lat, Lon, CanSee) : not enoughCharge <- !charge; !getToPeripheryLocationStart(Lat, Lon).
 +!getToPeripheryLocation(Lat, Lon, CanSee) <- !doAction(goto(Lat, Lon)); !getToPeripheryLocationStart(Lat, Lon).
 
-+!charge : charge(X) & currentBattery(X).
++!charge : fullCharge.
 +!charge : inChargingStation <-
     !doAction(charge);
     !charge.

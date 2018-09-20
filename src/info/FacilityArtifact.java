@@ -1,5 +1,6 @@
 package info;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -199,13 +200,8 @@ public class FacilityArtifact extends Artifact {
 
 	public static void destroyWell(Location loc) {
 		try {
-			System.out.println("Known wells: ");
-			wells.keySet().forEach(name -> System.out.println(name));
 			Well well = wells.values().stream().filter(w -> w.getLocation().inRange(loc)).findFirst().get();
 			wells.remove(well.getName());
-			System.out.println("REMOVED WELL: " + well.getName());
-			System.out.println("Known wells: ");
-			wells.keySet().forEach(name -> System.out.println(name));
 		} catch (NoSuchElementException | NullPointerException e) {
 			// Already destroyed
 			System.out.println("Already destroyed well");
@@ -400,8 +396,12 @@ public class FacilityArtifact extends Artifact {
 	{
 		if (facilityName.equals("none")) return null;
 
-		return allFacilities.stream().filter(facilities -> facilities.containsKey(facilityName))
-				.findFirst().get().get(facilityName);
+		try {
+			return allFacilities.stream().filter(facilities -> facilities.containsKey(facilityName))
+					.findFirst().get().get(facilityName);
+		} catch (NoSuchElementException e) {
+			return null;
+		}
 	}
 	
 	private static Facility getShop(String shopName)

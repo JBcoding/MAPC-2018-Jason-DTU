@@ -16,17 +16,17 @@ free.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 +!loop : free & scout(X) & X <- .print("Scouting"); -free; !scoutt; +free; !loop.
-//+!loop : free & build(X) & X <- .print("Building well"); -free; !buildWell; +free; !loop.
-//+!loop : free & destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
-//+!loop : free & gather(X) & X <- -free; !gatherRole; +free; !loop.
-//+!loop : free & builder(X) & X <- -free; !builderRole; +free; !loop.
-//+!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
-//+!loop <- !startLoop.
++!loop : build <- .print("Building well"); !buildWell; !loop.
++!loop : free & destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
++!loop : free & gather(X) & X <- .print("Gathering items"); -free; !gatherRole; +free; !loop.
++!loop : free & builder(X) & X <- .print("Creating items"); -free; !builderRole; +free; !loop.
++!loop : not fullCharge <- .print("Nothing to do, charging"); !charge; !loop.
++!loop <- doAction("continue").
 
 // Andreas uses this one
 +!loop : scout(X) & not X.
 
-// Percepts	
+// Percepts
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").

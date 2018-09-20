@@ -645,7 +645,6 @@ public class AgentArtifact extends Artifact {
 
 	@OPERATION
 	void markWellDestroyed() {
-		System.out.println("Marking well destroyed");
 		FacilityArtifact.destroyWell(getEntity().getLocation());
 		getObsProperty("inFacility").updateValue("none");
 		getObsProperty("inOwnWell").updateValue(false);
@@ -662,23 +661,28 @@ public class AgentArtifact extends Artifact {
 		try {
 			wellPrice = StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getCost();
 		} catch (NullPointerException e) {
+			System.out.println("No best well type. Not enough massium");
 			return;
 		}
 
-			artifacts.values().stream()
-					.filter(a ->
-							a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
-							a.getEntity().getRole().getName().equals("truck") &&  !((boolean)a.getObsProperty("destroy").getValue()))
-					.sorted(
-							Comparator.comparingDouble(a ->
-									FacilityArtifact.euclideanDistance(
-											a.getEntity().getLocation(),
-											StaticInfoArtifact.getMap().getClosestPeriphery(a.getEntity().getLocation(), EPSILON)
-									)
-							)
+		artifacts.values().stream()
+			.filter(a ->
+				a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
+				a.getEntity().getRole().getName().equals("truck") &&
+					!(boolean)a.getObsProperty("destroy").getValue() &&
+					!(boolean)a.getObsProperty("scout").getValue() &&
+					!(boolean)a.getObsProperty("gather").getValue() &&
+					!(boolean)a.getObsProperty("builder").getValue())
+			.sorted(
+				Comparator.comparingDouble(a ->
+					FacilityArtifact.euclideanDistance(
+						a.getEntity().getLocation(),
+						StaticInfoArtifact.getMap().getClosestPeriphery(a.getEntity().getLocation(), EPSILON)
 					)
-					.limit(DynamicInfoArtifact.getMoney() / wellPrice)
-					.forEach(AgentArtifact::setToBuild);
+				)
+			)
+			.limit(DynamicInfoArtifact.getMoney() / wellPrice)
+			.forEach(AgentArtifact::setToBuild);
 	}
 
 	public static void setInitialDestroyers() {
@@ -709,6 +713,8 @@ public class AgentArtifact extends Artifact {
 					wellBuilders.add(this.agentName);
 				}
 			} catch (NoSuchElementException e) {
+				//System.out.println("Could not set to builder. Error: ");
+				//e.printStackTrace();
 				//e.printStackTrace();
 			}
 			buildSemaphore.release();

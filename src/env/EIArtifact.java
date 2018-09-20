@@ -1,6 +1,8 @@
 package env;
 // Environment code for project multiagent_jason
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,9 +38,13 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     public static final boolean LOGGING_ENABLED = false;
 
     private static EnvironmentInterfaceStandard ei;
-    //private static final String configFile = "conf/eismassimconfig.json";
-	//private static final String configFile = "conf/eismassimconfig_connection_test.json";
-	private static final String configFile = "conf/eismassimconfig_team_B.json";
+
+    private static final String configFilePath = "conf/config_file_path.txt";
+
+    private static String configFile = "";
+    //private static String configFile = "conf/eismassimconfig.json";
+	//private static String configFile = "conf/eismassimconfig_connection_test.json";
+	//private static String configFile = "conf/eismassimconfig_team_B.json";
 
     private static Map<String, String> connections 	= new HashMap<>();
     private static Map<String, String> entities		= new HashMap<>();
@@ -55,6 +61,12 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 		
 		try 
 		{
+			if (configFile.equals("")) {
+				BufferedReader br = new BufferedReader(new FileReader(configFilePath));
+				configFile = br.readLine();
+				br.close();
+			}
+
 			ei = new EnvironmentInterface(configFile);
 
 			// Get the team name from EI. Should be a better way
