@@ -2,6 +2,7 @@ package data;
 
 import info.AgentArtifact;
 import info.ItemArtifact;
+import info.StaticInfoArtifact;
 import massim.scenario.city.data.Item;
 
 import java.util.*;
@@ -50,7 +51,7 @@ public class CBuildTeam {
     }
 
     public String getTruckName() {
-        return truckName;
+        return "A27";
     }
 
     public String thingToBuild(String agentName) {
@@ -79,7 +80,12 @@ public class CBuildTeam {
         return missingAgents.get(roleName) > 0;
     }
 
+    private int lastChangeRound = 0;
     public void requestHelp(String agentName) {
+        if (lastChangeRound == StaticInfoArtifact.getSteps()) {
+            return;
+        }
+        lastChangeRound = StaticInfoArtifact.getSteps();
         truckName = agentName;
     }
 }
