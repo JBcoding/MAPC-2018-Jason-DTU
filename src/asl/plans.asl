@@ -217,11 +217,8 @@
     !gatherRole.
 
 +!assembleItemM(Item, Quantity) <-
-    .print("HELLLLLLLLLLLLLLLLLLL____OLLLLLLO");
     haveItem(Item, X, Quantity);
-    .print("HELLLLLLLLLLLLLLLLLLL____OLLLLLLO");
     if (not X) {
-        .print("HELLLLLLLLLLLLLLLLLLL____OLLLLLLO");
         requestHelp;
         !doAction(assemble(Item));
         !assembleItemM(Item, Quantity);

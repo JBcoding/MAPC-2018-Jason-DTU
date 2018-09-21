@@ -8,7 +8,7 @@ public class Runner {
 	public static void main(String[] args) throws JasonException {
 		new Thread(new Runnable() {
 			public void run() {
-				Server.main(new String[] { "-conf", "conf/SampleConfig-CheapWells.json", "--monitor" });
+				Server.main(new String[] { "-conf", "conf/SampleConfig.json", "--monitor" });
 			}
 		}).start();
 

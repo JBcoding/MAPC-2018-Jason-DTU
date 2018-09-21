@@ -630,6 +630,16 @@ public class AgentArtifact extends Artifact {
 		    int volume = i.getRequiredItems().stream().map(Item::getVolume).mapToInt(f -> f).sum();
 		    volume = Math.max(volume, i.getVolume());
             quantity.set(getEntity().getCurrentCapacity() / volume);
+        } else {
+            Item i = ItemArtifact.getItem(itemName);
+            int volume = i.getRequiredItems().stream().map(Item::getVolume).mapToInt(f -> f).sum();
+            volume = Math.max(volume, i.getVolume());
+            int count = getEntity().getCurrentCapacity() / volume;
+            for (Item p : i.getRequiredItems()) {
+                count = Math.min(count, StaticInfoArtifact.getStorage().getItems().get(p.getName()));
+            }
+            count = Math.max(count, 1);
+            quantity.set(count);
         }
         item.set(StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName));
     }

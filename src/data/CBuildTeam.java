@@ -56,13 +56,26 @@ public class CBuildTeam {
 
     public String thingToBuild(String agentName) {
         // If we have nothing to build, build op some level 1 stuff
-        if (toBuild.size() == 0) {
-            Set<Item> level1Set = ItemArtifact.getLevel1Items();
-            Item[] level1s = level1Set.toArray(new Item[level1Set.size()]);
-            Item item = level1s[this.nextIndex % level1s.length];
-            this.nextIndex++;
-            build(item.getName());
-            System.out.println("HEREEER________ " + toBuild);
+        while (toBuild.size() == 0) {
+            List<Item> levelNon0Items = new ArrayList<>();
+            for (Item i : ItemArtifact.getAllItems()) {
+                levelNon0Items.add(i);
+            }
+            for (Item i : ItemArtifact.getLevel0Items()) {
+                levelNon0Items.remove(i);
+            }
+            Item item = levelNon0Items.get(this.nextIndex % levelNon0Items.size());
+            this.nextIndex ++;
+            boolean add = true;
+            for (Item i : item.getRequiredItems()) {
+                if (StaticInfoArtifact.getStorage().getItems().get(i.getName()) == 0) {
+                    add = false;
+                    break;
+                }
+            }
+            if (add) {
+                build(item.getName());
+            }
         }
 
         if (!thingsBeingBuild.containsKey(agentName)) {

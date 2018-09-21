@@ -84,4 +84,8 @@ public class CStorage {
     public String getMainWorkShop() {
         return mainWorkshop.getName();
     }
+
+    public Map<String, Integer> getItems() {
+        return items;
+    }
 }
