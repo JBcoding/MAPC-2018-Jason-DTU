@@ -335,7 +335,7 @@ public class CEntity {
             StaticInfoArtifact.getBuildTeam().addAgent(this.agentArtifact.agentName);
         } else if (this.role.getName().equals("drone")) {
             this.agentArtifact.setToScout();
-        } else if (this.role.getName().equals("car") || this.role.getName().equals("motorcycle")) {
+        } else if (this.role.getName().equals("car") || this.role.getName().equals("motorcycle") || this.role.getName().equals("truck")) {
             this.agentArtifact.setToGather();
         }
     }
