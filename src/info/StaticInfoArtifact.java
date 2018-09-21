@@ -1,12 +1,6 @@
 package info;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -376,9 +370,17 @@ public class StaticInfoArtifact extends Artifact {
 
     public static WellType getBestWellType(int money) {
 		try {
-    	return wellTypes.values().stream().filter(wt -> wt.getCost() <= money).max((wt1, wt2) -> wt1.getEfficiency() - wt2.getEfficiency()).get();
-		} catch (Exception e) {
+    		return wellTypes.values().stream().filter(wt -> wt.getCost() <= money).max((w1, w2) -> new WellComparer().compare(w1, w2)).get();
+		} catch (NoSuchElementException e) {
 			return null;
+		}
+	}
+
+	private static class WellComparer implements Comparator<WellType> {
+
+		@Override
+		public int compare(WellType w1, WellType w2) {
+			return w1.getEfficiency() - w2.getEfficiency();
 		}
 	}
 

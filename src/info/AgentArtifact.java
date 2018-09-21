@@ -568,8 +568,6 @@ public class AgentArtifact extends Artifact {
 
 	@OPERATION
 	void getCoords(ResourceNode facility, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
-		System.out.println(facility.getLocation().getLat());
-		System.out.println(facility.getLocation().getLon());
 		lat.set(facility.getLocation().getLat());
 		lon.set(facility.getLocation().getLon());
 	}
@@ -684,10 +682,7 @@ public class AgentArtifact extends Artifact {
 			.filter(a ->
 				a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 				a.getEntity().getRole().getName().equals("truck") &&
-					!(boolean)a.getObsProperty("destroy").getValue() &&
-					!(boolean)a.getObsProperty("scout").getValue() &&
-					!(boolean)a.getObsProperty("gather").getValue() &&
-					!(boolean)a.getObsProperty("builder").getValue())
+				(boolean)a.getObsProperty("gather").getValue())
 			.sorted(
 				Comparator.comparingDouble(a ->
 					FacilityArtifact.euclideanDistance(
@@ -698,15 +693,6 @@ public class AgentArtifact extends Artifact {
 			)
 			.limit(DynamicInfoArtifact.getMoney() / wellPrice)
 			.forEach(AgentArtifact::setToBuild);
-	}
-
-	public static void setInitialDestroyers() {
-		artifacts.values().stream()
-				.filter(a ->
-						a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
-						a.getEntity().getRole().getName().equals("truck") && !((boolean)a.getObsProperty("build").getValue()))
-				.limit(MAX_DESTROYERS)
-				.forEach(AgentArtifact::setToDestroy);
 	}
 
     public void setToBuild() {
@@ -728,9 +714,8 @@ public class AgentArtifact extends Artifact {
 					wellBuilders.add(this.agentName);
 				}
 			} catch (NoSuchElementException e) {
-				//System.out.println("Could not set to builder. Error: ");
-				//e.printStackTrace();
-				//e.printStackTrace();
+				System.out.println("Could not set to builder. Error: ");
+				e.printStackTrace();
 			}
 			buildSemaphore.release();
 		} catch (InterruptedException e) {
@@ -757,7 +742,7 @@ public class AgentArtifact extends Artifact {
     }
 
 	@OPERATION
-    void setToDestroy() {
+    public void setToDestroy() {
 		try {
 			destroySemaphore.acquire();
 			if (destroyers.size() < MAX_DESTROYERS) {
@@ -769,6 +754,10 @@ public class AgentArtifact extends Artifact {
 			logger.warning("Thread interrupted in setToDestroy");
 		}
     }
+
+    public static boolean needMoreDestroyers() {
+		return destroyers.size() < MAX_DESTROYERS;
+	}
 
     @OPERATION
     void stopDestroying() {

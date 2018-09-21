@@ -206,6 +206,7 @@ public class FacilityArtifact extends Artifact {
 		try {
 			Well well = wells.values().stream().filter(w -> w.getLocation().inRange(loc)).findFirst().get();
 			wells.remove(well.getName());
+			System.out.println("Well has been destroyed: " + well.getName());
 		} catch (NoSuchElementException | NullPointerException e) {
 			// Already destroyed
 			System.out.println("Already destroyed well");

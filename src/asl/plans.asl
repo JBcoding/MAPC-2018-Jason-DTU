@@ -145,12 +145,14 @@
 +!retrieveTool(Tool) : canUseTool(Tool) 		<- !retrieveItems([map(Tool, 1)]).
 +!retrieveTool(Tool) 							<- .print("Can not use ", Tool). // Need help from someone that can use this tool
 
++!getToFacility(F) : build <- !buildWell; !getToFacility(F).
 +!getToFacility(F) : inFacility(F).
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F)    <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
 // Meant for getting to resource nodes and wells
++!getToLocation(F, Lat, Lon) : build <- !buildWell; getToLocation(F, Lat, Lon).
 +!getToLocation(F, _, _) : inFacility(F).
 +!getToLocation(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocation(F, Lat, Lon).
@@ -189,9 +191,11 @@
 +!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
 +!scout(_, _) : scout(X) & not X.
 
++!gatherUntilFull(V) : build <- !buildWell; gatherUntilFull(V).
 +!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
++!emptyInventory : build <- !buildWell; emptyInventory.
 +!emptyInventory : inStorage & load(L) & L >= 1 <-
     getItemNameAndQuantity(Item, Quantity);
     if (not Quantity == -1) {

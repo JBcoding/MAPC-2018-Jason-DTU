@@ -186,7 +186,6 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			JobArtifact			.perceiveUpdate(allPercepts);
 
 			AgentArtifact.setBuilders();
-			AgentArtifact.setInitialDestroyers();
 			
 			// Define roles
 			// TODO:
