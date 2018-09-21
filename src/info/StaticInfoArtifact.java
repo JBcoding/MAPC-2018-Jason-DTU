@@ -380,7 +380,11 @@ public class StaticInfoArtifact extends Artifact {
 
 		@Override
 		public int compare(WellType w1, WellType w2) {
-			return w1.getEfficiency() - w2.getEfficiency();
+			return getValue(w1) - getValue(w2);
+		}
+
+		private int getValue(WellType wt) {
+			return wt.getEfficiency() / wt.getCost() * wt.getMaxIntegrity();
 		}
 	}
 
