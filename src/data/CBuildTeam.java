@@ -51,7 +51,7 @@ public class CBuildTeam {
     }
 
     public String getTruckName() {
-        return "A27";
+        return truckName;
     }
 
     public String thingToBuild(String agentName) {
