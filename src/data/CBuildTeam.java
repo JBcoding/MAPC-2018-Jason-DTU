@@ -18,6 +18,7 @@ public class CBuildTeam {
 
     private Map<String, Integer> missingAgents = new HashMap<>();
     private int nextIndex;
+    private int lastChangeRound = 0;
 
     public CBuildTeam() {
         agents = new HashSet<>();
@@ -93,7 +94,6 @@ public class CBuildTeam {
         return missingAgents.get(roleName) > 0;
     }
 
-    private int lastChangeRound = 0;
     public void requestHelp(String agentName) {
         if (lastChangeRound == StaticInfoArtifact.getCurrentStep()) {
             return;

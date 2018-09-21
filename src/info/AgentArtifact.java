@@ -683,7 +683,13 @@ public class AgentArtifact extends Artifact {
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
         scouts.remove(this.agentName);
-        setToDeliver();
+
+        String role = this.getEntity().getRole().getName();
+        if (role.equals("drone")) {
+            setToDeliver();
+        } else {
+            setToGather();
+        }
     }
 
 	public static void setBuilders() {

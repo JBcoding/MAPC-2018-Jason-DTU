@@ -231,12 +231,12 @@
     }.
 
 +!builderRole: builder(X) & X <-
-    getMainTruckName(T);
     getWorkShop(W);
     isTruck(N);
     if (not N) {
         !getToFacility(W);
         .wait(100); // dirty fix
+        getMainTruckName(T);
         !doAction(assist_assemble(T));
     } else {
         getMainStorageFacility(S);

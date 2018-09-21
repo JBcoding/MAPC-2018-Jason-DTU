@@ -328,6 +328,8 @@ public class CEntity {
 		return this.lastActionParam;
 	}
 
+	private static int motorcycleScouts = 0;
+
     public void addAgentArtifact(AgentArtifact agentArtifact) {
         this.agentArtifact = agentArtifact;
         if (StaticInfoArtifact.getDeliverTeam().needThis(this.role.getName())) {
@@ -341,6 +343,10 @@ public class CEntity {
         } else if (this.role.getName().equals("drone")) {
             this.agentArtifact.setToScout();
         } else {
+            if (this.role.getName().equals("motorcycle") && motorcycleScouts < 4) {
+                this.agentArtifact.setToScout();
+                motorcycleScouts++;
+            }
             this.agentArtifact.setToGather();
         }
     }
