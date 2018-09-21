@@ -9,6 +9,8 @@ import cartago.Artifact;
 import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
+import data.CBuildTeam;
+import data.CStorage;
 import data.CUtil;
 import eis.iilang.Percept;
 import env.EIArtifact;
@@ -21,6 +23,7 @@ import massim.scenario.city.data.Role;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Shop;
+import massim.scenario.city.data.facilities.Storage;
 
 public class ItemArtifact extends Artifact {
 
@@ -71,6 +74,45 @@ public class ItemArtifact extends Artifact {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, Integer::sum));
     }
 
+    @OPERATION
+    void instructBuilders(Object[] itemMap) {
+        Map<Item, Integer> items = Translator.convertASObjectToMap(itemMap);
+
+        CStorage storage = StaticInfoArtifact.getStorage();
+        CBuildTeam buildTeam = StaticInfoArtifact.getBuildTeam();
+
+        for (Entry<Item, Integer> entry : items.entrySet()) {
+            Item item = entry.getKey();
+            int amount = entry.getValue();
+
+            int ready = storage.getAmount(item);
+            int needed = amount - ready;
+
+            for (int i = 0; i < needed; i++) {
+                buildTeam.build(item.getName());
+            }
+        }
+    }
+
+    @OPERATION
+    void haveItemsReady(Object[] itemMap, OpFeedbackParam<Boolean> retReady) {
+        Map<Item, Integer> items = Translator.convertASObjectToMap(itemMap);
+
+        CStorage storage = StaticInfoArtifact.getStorage();
+
+        for (Entry<Item, Integer> entry : items.entrySet()) {
+            Item item = entry.getKey();
+            int amount = entry.getValue();
+
+            if (storage.getAmount(item) < amount) {
+                retReady.set(false);
+                return;
+            }
+        }
+
+        retReady.set(true);
+    }
+
     public static Map<Item, Integer> getItemMap(Map<String, Integer> map) {
         return map.entrySet().stream().collect(Collectors.toMap(e -> items.get(e.getKey()), Entry::getValue));
     }
@@ -118,12 +160,7 @@ public class ItemArtifact extends Artifact {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
     }
 
-    @GUARD
-    private boolean doneScouting() {
-        return !AgentArtifact.isScouting;
-    }
-
-    public Map<String, Integer> getResourceList(Map<Item, Integer> items) {
+    private Map<String, Integer> getResourceList(Map<Item, Integer> items) {
         Map<String, Integer> resourceList = new HashMap<>();
 
         Map<String, ResourceNode> nodes = FacilityArtifact.getResourceNodes();
@@ -290,8 +327,6 @@ public class ItemArtifact extends Artifact {
 		percepts.stream().filter(percept -> percept.getName().equals(ITEM))
 						 .forEach(item -> perceiveItem(item, requirements));
 		
-		// TODO: Tools and items that require assembly have a volume of 0. -- AHF: Still relevant?
-
         // This is annoying since we cannot add parts to items after the fact.
         // Loop through the requirements map until empty and add an item to `items` if all
         // requirements are already in `items`.
@@ -331,7 +366,7 @@ public class ItemArtifact extends Artifact {
         }
 
         for (Item item : items.values()) {
-            System.out.println(item.getName() + " <-- "
+            System.out.println(item.getName() + "(" + item.getVolume() + ")" + " <-- "
                     + item.getRequiredRoles().stream().map(Role::getName).collect(Collectors.toSet()) + " <== "
                     + item.getRequiredItems().stream().map(Item::getName).collect(Collectors.toSet()) + " : "
                     + item.needsAssembly());

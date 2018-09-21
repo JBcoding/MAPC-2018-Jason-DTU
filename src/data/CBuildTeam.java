@@ -54,7 +54,7 @@ public class CBuildTeam {
         return truckName;
     }
 
-    public String thingToBuild(String agentName) {
+    public synchronized String thingToBuild(String agentName) {
         // If we have nothing to build, build op some level 1 stuff
         while (toBuild.size() == 0) {
             List<Item> levelNon0Items = new ArrayList<>();

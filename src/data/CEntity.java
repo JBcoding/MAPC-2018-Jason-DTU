@@ -330,14 +330,16 @@ public class CEntity {
 
     public void addAgentArtifact(AgentArtifact agentArtifact) {
         this.agentArtifact = agentArtifact;
-        if (StaticInfoArtifact.getBuildTeam().needThis(this.role.getName())) {
+        if (StaticInfoArtifact.getDeliverTeam().needThis(this.role.getName())) {
+            this.agentArtifact.setToDeliver();
+            StaticInfoArtifact.getDeliverTeam().addAgent(this.agentArtifact.agentName);
+        } else if (StaticInfoArtifact.getBuildTeam().needThis(this.role.getName())) {
             this.agentArtifact.setToBuilder();
             StaticInfoArtifact.getBuildTeam().addAgent(this.agentArtifact.agentName);
         } else if (this.role.getName().equals("truck") && AgentArtifact.needMoreDestroyers()) {
             this.agentArtifact.setToDestroy();
         } else if (this.role.getName().equals("drone")) {
             this.agentArtifact.setToScout();
-            this.agentArtifact.setToGather();
         } else {
             this.agentArtifact.setToGather();
         }

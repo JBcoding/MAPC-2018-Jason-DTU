@@ -59,6 +59,7 @@ public class StaticInfoArtifact extends Artifact {
 
     private static CStorage storage;
     private static CBuildTeam buildTeam;
+	private static CDeliverTeam deliverTeam;
 	private static int currentStep = 0;
 
 	public static CStorage getStorage() {
@@ -85,6 +86,14 @@ public class StaticInfoArtifact extends Artifact {
 	}
 
 	@OPERATION
+	public static CDeliverTeam getDeliverTeam() {
+		if (deliverTeam == null) {
+			deliverTeam = new CDeliverTeam();
+		}
+		return deliverTeam;
+	}
+
+    @OPERATION
 	void getSimulationData(OpFeedbackParam<String> id, OpFeedbackParam<String> map,
 			OpFeedbackParam<Integer> seedCapital, OpFeedbackParam<Integer> steps, 
 			OpFeedbackParam<String> team)

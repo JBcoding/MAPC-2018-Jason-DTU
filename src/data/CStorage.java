@@ -88,4 +88,8 @@ public class CStorage {
     public Map<String, Integer> getItems() {
         return items;
     }
+
+    public int getAmount(Item item) {
+        return items.getOrDefault(item.getName(), 0);
+    }
 }

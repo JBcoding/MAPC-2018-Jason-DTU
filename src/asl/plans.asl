@@ -19,8 +19,13 @@
     !doAction(gather);
     !gatherItem(Node, map(Item, Amount)).
 
-//+!goToResourceNode(Lat, Lon)
-//+!goToWell(Lat, Lon)
+// Assumes we are at the storage facility.
++!getItems([]).
++!getItems([Item|Items]) : getInventory(Inv) & contains(Item, Inv) <-
+    !getItems(Items).
++!getItems([map(Item, Amount) | Items]) <-
+    !doAction(retrieve(Item, Amount));
+    !getItems([map(Item, Amount) | Items]).
 
 +!buildWell :
     inOwnWell &
@@ -138,12 +143,6 @@
 +!assistAssemble(Agent) : myRole(Role) <-
     !doAction(assist_assemble(Agent));
     !assistAssemble(Agent).
-
-+!retrieveTools([]).
-+!retrieveTools([Tool | Tools]) : have(Tool) 	<- !retrieveTools(Tools).
-+!retrieveTools([Tool | Tools]) 				<- !retrieveTool(Tool);	!retrieveTools(Tools).
-+!retrieveTool(Tool) : canUseTool(Tool) 		<- !retrieveItems([map(Tool, 1)]).
-+!retrieveTool(Tool) 							<- .print("Can not use ", Tool). // Need help from someone that can use this tool
 
 +!getToFacility(F) : build <- !buildWell; !getToFacility(F).
 +!getToFacility(F) : inFacility(F).

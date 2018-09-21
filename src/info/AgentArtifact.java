@@ -60,7 +60,6 @@ public class AgentArtifact extends Artifact {
 	private static Map<String, AgentArtifact> artifacts = new HashMap<>();
 	
 	public String agentName;
-	public static boolean isScouting = true;
 
 	private static final double EPSILON = 1E-3;
 
@@ -94,6 +93,7 @@ public class AgentArtifact extends Artifact {
 		defineObsProperty("scout", false);
         defineObsProperty("gather", false);
 		defineObsProperty("builder", false);
+		defineObsProperty("deliver", false);
 
 		defineObsProperty("build", false);
 		defineObsProperty("destroy", false);
@@ -552,7 +552,6 @@ public class AgentArtifact extends Artifact {
 
     public void setToScout() {
         getObsProperty("scout").updateValue(true);
-        isScouting = true;
         scouts.add(this.agentName);
     }
 
@@ -684,8 +683,7 @@ public class AgentArtifact extends Artifact {
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
         scouts.remove(this.agentName);
-        setToGather();
-        isScouting = false;
+        setToDeliver();
     }
 
 	public static void setBuilders() {
@@ -734,7 +732,7 @@ public class AgentArtifact extends Artifact {
 				}
 			} catch (NoSuchElementException e) {
 				System.out.println("Could not set to builder. Error: ");
-				e.printStackTrace();
+				// e.printStackTrace();
 			}
 			buildSemaphore.release();
 		} catch (InterruptedException e) {
@@ -812,4 +810,8 @@ public class AgentArtifact extends Artifact {
     public void setToBuilder() {
         getObsProperty("builder").updateValue(true);
     }
+
+	public void setToDeliver() {
+		getObsProperty("deliver").updateValue(true);
+	}
 }

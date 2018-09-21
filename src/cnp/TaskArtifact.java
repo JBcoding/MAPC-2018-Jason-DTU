@@ -24,8 +24,6 @@ public class TaskArtifact extends Artifact {
 	private static TaskArtifact instance;
 	private static int 			cnpId;
 
-	private boolean haveWaited = false;
-	
 	void init()
 	{
 		instance = this;
@@ -72,34 +70,9 @@ public class TaskArtifact extends Artifact {
 		instance.announce("buyRequest", item, amount, shop);
 	}
 
-    @GUARD
-    private boolean doneScouting() {
-        return !AgentArtifact.isScouting;
-    }
-
 	@OPERATION
-	void announceAssemble(Object items, String workshop, String taskId, String deliveryLocation, String type)
-	{
-	    // TODO: be more eager than this, but causes some problems right now
-		if (!haveWaited) {
-			System.out.println("Waiting");
-			await("doneScouting");
-			haveWaited = true;
-		}
-
-		instance.announce("assembleRequest", items, workshop, taskId, deliveryLocation, type);
-	}
-
-	@OPERATION
-	void announceRetrieve(String agent, Object resourceList, Object roles, String workshop)
-	{
-		instance.announce("retrieveRequest", agent, toItemMap(resourceList), roles, workshop);
-	}
-
-	@OPERATION
-	void announceAssist(String agent, Object roles, String workshop)
-	{
-		instance.announce("assistRequest", agent, roles, workshop);
+	void announceDeliver(Object items, String taskId, String deliveryLocation, String type) {
+		instance.announce("deliverRequest", items, taskId, deliveryLocation, type);
 	}
 
 	private void define(String property, Object... args)
@@ -141,23 +114,11 @@ public class TaskArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	void clearAssemble(Object cnpId)
+	void clearDeliver(Object cnpId)
 	{
-		instance.clear("assembleRequest", null, null, null, null, null, cnpId);
+		instance.clear("deliverRequest", null, null, null, null, cnpId);
 	}
 	
-	@OPERATION
-	void clearRetrieve(Object cnpId)
-	{
-		instance.clear("retrieveRequest", null, null, null, null, cnpId);
-	}
-
-	@OPERATION
-	void clearAssist(Object cnpId)
-	{
-		instance.clear("assistRequest", null, null, null, cnpId);
-	}
-
 	@OPERATION
 	private void clear(String property, Object... args)
 	{
