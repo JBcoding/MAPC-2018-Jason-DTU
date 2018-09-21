@@ -24,6 +24,7 @@
 // Percepts
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
++step(X) : lastAction("goto") & lastActionResult("failed_no_route") <- !charge.
 +step(X) : lastAction("build") & lastActionResult("failed_location") <- stopBuilding.
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
 +step(X) : lastAction("give") 		 & lastActionResult("successful") <- .print("Give successful!").

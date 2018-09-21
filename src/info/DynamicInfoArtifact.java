@@ -114,6 +114,7 @@ public class DynamicInfoArtifact extends Artifact {
 			logger.info("Perceived step:\t" + step);
 			logger.info("Perceived timestamp:\t" + timestamp);
 		}
+
 	}
 	
 	// Literal(long)

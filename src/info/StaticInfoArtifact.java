@@ -402,7 +402,10 @@ public class StaticInfoArtifact extends Artifact {
 		}
 
 		private int getValue(WellType wt) {
-			return wt.getEfficiency() / wt.getCost() * wt.getMaxIntegrity();
+			double eff = (double)wt.getEfficiency();
+			double cost = (double)wt.getCost();
+			double inte = (double)wt.getCost();
+			return (int)(eff/cost * (inte * (eff/cost)));
 		}
 	}
 

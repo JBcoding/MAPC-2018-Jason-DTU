@@ -1,6 +1,7 @@
 package info;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
@@ -64,7 +65,7 @@ public class AgentArtifact extends Artifact {
 	private static final double EPSILON = 1E-3;
 
 	private static Deque<String> scouts = new ConcurrentLinkedDeque<String>();
-	private static Deque<String> wellBuilders = new ConcurrentLinkedDeque<String>();
+	private static Set<String> wellBuilders = ConcurrentHashMap.newKeySet();
 	private static Deque<String> destroyers = new ConcurrentLinkedDeque<String>();
 
 	private static final int MAX_DESTROYERS = 3;
@@ -251,9 +252,9 @@ public class AgentArtifact extends Artifact {
         }
 
         // If agent is where a well should be, but it no longer is.
-		if (FacilityArtifact.getFacilities("well").stream().filter(w -> w.getLocation().inRange(getEntity().getLocation())).count() > 0 &&
+		if (FacilityArtifact.getFacilities("well").stream().filter(w -> canSee(w.getLocation())).count() > 0 &&
 				percepts.stream().filter(p ->
-					p.getName().equals(FacilityArtifact.WELL) && new Location((double)Translator.perceptToObject(p)[2], (double)Translator.perceptToObject(p)[1]).inRange(getEntity().getLocation())
+					p.getName().equals(FacilityArtifact.WELL) && canSee(new Location((double)Translator.perceptToObject(p)[2], (double)Translator.perceptToObject(p)[1]))
 				).count() == 0) {
 			markWellDestroyed();
 		}
@@ -558,7 +559,7 @@ public class AgentArtifact extends Artifact {
     @OPERATION
     void getResourceNode(OpFeedbackParam<Facility> f) {
         f.set(StaticInfoArtifact.getStorage().getLowestResourceNode());
-    }
+	}
 
     @OPERATION
     void getFacilityName(ResourceNode facility, OpFeedbackParam<String> name) {
@@ -569,6 +570,13 @@ public class AgentArtifact extends Artifact {
 	void getCoords(ResourceNode facility, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
 		lat.set(facility.getLocation().getLat());
 		lon.set(facility.getLocation().getLon());
+	}
+
+	@OPERATION
+	void getWellCoordsFromName(String well, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+		Location loc = FacilityArtifact.getFacility(well).getLocation();
+		lat.set(loc.getLat());
+		lat.set(loc.getLat());
 	}
 
 	@OPERATION
@@ -668,14 +676,18 @@ public class AgentArtifact extends Artifact {
         StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
     }
 
-    @OPERATION
+	public boolean canSee(Location loc) {
+		return StaticInfoArtifact.getMap().isVisible(getEntity().getLocation(), loc, this.getEntity().getCurrentVision());
+	}
+
+	@OPERATION
 	void canSee(double lat, double lon, OpFeedbackParam<Boolean> canSee) {
-		canSee.set(StaticInfoArtifact.getMap().isVisible(getEntity().getLocation(), new Location(lon, lat), this.getEntity().getCurrentVision()));
+		canSee.set(canSee(new Location(lon, lat)));
 	}
 
 	@OPERATION
 	void markWellDestroyed() {
-		FacilityArtifact.destroyWell(getEntity().getLocation());
+		FacilityArtifact.destroyWell(this);
 		getObsProperty("inFacility").updateValue("none");
 		getObsProperty("inOwnWell").updateValue(false);
 	}
@@ -705,7 +717,8 @@ public class AgentArtifact extends Artifact {
 			.filter(a ->
 				a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 				a.getEntity().getRole().getName().equals("truck") &&
-				(boolean)a.getObsProperty("gather").getValue())
+				(boolean)a.getObsProperty("gather").getValue() &&
+				!wellBuilders.contains(a))
 			.sorted(
 				Comparator.comparingDouble(a ->
 					FacilityArtifact.euclideanDistance(
@@ -716,6 +729,8 @@ public class AgentArtifact extends Artifact {
 			)
 			.limit(DynamicInfoArtifact.getMoney() / wellPrice)
 			.forEach(AgentArtifact::setToBuild);
+
+		System.out.println("Current builders: " + wellBuilders.size() + " - " + wellBuilders);
 	}
 
     public void setToBuild() {

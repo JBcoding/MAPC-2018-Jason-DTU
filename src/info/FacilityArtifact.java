@@ -202,11 +202,11 @@ public class FacilityArtifact extends Artifact {
 		}
 	}
 
-	public static void destroyWell(Location loc) {
+	public static void destroyWell(AgentArtifact agent) {
 		try {
-			Well well = wells.values().stream().filter(w -> w.getLocation().inRange(loc)).findFirst().get();
+			Well well = wells.values().stream().filter(w -> agent.canSee(w.getLocation())).findFirst().get();
 			wells.remove(well.getName());
-			System.out.println("Well has been destroyed: " + well.getName());
+			allFacilities = new ArrayList<>(Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
 		} catch (NoSuchElementException | NullPointerException e) {
 			// Already destroyed
 			System.out.println("Already destroyed well");

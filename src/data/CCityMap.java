@@ -301,6 +301,20 @@ public class CCityMap implements Serializable {
                 mapName, minLat, minLon, maxLat, maxLon, center.getLat(), center.getLon());
 	}
 
+	private Location getNextClockwisePosition(Location l) {
+		double centerLat = center.getLat();
+		double centerLon = center.getLon();
+		
+		double angle = 50;
+
+		double lat = centerLat + (l.getLat()-centerLat)*Math.cos(angle) - (l.getLon()-centerLon)*Math.sin(angle);
+		double lon = centerLon + (l.getLat()-centerLat)*Math.sin(angle) + (l.getLon()-centerLon)*Math.cos(angle);
+
+		System.out.println("Got next clockwise position");
+
+		return new Location(lon, lat);
+	}
+
 	public Location getClosestPeriphery(Location l, double epsilon) {
 		double newLat;
 		double newLon;
@@ -326,15 +340,18 @@ public class CCityMap implements Serializable {
 		Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
 
 		// If we can't find a route to the nearest periphery, we just want to go towards anything reachable in that general direction
-		if (!existsRoute(l, loc)) {
-		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
-		    loc = FacilityArtifact.getFacility(facility).getLocation();
-		    Set<String> roadTypes = new HashSet<String>();
-		    roadTypes.add("road");
-		    int iterations = 10;
+		while (!existsRoute(l, loc)) {
+			int iterations = 10;
 			for (int i = 0; i < iterations && !existsRoute(l, loc); i++) {
-				loc = getRandomLocation(roadTypes, iterations);
+				loc = getNextClockwisePosition(loc);
 			}
+//		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
+//		    loc = FacilityArtifact.getFacility(facility).getLocation();
+//		    Set<String> roadTypes = new HashSet<String>();
+//		    roadTypes.add("road");
+//			for (int i = 0; i < iterations && !existsRoute(l, loc); i++) {
+//				loc = getRandomLocation(roadTypes, iterations);
+//			}
         }
 		//Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
 		//Location loc = getNearestRoad(latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat()));
