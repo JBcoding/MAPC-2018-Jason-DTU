@@ -19,8 +19,13 @@
     !doAction(gather);
     !gatherItem(Node, map(Item, Amount)).
 
-//+!goToResourceNode(Lat, Lon)
-//+!goToWell(Lat, Lon)
+// Assumes we are at the storage facility.
++!getItems([]).
++!getItems([Item|Items]) : getInventory(Inv) & contains(Item, Inv) <-
+    !getItems(Items).
++!getItems([map(Item, Amount) | Items]) <-
+    !doAction(retrieve(Item, Amount));
+    !getItems([map(Item, Amount) | Items]).
 
 +!buildWell :
     inOwnWell &
@@ -139,13 +144,6 @@
     !doAction(assist_assemble(Agent));
     !assistAssemble(Agent).
 
-+!retrieveTools([]).
-+!retrieveTools([Tool | Tools]) : have(Tool) 	<- !retrieveTools(Tools).
-+!retrieveTools([Tool | Tools]) 				<- !retrieveTool(Tool);	!retrieveTools(Tools).
-+!retrieveTool(Tool) : canUseTool(Tool) 		<- !retrieveItems([map(Tool, 1)]).
-+!retrieveTool(Tool) 							<- .print("Can not use ", Tool). // Need help from someone that can use this tool
-
-+!getToFacility(F) : build <- !buildWell; !getToFacility(F).
 +!getToFacility(F) : inFacility(F).
 +!getToFacility(F) : not canMove									<- !doAction(recharge); !getToFacility(F).
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F)    <- !charge; !getToFacility(F).
@@ -167,6 +165,16 @@
         canSee(Lat, Lon, CanSee);
         !getToPeripheryLocation(Lat, Lon, CanSee);
     }.
+//+!getToPeripheryLocationStart(Lat, Lon) :
+//    build
+//    <-
+//    canSeeWell(CanSeeWell, NewLat, NewLon);
+//    if (not CanSeeWell) {
+//        !getToPeripheryLocation(Lat, Lon, true);
+//    } else {
+//        .print("WOOOP: finding new location because of well");
+//        getToPeripheryLocationStart(NewLat, NewLon);
+//    }.
 +!getToPeripheryLocationStart(Lat, Lon) <- !getToPeripheryLocation(Lat, Lon, true).
 +!getToPeripheryLocation(Lat, Lon, CanSee) : atPeriphery & CanSee.
 +!getToPeripheryLocation(Lat, Lon, CanSee) : not canMove <- !doAction(recharge); !getToPeripheryLocationStart(Lat, Lon).
@@ -191,7 +199,15 @@
 +!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
 +!scout(_, _) : scout(X) & not X.
 
-+!gatherUntilFull(V) : build <- !buildWell; !gatherUntilFull(V).
++!gatherUntilFull(_) : build <-
+    !buildWell;
+    // Perform the previous step for !gatherRole
+    getResourceNode(F);
+    getFacilityName(F, N);
+    getCoords(F, Lat, Lon);
+    !getToLocation(N, Lat, Lon);
+    getItemVolume(F, V);
+    !gatherUntilFull(V).
 +!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
@@ -232,12 +248,12 @@
     }.
 
 +!builderRole: builder(X) & X <-
-    getMainTruckName(T);
     getWorkShop(W);
     isTruck(N);
     if (not N) {
         !getToFacility(W);
         .wait(100); // dirty fix
+        getMainTruckName(T);
         !doAction(assist_assemble(T));
     } else {
         getMainStorageFacility(S);

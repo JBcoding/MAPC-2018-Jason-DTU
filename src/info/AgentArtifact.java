@@ -656,6 +656,21 @@ public class AgentArtifact extends Artifact {
         x.set(getEntity().getInventory().getItemCount(ItemArtifact.getItem(item)) >= quantity);
     }
 
+    private boolean doingAction = false;
+    @OPERATION
+    void doActionStart() {
+        doingAction = true;
+    }
+    @OPERATION
+    void doActionEnd() {
+        doingAction = false;
+    }
+    @OPERATION
+    void doingAction(OpFeedbackParam<Boolean> x) {
+        x.set(doingAction);
+    }
+
+
     @OPERATION
     void getMissingItemToBuildItem(String item, OpFeedbackParam<String> itemToRetrive, OpFeedbackParam<Integer> quantity) {
         Item mainItem = ItemArtifact.getItem(item);

@@ -13,30 +13,29 @@
 +task(TaskId, Type) : Type \== "auction" <-
 	getJob(TaskId, Storage, Items);
 	.print("New task: ", TaskId, " - ", Items, " - Type: ", Type);
-	getClosestWorkshopToStorage(Storage, Workshop); // TODO: Do we need this?
-    // TODO: Consider waiting with announcing until we are done scouting
+    haveItemsReady(Items, X);
 	if (Type = "mission") {
-	    !announceAssemble(Items, Workshop, TaskId, Storage, "mission");
+        .print("~~~ TAKING MISSION: ", TaskId, "(", X, ") ~~~");
+	    !announceDeliver(Items, TaskId, Storage, "mission");
     } else {
-        !announceAssemble(Items, Workshop, TaskId, Storage, "new");
+        if (X) {
+            .print("~~~ TAKING JOB: ", TaskId, "~~~");
+            !announceDeliver(Items, TaskId, Storage, "new");
+        } else {
+            .print("Forgoing ", TaskId);
+        }
     }
 	clearTask(TaskId); -task(TaskId, _).
+
++task(TaskId, "auction") <- .print("Ignoring auction"). // announceAuction(TaskId); clearTask(TaskId); -task(TaskId, _).
 	
-+task(TaskId, "auction") <- announceAuction(TaskId); clearTask(TaskId); -task(TaskId, _).
-	
-+!announceAssemble([], _, _, _).
-+!announceAssemble(Items, Workshop, TaskId, Storage, Type) <-
-    announceAssemble(Items, Workshop, TaskId, Storage, Type).
++!announceDeliver([], _, _, _).
++!announceDeliver(Items, TaskId, Storage, Type) <-
+    announceDeliver(Items, TaskId, Storage, Type).
 
-+!announceRetrieve(Agent, [map(_, 0)|Rest], Roles, Workshop) <- !announceRetrieve(Agent, Rest, Roles, Workshop).
-+!announceRetrieve(Agent, ResourceList, Roles, Workshop) <- announceRetrieve(Agent, ResourceList, Roles, Workshop).
-
-+!announceAssist(Agent, Roles, Workshop) <- announceAssist(Agent, Roles, Workshop).
-
-+assembleRequest(_, _, TaskId, _, "new", CNPId) <-
++deliverRequest(_, TaskId, _, "new", CNPId) <-
 	takeTask(CanTake)[artifact_id(CNPId)];
-	if (CanTake)
-	{
+	if (CanTake) {
 		completeJob(TaskId);
-		clearAssemble(CNPId);
+		clearDeliver(CNPId);
 	}.

@@ -11,6 +11,8 @@
 
 !startLoop.
 
+!continueLoopSleep.
+
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 
 +!loop : scout(X) & X <- .print("Scouting"); !scoutt; !loop.
@@ -22,7 +24,7 @@
 +!loop : not fullCharge <- .print("ERROR: Nothing to do. Should have a role"); !charge; !loop.
 
 // Percepts
-+!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
++!doAction(Action) : .my_name(Me) <- doActionStart; jia.action(Me, Action); .wait({+step(_)}); doActionEnd.
 
 +step(X) : lastAction("goto") & lastActionResult("failed_no_route") <- !charge.
 +step(X) : lastAction("build") & lastActionResult("failed_location") <- stopBuilding.
@@ -40,3 +42,6 @@
 		 & lastAction(A) & lastActionParam(P) <- .print(R, " ", A, " ", P).
 		 
 +reset <- .print("resetting"); .drop_all_desires; .drop_all_events; .drop_all_intentions; -reset.
+
++!continueLoopSleep <- .wait({+step(_)}); !continueLoop.
++!continueLoop <- .wait(500); doingAction(X); if (not X) {!doAction(recharge); !continueLoop;} else {!continueLoopSleep;}.
