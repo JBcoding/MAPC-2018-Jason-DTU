@@ -1,2 +1,2 @@
-conf/eismassimconfig_team_B.json
-B
+conf/eismassimconfig.json
+A

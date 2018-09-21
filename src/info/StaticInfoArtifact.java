@@ -127,8 +127,8 @@ public class StaticInfoArtifact extends Artifact {
 		return StaticInfoArtifact.getMap().findRoute(agent.getLocation(), to, agent.getPermissions());
 	}
 
-	public static void perceiveInitial(Collection<Percept> percepts)
-	{		
+	public static void perceiveInitial(Collection<Percept> percepts) {
+
 		// Roles and team are used when perceiving entities
 		percepts.stream().filter(percept -> percept.getName().equals(ROLE))
 						 .forEach(role -> perceiveRole(role));
@@ -195,7 +195,7 @@ public class StaticInfoArtifact extends Artifact {
 		Object[] args = Translator.perceptToObject(percept);
 
 		String team = (String) args[1];
-		String name = ((String) args[0]).replaceAll(team, "");
+		String name = ((String) args[0]); // This is team + number
 		double lon 	= (double) args[2];
 		double lat 	= (double) args[3];
 		String role = (String) args[4];
@@ -203,8 +203,7 @@ public class StaticInfoArtifact extends Artifact {
 		// Entity has not been made public
 		if (team.equals(StaticInfoArtifact.team))
 		{
-		    name = "agent" + name;
-		    //System.out.println(name);
+		    name = "agent" + name.replace(team, ""); // This now matches what Jason names artifacts
 			AgentArtifact.addEntity(name, new CEntity(roles.get(role), new Location(lon, lat)));
 		}
 	}

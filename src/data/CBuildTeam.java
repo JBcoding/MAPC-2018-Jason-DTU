@@ -5,6 +5,7 @@ import info.ItemArtifact;
 import massim.scenario.city.data.Item;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CBuildTeam {
     private Set<String> agents;
@@ -15,6 +16,7 @@ public class CBuildTeam {
     private Map<String, String> thingsBeingBuild;
 
     private Map<String, Integer> missingAgents = new HashMap<>();
+    private int nextIndex;
 
     public CBuildTeam() {
         agents = new HashSet<>();
@@ -54,7 +56,11 @@ public class CBuildTeam {
     public String thingToBuild(String agentName) {
         // If we have nothing to build, build op some level 1 stuff
         if (toBuild.size() == 0) {
-            build("item9");
+            Set<Item> level1Set = ItemArtifact.getLevel1Items();
+            Item[] level1s = level1Set.toArray(new Item[level1Set.size()]);
+            Item item = level1s[this.nextIndex % level1s.length];
+            this.nextIndex++;
+            build(item.getName());
             System.out.println("HEREEER________ " + toBuild);
         }
 

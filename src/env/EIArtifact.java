@@ -28,7 +28,6 @@ import info.JobArtifact;
 import info.StaticInfoArtifact;
 import logging.LoggerFactory;
 import massim.eismassim.EnvironmentInterface;
-import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Role;
 
 public class EIArtifact extends Artifact implements AgentListener, EnvironmentListener {
@@ -50,7 +49,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     private static Map<String, String> connections 	= new HashMap<>();
     private static Map<String, String> entities		= new HashMap<>();
     
-    private String team;
+    private static String team;
 
     /**
      * Instantiates and starts the environment interface.
@@ -60,12 +59,11 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
     	logger.setLevel(Level.SEVERE);
 		logger.info("init");
 		
-		try 
-		{
+		try {
 			if (configFile.equals("")) {
 				BufferedReader br = new BufferedReader(new FileReader(configFilePath));
 				configFile = br.readLine();
-				this.team = br.readLine();
+				team = br.readLine().trim();
 				br.close();
 			}
 
@@ -85,9 +83,9 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 	@OPERATION
 	void register() {
         String agentName = getOpUserName();
-        String id = agentName.substring(5);
+        String id = agentName.replace("agent", "");
         String connection = "connection" + team + id;
-        String entity = "agent" + team + id;
+        String entity = "agent" + id;
 
         logger.fine("register " + agentName + " on " + connection);
 
@@ -134,22 +132,21 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 	public static void performAction(String agentName, Action action) {
 		logger.fine("Step " + DynamicInfoArtifact.getStep() + ": " + agentName + " doing " + action);
 		
-		try 
-		{			
-			if (action.getName().equals("assist_assemble"))
-			{
+		try {
+			if (action.getName().equals("assist_assemble")) {
 				String name = PrologVisitor.staticVisit(action.getParameters().get(0));
 				
 				LinkedList<Parameter> params = new LinkedList<>();
-				params.add(new Identifier(EIArtifact.getAgentName(name).replace("agent", "")));
+
+				// The argument to assist_assemble should just be team + id
+				String otherAgent = team + EIArtifact.getAgentName(name).replace("agent", "");
+				params.add(new Identifier(otherAgent));
 				
 				action.setParameters(params);
 			}
 
 			ei.performAction(agentName, action);
-		} 
-		catch (Throwable e) 
-		{
+		} catch (Throwable e) {
 			logger.log(Level.SEVERE, "Failure in performAction: " + e.getMessage(), e);
 		}
 	}
@@ -200,8 +197,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			}
 
 			// Perceive agent info
-			for (Entry<String, Collection<Percept>> entry : agentPercepts.entrySet())
-			{			
+			for (Entry<String, Collection<Percept>> entry : agentPercepts.entrySet()) {
 				String agentName = entry.getKey();
 				
 				AgentArtifact.getAgentArtifact(agentName).perceiveInitial(entry.getValue());

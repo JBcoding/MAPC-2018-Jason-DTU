@@ -18,6 +18,7 @@ import eis.iilang.PrologVisitor;
 import env.EIArtifact;
 import env.Translator;
 import massim.protocol.messagecontent.Action;
+import massim.scenario.city.data.Entity;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
@@ -72,8 +73,8 @@ public class AgentArtifact extends Artifact {
 	private static Semaphore buildSemaphore = new Semaphore(1);
 	private static Semaphore destroySemaphore = new Semaphore(1);
 
-	void init()
-	{
+	void init() {
+	    // This will be agent + some id, this comes from the Jason config.
 		this.agentName = this.getId().getName();
 
 		artifacts.put(this.agentName, this);
@@ -126,9 +127,16 @@ public class AgentArtifact extends Artifact {
 		return entities.keySet();
 	}
 	
-	protected static void addEntity(String name, CEntity entity)
-	{
+	protected static void addEntity(String name, CEntity entity) {
 		entities.put(name, entity);
+
+		Artifact artifact = artifacts.get(name);
+		if (artifact == null) {
+		    throw new IllegalStateException(
+		            "Artifact not found under: " + name + "\n" +
+                    "Artifacts: " + artifacts.keySet()
+            );
+        }
 		entity.addAgentArtifact(artifacts.get(name));
 	}
 	
@@ -140,8 +148,7 @@ public class AgentArtifact extends Artifact {
 	/**
 	 * @return The entity associated with this agent artifact
 	 */
-	private CEntity getEntity()
-	{
+	private CEntity getEntity() {
 		return entities.get(this.agentName);
 	}
 
@@ -207,9 +214,7 @@ public class AgentArtifact extends Artifact {
 	}
 	
 	@OPERATION
-	private void update(Collection<Percept> percepts)
-	{
-
+	private void update(Collection<Percept> percepts) {
 		int load = this.getEntity().getCurrentLoad();
 
 		this.getEntity().clearInventory();
@@ -391,15 +396,20 @@ public class AgentArtifact extends Artifact {
 	@OPERATION
 	public void perceiveFacility(Percept percept) {
 		Parameter param = percept.getParameters().get(0);
-		if (!PrologVisitor.staticVisit(param).equals(""))
-		{
+
+		CEntity entity = this.getEntity();
+		if (entity == null) {
+		    return;
+        }
+
+		if (!PrologVisitor.staticVisit(param).equals("")) {
 			Object[] args = Translator.perceptToObject(percept);
 			
 			Facility facility = FacilityArtifact.getFacility((String) args[0]);
 
-			if (!this.getEntity().getFacilityName().equals(facility.getName())) {
+			if (!entity.getFacilityName().equals(facility.getName())) {
 				this.getEntity().setFacility(facility);
-				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+				getObsProperty("inFacility").updateValue(entity.getFacilityName());
 
 				if (facility instanceof Well) {
 					getObsProperty("inOwnWell").updateValue(((Well)facility).getTeam().equals(StaticInfoArtifact.getTeam()));
@@ -408,10 +418,10 @@ public class AgentArtifact extends Artifact {
 		}
 		else 
 		{
-			if (!this.getEntity().getFacilityName().equals("none"))
+			if (!entity.getFacilityName().equals("none"))
 			{
-				this.getEntity().setFacility(null);
-				getObsProperty("inFacility").updateValue(this.getEntity().getFacilityName());
+				entity.setFacility(null);
+				getObsProperty("inFacility").updateValue(entity.getFacilityName());
 				getObsProperty("inOwnWell").updateValue(false);
 			}
 		}
@@ -657,6 +667,7 @@ public class AgentArtifact extends Artifact {
     private void stopScouting() {
         getObsProperty("scout").updateValue(false);
         scouts.remove(this.agentName);
+        setToGather();
         isScouting = false;
     }
 

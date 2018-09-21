@@ -23,9 +23,6 @@ free.
 +!loop : not fullCharge <- .print("Nothing to do, charging"); !charge; !loop.
 +!loop <- !doAction(continue).
 
-// Andreas uses this one
-+!loop : scout(X) & not X.
-
 // Percepts
 +!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
