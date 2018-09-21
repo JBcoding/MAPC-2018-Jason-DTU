@@ -28,6 +28,7 @@ import info.JobArtifact;
 import info.StaticInfoArtifact;
 import logging.LoggerFactory;
 import massim.eismassim.EnvironmentInterface;
+import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Role;
 
 public class EIArtifact extends Artifact implements AgentListener, EnvironmentListener {
@@ -64,13 +65,11 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			if (configFile.equals("")) {
 				BufferedReader br = new BufferedReader(new FileReader(configFilePath));
 				configFile = br.readLine();
+				this.team = br.readLine();
 				br.close();
 			}
 
 			ei = new EnvironmentInterface(configFile);
-
-			// Get the team name from EI. Should be a better way
-			this.team = ((String) (ei.getEntities().toArray())[0]).substring(10, 11);
 
 			if (LOG_TO_FILE) {
 				fileLogger = LoggerFactory.createFileLogger(team);

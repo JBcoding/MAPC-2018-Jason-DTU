@@ -363,7 +363,7 @@ public class FacilityArtifact extends Artifact {
 		double lat = (double) args[1];
 		double lon = (double) args[2];
 		String resource = (String) args[3];
-		
+
 		resourceNodes.put(name, 
 				new ResourceNode(name, new Location(lon, lat), ItemArtifact.getItem(resource), 0));
 	}

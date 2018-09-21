@@ -27,6 +27,8 @@ import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Well;
 import massim.util.RNG;
 
+import javax.xml.bind.SchemaOutputResolver;
+
 public class AgentArtifact extends Artifact {
 	
 	private static final Logger logger = Logger.getLogger(AgentArtifact.class.getName());
@@ -556,6 +558,8 @@ public class AgentArtifact extends Artifact {
 
 	@OPERATION
 	void getCoords(ResourceNode facility, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+		System.out.println(facility.getLocation().getLat());
+		System.out.println(facility.getLocation().getLon());
 		lat.set(facility.getLocation().getLat());
 		lon.set(facility.getLocation().getLon());
 	}

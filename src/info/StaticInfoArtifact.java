@@ -291,6 +291,7 @@ public class StaticInfoArtifact extends Artifact {
         Object[] args = Translator.perceptToObject(percept);
 
         proximity = (int) args[0];
+		Location.setProximity(proximity);
     }
 
     // Literal(String)
