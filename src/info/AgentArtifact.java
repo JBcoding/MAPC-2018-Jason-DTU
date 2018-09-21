@@ -621,13 +621,22 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void getItemToBuild(OpFeedbackParam<String> item) {
+    void getItemToBuild(OpFeedbackParam<String> item, OpFeedbackParam<Integer> quantity) {
+		String itemName = StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName);
+		boolean level1Item = ItemArtifact.getLevel1Items().stream().map(Item::getName).filter(a -> a.equals(itemName)).count() == 1;
+        quantity.set(1);
+		if (level1Item) {
+		    Item i = ItemArtifact.getItem(itemName);
+		    int volume = i.getRequiredItems().stream().map(Item::getVolume).mapToInt(f -> f).sum();
+		    volume = Math.max(volume, i.getVolume());
+            quantity.set(getEntity().getCurrentCapacity() / volume);
+        }
         item.set(StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName));
     }
 
     @OPERATION
-    void haveItem(String item, OpFeedbackParam<Boolean> x) {
-        x.set(getEntity().getInventory().getItemCount(ItemArtifact.getItem(item)) > 0);
+    void haveItem(String item, OpFeedbackParam<Boolean> x, int quantity) {
+        x.set(getEntity().getInventory().getItemCount(ItemArtifact.getItem(item)) >= quantity);
     }
 
     @OPERATION

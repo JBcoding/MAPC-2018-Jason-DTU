@@ -165,6 +165,7 @@
 
     // Assemblers are responsible for assembling separate items to be delivered.
 	if (not AssembleRest = []) {
+	    .print("Announce assemble rest: ", AssembleRest);
 		.send(announcer, achieve, announceAssemble(AssembleRest, Workshop, TaskId, DeliveryLocation, "old"));
 	}
 
@@ -192,7 +193,7 @@
 	!assembleItems(ItemsToAssemble);	
 	!!assembleComplete;
 
-	.print("Assemble complete");
+	.print("Assemble complete. Delivering: ", ItemsToAssemble);
 
 	!deliverItems(TaskId, DeliveryLocation).
 
@@ -236,7 +237,7 @@
 
 	getItemsToCarry(Items, Capacity, ItemsToAssemble, AssembleRest);
 	getBaseItems(ItemsToAssemble, ItemsToRetrieve);
-	
+
 	if (not ItemsToRetrieve = []) {
 		takeTask(CanTake)[artifact_id(CNPId)];
 		

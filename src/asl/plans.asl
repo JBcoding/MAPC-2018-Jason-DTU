@@ -216,19 +216,22 @@
     !emptyInventory;
     !gatherRole.
 
-+!assembleItem(Item) <-
-    haveItem(Item, X);
++!assembleItemM(Item, Quantity) <-
+    .print("HELLLLLLLLLLLLLLLLLLL____OLLLLLLO");
+    haveItem(Item, X, Quantity);
+    .print("HELLLLLLLLLLLLLLLLLLL____OLLLLLLO");
     if (not X) {
+        .print("HELLLLLLLLLLLLLLLLLLL____OLLLLLLO");
         requestHelp;
         !doAction(assemble(Item));
-        !assembleItem(Item);
+        !assembleItemM(Item, Quantity);
     }.
 
-+!getItemsToBuildItem(Item) <-
++!getItemsToBuildItem(Item, Q) <-
     getMissingItemToBuildItem(Item, ItemToRetrieve, Quantity);
     if (not Quantity == -1) {
-        !doAction(retrieve(ItemToRetrieve, Quantity));
-        !getItemsToBuildItem(Item);
+        !doAction(retrieve(ItemToRetrieve, Q));
+        !getItemsToBuildItem(Item, Q);
     }.
 
 +!builderRole: builder(X) & X <-
@@ -237,21 +240,22 @@
     isTruck(N);
     if (not N) {
         !getToFacility(W);
+        .wait(100); // dirty fix
         !doAction(assist_assemble(T));
     } else {
         getMainStorageFacility(S);
         !getToFacility(S);
         somethingToBuild(Y);
         if (Y) {
-            getItemToBuild(Item);
+            getItemToBuild(Item, Quantity);
 
             // Below is a 5 step plan to build anything !!!
             // 1. Take needed items out
-            !getItemsToBuildItem(Item);
+            !getItemsToBuildItem(Item, Quantity);
             // 2. go to workshop
             !getToFacility(W);
             // 3. assemble
-            !assembleItem(Item);
+            !assembleItemM(Item, Quantity);
             // 4. go to storage
             !getToFacility(S);
             // 5. empty inventory

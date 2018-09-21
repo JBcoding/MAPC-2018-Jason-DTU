@@ -59,8 +59,9 @@ public class StaticInfoArtifact extends Artifact {
 
     private static CStorage storage;
     private static CBuildTeam buildTeam;
+	private static int currentStep = 0;
 
-    public static CStorage getStorage() {
+	public static CStorage getStorage() {
         return storage;
     }
 
@@ -75,7 +76,15 @@ public class StaticInfoArtifact extends Artifact {
         return buildTeam;
     }
 
-    @OPERATION
+	public static void incrementStep() {
+		currentStep ++;
+	}
+
+	public static int getCurrentStep() {
+		return currentStep;
+	}
+
+	@OPERATION
 	void getSimulationData(OpFeedbackParam<String> id, OpFeedbackParam<String> map,
 			OpFeedbackParam<Integer> seedCapital, OpFeedbackParam<Integer> steps, 
 			OpFeedbackParam<String> team)

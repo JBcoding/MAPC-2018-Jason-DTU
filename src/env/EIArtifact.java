@@ -122,6 +122,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
                 System.out.println(percept);
                 break;
             case "step":
+				StaticInfoArtifact.incrementStep();
                 execInternalOp("perceiveUpdate");
                 break;
             default:

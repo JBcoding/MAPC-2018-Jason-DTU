@@ -12,21 +12,19 @@ free.
 !register.
 !focusArtifacts.
 
-// +step(0) <- !scoutt.
-
 !startLoop.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
-+!loop : scout(X) & X <- .print("Scouting"); -free; !scoutt; +free; !loop.
-//+!loop : build(X) & X <- .print("Building well"); -free; !buildWell; +free; !loop.
-//+!loop : destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
-+!loop : gather(X) & X <- -free; !gatherRole; +free; !loop.
-+!loop : builder(X) & X <- -free; !builderRole; +free; !loop.
-//+!loop <- !getToFacility("shop1"); !getToFacility("chargingStation1"); !loop.
-+!loop <- !startLoop.
-	
-// Percepts	
-+!doAction(Action) : .my_name(Me) <- getMyName(H); .print(H, Me, Action); jia.action(Me, Action); .wait({+step(_)}).
++!loop : free & scout(X) & X <- .print("Scouting"); -free; !scoutt; +free; !loop.
++!loop : build <- .print("Building well"); !buildWell; !loop.
++!loop : free & destroy <- .print("Dismantling wells"); -free; !dismantleEnemyWell; +free; !loop.
++!loop : free & gather(X) & X <- .print("Gathering items"); -free; !gatherRole; +free; !loop.
++!loop : free & builder(X) & X <- .print("Creating items"); -free; !builderRole; +free; !loop.
++!loop : not fullCharge <- .print("Nothing to do, charging"); !charge; !loop.
++!loop <- !doAction(continue).
+
+// Percepts
++!doAction(Action) : .my_name(Me) <- jia.action(Me, Action); .wait({+step(_)}).
 
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
 +step(X) : lastAction("give") 		 & lastActionResult("successful") <- .print("Give successful!").

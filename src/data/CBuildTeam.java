@@ -82,7 +82,7 @@ public class CBuildTeam {
 
     private int lastChangeRound = 0;
     public void requestHelp(String agentName) {
-        if (lastChangeRound == StaticInfoArtifact.getSteps()) {
+        if (lastChangeRound == StaticInfoArtifact.getCurrentStep()) {
             return;
         }
         lastChangeRound = StaticInfoArtifact.getSteps();
