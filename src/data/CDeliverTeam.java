@@ -15,9 +15,9 @@ public class CDeliverTeam {
         agents = new HashSet<>();
 
         missingAgents = new HashMap<>();
-        missingAgents.put("drone", 0); // We set the three scouting drones to deliver later.
-        missingAgents.put("motorcycle", 1);
-        missingAgents.put("car", 1);
+        missingAgents.put("drone", 0); // We set the scouting drones to deliver later.
+        missingAgents.put("motorcycle", 2);
+        missingAgents.put("car", 2);
         missingAgents.put("truck", 1);
     }
 

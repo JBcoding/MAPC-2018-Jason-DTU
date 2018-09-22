@@ -11,13 +11,16 @@ import cartago.Artifact;
 import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
+import data.CBuildTeam;
 import data.CCityMap;
 import data.CEntity;
+import data.CStorage;
 import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import eis.iilang.PrologVisitor;
 import env.EIArtifact;
 import env.Translator;
+import jason.util.Pair;
 import massim.protocol.messagecontent.Action;
 import massim.scenario.city.data.Entity;
 import massim.scenario.city.data.Item;
@@ -70,8 +73,11 @@ public class AgentArtifact extends Artifact {
 
 	private static final int MAX_DESTROYERS = 3;
 
+	// TODO: replace with synchronized keyword?
 	private static Semaphore buildSemaphore = new Semaphore(1);
 	private static Semaphore destroySemaphore = new Semaphore(1);
+
+	private int updateRound = -1;
 
 	void init() {
 	    // This will be agent + some id, this comes from the Jason config.
@@ -208,7 +214,7 @@ public class AgentArtifact extends Artifact {
 		
 		perceiveUpdate(percepts);
 	}
-	
+
 	public void perceiveUpdate(Collection<Percept> percepts)
 	{
 		execInternalOp("update", percepts);
@@ -221,13 +227,12 @@ public class AgentArtifact extends Artifact {
 		this.getEntity().clearInventory();
 
 		boolean positionChange = true;
-		for (Percept percept : percepts)
-		{
+		for (Percept percept : percepts) {
 		    if (percept.getName().equals(LAT) || percept.getName().equals(LON)) {
 		        positionChange = true;
             }
-			switch (percept.getName())
-			{
+
+			switch (percept.getName()) {
 //			case ACTION_ID: perceiveActionID(percept); break;
 			case CHARGE: 				perceiveCharge(percept); break;
 			case FACILITY:				perceiveFacility(percept); break;
@@ -267,6 +272,8 @@ public class AgentArtifact extends Artifact {
 		getObsProperty("lastActionParam").updateValue(this.getEntity().getLastActionParam());
 
 		updateAtPeriphery();
+
+		updateRound = StaticInfoArtifact.getCurrentStep();
 
 		if (EIArtifact.LOGGING_ENABLED)
 		{
@@ -607,8 +614,10 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void getMainTruckName(OpFeedbackParam<String> v) {
-        v.set(StaticInfoArtifact.getBuildTeam().getTruckName());
+    void getMainTruckName(OpFeedbackParam<String> v, OpFeedbackParam<Integer> step) {
+        Pair<String, Integer> res = StaticInfoArtifact.getBuildTeam().getTruckName();
+        v.set(res.getFirst());
+        step.set(res.getSecond());
     }
 
     @OPERATION
@@ -628,27 +637,45 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void getItemToBuild(OpFeedbackParam<String> item, OpFeedbackParam<Integer> quantity) {
+    void getItemToBuild(OpFeedbackParam<String> retItem, OpFeedbackParam<Integer> retQuantity) {
 		String itemName = StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName);
-		boolean level1Item = ItemArtifact.getLevel1Items().stream().map(Item::getName).filter(a -> a.equals(itemName)).count() == 1;
-        quantity.set(1);
-		if (level1Item) {
-		    Item i = ItemArtifact.getItem(itemName);
-		    int volume = i.getRequiredItems().stream().map(Item::getVolume).mapToInt(f -> f).sum();
-		    volume = Math.max(volume, i.getVolume());
-            quantity.set(getEntity().getCurrentCapacity() / volume);
-        } else {
-            Item i = ItemArtifact.getItem(itemName);
-            int volume = i.getRequiredItems().stream().map(Item::getVolume).mapToInt(f -> f).sum();
-            volume = Math.max(volume, i.getVolume());
-            int count = getEntity().getCurrentCapacity() / volume;
-            for (Item p : i.getRequiredItems()) {
-                count = Math.min(count, StaticInfoArtifact.getStorage().getItems().get(p.getName()));
+
+        Item item = ItemArtifact.getItem(itemName);
+        boolean level1Item = isLevel1Item(item);
+
+        int volume = level1Item
+                ? ItemArtifact.getVolume(item.getRequiredBaseItems())
+                : ItemArtifact.getVolume(item.getRequiredItems());
+
+		int quantity = getEntity().getCurrentCapacity() / volume;
+        CStorage storage = StaticInfoArtifact.getStorage();
+
+		if (!level1Item) {
+            for (Item part : item.getRequiredItems()) {
+                quantity = Math.min(quantity, storage.getAmount(part));
             }
-            count = Math.max(count, 1);
-            quantity.set(count);
+
+            quantity = Math.max(quantity, 1);
+
+            for (Item part : item.getRequiredItems()) {
+                storage.reserve(part, quantity);
+            }
         }
-        item.set(StaticInfoArtifact.getBuildTeam().thingToBuild(this.agentName));
+
+
+        retItem.set(itemName);
+		retQuantity.set(quantity);
+    }
+
+    @OPERATION
+    void itemInStorage(String itemName, int amount, OpFeedbackParam<Boolean> contained) {
+        CStorage storage = StaticInfoArtifact.getStorage();
+        Item item = ItemArtifact.getItem(itemName);
+        contained.set(storage.getAmount(item) >= amount);
+    }
+
+    private boolean isLevel1Item(Item item) {
+	    return item.needsAssembly() && item.getRequiredItems().stream().noneMatch(Item::needsAssembly);
     }
 
     @OPERATION
@@ -687,8 +714,8 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void requestHelp() {
-        StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
+    void requestHelp(int step) {
+        StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName, step);
     }
 
 	public boolean canSee(Location loc) {
@@ -724,7 +751,7 @@ public class AgentArtifact extends Artifact {
 		try {
 			wellPrice = StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getCost();
 		} catch (NullPointerException e) {
-			System.out.println("No best well type. Not enough massium");
+			// System.out.println("No best well type. Not enough massium");
 			return;
 		}
 

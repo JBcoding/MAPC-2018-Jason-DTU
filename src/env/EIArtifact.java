@@ -188,8 +188,6 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 
 			AgentArtifact.setBuilders();
 			
-			// Define roles
-			// TODO:
 			for (Role role : StaticInfoArtifact.getRoles())
 			{
 				defineObsProperty("role", role.getName(), role.getMaxSpeed(), role.getMaxLoad(),
@@ -249,8 +247,8 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 				AgentArtifact.getAgentArtifact(entry.getKey()).perceiveUpdate(entry.getValue());
 			}
 
-			getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
-			getObsProperty("money").updateValue(DynamicInfoArtifact.getMoney());
+            getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
+            getObsProperty("money").updateValue(DynamicInfoArtifact.getMoney());
 			getObsProperty("enoughMoneyForWell").updateValue(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()) != null);
 
 			logData();

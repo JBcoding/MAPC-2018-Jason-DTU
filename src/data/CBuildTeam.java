@@ -1,8 +1,10 @@
 package data;
 
+import cartago.GUARD;
 import info.AgentArtifact;
 import info.ItemArtifact;
 import info.StaticInfoArtifact;
+import jason.util.Pair;
 import massim.scenario.city.data.Item;
 
 import java.util.*;
@@ -16,9 +18,11 @@ public class CBuildTeam {
 
     private Map<String, String> thingsBeingBuild;
 
-    private Map<String, Integer> missingAgents = new HashMap<>();
+    private Map<String, Integer> missingAgents;
     private int nextIndex;
     private int lastChangeRound = 0;
+
+    private List<Item> levelNon0Items;
 
     public CBuildTeam() {
         agents = new HashSet<>();
@@ -48,34 +52,65 @@ public class CBuildTeam {
                 build(part.getName());
             }
         }
+
         toBuild.add(itemName);
     }
 
-    public String getTruckName() {
-        return truckName;
+    public synchronized Pair<String, Integer> getTruckName() {
+        return new Pair<>(truckName, lastChangeRound);
     }
 
     public synchronized String thingToBuild(String agentName) {
-        // If we have nothing to build, build op some level 1 stuff
-        while (toBuild.size() == 0) {
-            List<Item> levelNon0Items = new ArrayList<>();
+        if (levelNon0Items == null) {
+            levelNon0Items = new ArrayList<>();
             for (Item i : ItemArtifact.getAllItems()) {
-                levelNon0Items.add(i);
+                if (i.needsAssembly()) {
+                    levelNon0Items.add(i);
+                }
             }
-            for (Item i : ItemArtifact.getLevel0Items()) {
-                levelNon0Items.remove(i);
+        }
+
+        CStorage storage = StaticInfoArtifact.getStorage();
+
+        // If we have nothing to build, build up some level >0 stuff
+        while (toBuild.size() == 0) {
+            List<Item> missingItems = new ArrayList<>();
+            for (Item item : levelNon0Items) {
+                if (storage.getAmount(item) == 0) {
+                    missingItems.add(item);
+                }
             }
-            Item item = levelNon0Items.get(this.nextIndex % levelNon0Items.size());
-            this.nextIndex ++;
+
+            Item item;
+
+            if (!missingItems.isEmpty()) {
+                item = missingItems.get(this.nextIndex % missingItems.size());
+            } else {
+                item = levelNon0Items.get(this.nextIndex % levelNon0Items.size());
+            }
+
+            this.nextIndex++;
+
             boolean add = true;
+
             for (Item i : item.getRequiredItems()) {
-                if (StaticInfoArtifact.getStorage().getItems().get(i.getName()) == 0) {
+                if (storage.getAmount(i) == 0) {
                     add = false;
                     break;
                 }
             }
+
             if (add) {
                 build(item.getName());
+            } else {
+                Set<Item> missing = item.getRequiredItems().stream()
+                        .filter(Item::needsAssembly)
+                        .filter(i -> storage.getAmount(i) == 0)
+                        .collect(Collectors.toSet());
+
+                for (Item i : missing) {
+                    build(i.getName());
+                }
             }
         }
 
@@ -83,6 +118,7 @@ public class CBuildTeam {
             thingsBeingBuild.put(agentName, toBuild.get(0));
             toBuild.remove(0);
         }
+
         return thingsBeingBuild.get(agentName);
     }
 
@@ -94,11 +130,12 @@ public class CBuildTeam {
         return missingAgents.get(roleName) > 0;
     }
 
-    public void requestHelp(String agentName) {
-        if (lastChangeRound == StaticInfoArtifact.getCurrentStep()) {
+    public synchronized void requestHelp(String agentName, int step) {
+        if (lastChangeRound >= step) {
             return;
         }
-        lastChangeRound = StaticInfoArtifact.getSteps();
+
+        lastChangeRound = step;
         truckName = agentName;
     }
 }

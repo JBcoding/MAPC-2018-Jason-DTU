@@ -20,6 +20,8 @@ public class CStorage {
     Map<String, Double> itemsVar;
     Map<String, Integer> items;
 
+    Map<Item, Integer> reserved;
+
     public CStorage() {
         Collection<Facility> storages = FacilityArtifact.getFacilities(FacilityArtifact.STORAGE);
         Collection<Facility> workshops = FacilityArtifact.getFacilities(FacilityArtifact.WORKSHOP);
@@ -44,16 +46,18 @@ public class CStorage {
             items.put(item.getName(), 0);
             itemsVar.put(item.getName(), 0.0);
         }
+
+        reserved = new HashMap<>();
     }
 
     private double getItemCountWithVar(String name) {
         return items.get(name) + itemsVar.get(name);
     }
 
-    public Facility getLowestResourceNode() {
+    public synchronized Facility getLowestResourceNode() {
         Collection<Facility> nodes = FacilityArtifact.getFacilities(FacilityArtifact.RESOURCE_NODE);
         ResourceNode bestNode = null;
-        Double lowestAmount = Double.MAX_VALUE;
+        double lowestAmount = Double.MAX_VALUE;
         for (Facility nodeF : nodes) {
             ResourceNode node = (ResourceNode) nodeF;
             if (getItemCountWithVar(node.getResource().getName()) < lowestAmount) {
@@ -85,11 +89,21 @@ public class CStorage {
         return mainWorkshop.getName();
     }
 
-    public Map<String, Integer> getItems() {
-        return items;
+    public void reserve(Item item, int amount) {
+        reserved.put(item, amount + reserved.getOrDefault(item, 0));
+    }
+
+    public synchronized void unreserve(Item item, int amount) {
+        reserved.put(item, Math.max(reserved.getOrDefault(item, 0) - amount, 0));
     }
 
     public int getAmount(Item item) {
-        return items.getOrDefault(item.getName(), 0);
+        int amount = items.getOrDefault(item.getName(), 0);
+
+        if (amount > 0) {
+            amount -= reserved.getOrDefault(item, 0);
+        }
+
+        return amount;
     }
 }

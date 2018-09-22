@@ -41,14 +41,12 @@ public class JobArtifact extends Artifact {
 	private static Map<String, String>		toBeAnnounced	= new HashMap<>();
 	
 	@OPERATION
-	void getJob(String jobId, OpFeedbackParam<String> storage, 
-			OpFeedbackParam<Object> items)
-	{
+	void getJob(String jobId, OpFeedbackParam<String> storage, OpFeedbackParam<Object> items,
+				OpFeedbackParam<Integer> endStep) {
 		Job job = getJob(jobId);
-		
 		storage.set(job.getStorage().getName());
-
 		items.set(CUtil.extractItems(job));
+		endStep.set(job.getEndStep());
 	}
 	
 	@OPERATION

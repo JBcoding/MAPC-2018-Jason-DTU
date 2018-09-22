@@ -51,7 +51,7 @@ public class CEntity {
         if (role.getName().equals("drone")) 	permissions.add(GraphHopperManager.PERMISSION_AIR);
         else 				        	permissions.add(GraphHopperManager.PERMISSION_ROAD);
         
-        items = new CBoundedItemBox(role.getMaxLoad());
+        items = new CBoundedItemBox(role.getBaseLoad());
         this.lat = location.getLat();
         this.lon = location.getLon();
     }

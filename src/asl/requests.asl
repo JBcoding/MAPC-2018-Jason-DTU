@@ -5,7 +5,6 @@
 	: free & remainingCapacity(Capacity) & speed(Speed) <-
 	-free;
 
-    instructBuilders(Items);
 	getItemsToCarry(Items, Capacity, ItemsForMe, ItemsRest);
 
 	getVolume(ItemsForMe, Volume);
@@ -40,20 +39,23 @@
 
 +!deliver([], [], _, _).
 +!deliver(ItemsForMe, ItemsRest, TaskId, DeliveryLocation) <-
+    .send(announcer, tell, busy);
+
     // We cannot carry it all, so we need some more deliverers.
 	if (not ItemsRest = []) {
 		.send(announcer, achieve, announceDeliver(ItemsRest, TaskId, DeliveryLocation, "old"));
 	}
 
-    .print("--> DELIVERING ", TaskId, ": ", ItemsForMe);
     getMainStorageFacility(S);
     !getToFacility(S);
 	!getItems(ItemsForMe);
-	.print("Delivering: ", ItemsForMe);
-	!deliverItems(TaskId, DeliveryLocation).
+	!getToFacility(DeliveryLocation);
+	!deliverItems(TaskId);
+    .send(announcer, tell, available);
+	!getToFacility(S);
+	!emptyInventory.
 
 +free : deliverRequest(Items, TaskId, DeliveryLocation, _, CNPId) & remainingCapacity(Capacity) <-
-    instructBuilders(Items);
 	getItemsToCarry(Items, Capacity, ItemsForMe, ItemsRest);
 
 	if (not ItemsForMe = []) {

@@ -22,10 +22,21 @@
 // Assumes we are at the storage facility.
 +!getItems([]).
 +!getItems([Item|Items]) : getInventory(Inv) & contains(Item, Inv) <-
+    map(I, Amount) = Item;
+    unreserve(I, Amount);
     !getItems(Items).
-+!getItems([map(Item, Amount) | Items]) <-
-    !doAction(retrieve(Item, Amount));
-    !getItems([map(Item, Amount) | Items]).
++!getItems([map(Item, Amount) | Items])
+    : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
+    itemInStorage(Item, Amount, Yes);
+    if (Yes) {
+        !doAction(retrieve(Item, Amount));
+    } else {
+        !doAction(recharge);
+    }
+    // Sometimes it seems to take a bit to observe the retrieve,
+    // so try to retrieve the rest of the items first.
+    !getItems(NewItems).
+
 
 +!buildWell :
     inOwnWell &
@@ -113,10 +124,14 @@
 	}
 	else { .print("Can not find any resource nodes"); }.
 
-+!deliverItems(TaskId, Facility) <-
-	!getToFacility(Facility);
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("failed_job_status").
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("successful").
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("successful_partial").
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("useless").
++!deliverItems(TaskId) <-
 	.print("At facility. Delivering.");
- 	!doAction(deliver_job(TaskId)).
+ 	!doAction(deliver_job(TaskId));
+ 	!deliverItems(TaskId).
 
 +!assembleItems([]).
 +!assembleItems([map(Item, Amount) | Items])
@@ -211,14 +226,15 @@
 +!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
-+!emptyInventory : build <- !buildWell; !emptyInventory.
-+!emptyInventory : inStorage & load(L) & L >= 1 <-
-    getItemNameAndQuantity(Item, Quantity);
-    if (not Quantity == -1) {
-        !doAction(store(Item, Quantity));
-        !emptyInventory;
-    }.
-+!emptyInventory.
++!emptyInventory : build <- !buildWell; getMainStorageFacility(S); !getToFacility(S); !emptyInventory.
++!emptyInventory : getInventory(Inv) <- !emptyInventory(Inv).
+
+// This way we can change the order and mitigate slow inventory updates
++!emptyInventory([]).
++!emptyInventory([Item|Items]) : getInventory(Inv) & not contains(Item, Inv) <- !emptyInventory(Items).
++!emptyInventory([map(Item, Amount) | Items]) : append(Items, [map(Item, Amount)], NewItems) <-
+    !doAction(store(Item, Amount));
+    !emptyInventory(NewItems).
 
 +!gatherRole: gather(X) & X <-
     getResourceNode(F);
@@ -232,19 +248,25 @@
     !emptyInventory;
     !gatherRole.
 
-+!assembleItemM(Item, Quantity) <-
++!assembleItemM(Item, Quantity) : step(Step)<-
     haveItem(Item, X, Quantity);
     if (not X) {
-        requestHelp;
+        requestHelp(Step);
         !doAction(assemble(Item));
         !assembleItemM(Item, Quantity);
     }.
 
 +!getItemsToBuildItem(Item, Q) <-
-    getMissingItemToBuildItem(Item, ItemToRetrieve, Quantity);
-    if (not Quantity == -1) {
-        !doAction(retrieve(ItemToRetrieve, Q));
-        !getItemsToBuildItem(Item, Q);
+    getRequiredItems(Item, Q, Items);
+    !getItems(Items).
+
++!assistRole : step(X) <-
+    getMainTruckName(T, Y);
+    if (X > Y) {
+        .wait(50);
+        !assistRole;
+    } else {
+        !doAction(assist_assemble(T));
     }.
 
 +!builderRole: builder(X) & X <-
@@ -252,9 +274,8 @@
     isTruck(N);
     if (not N) {
         !getToFacility(W);
-        .wait(100); // dirty fix
-        getMainTruckName(T);
-        !doAction(assist_assemble(T));
+        .wait(100); // dirty fix (wait for requestHelp calls to complete)
+        !assistRole;
     } else {
         getMainStorageFacility(S);
         !getToFacility(S);

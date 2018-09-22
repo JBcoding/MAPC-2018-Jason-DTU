@@ -37,6 +37,8 @@ public class ItemArtifact extends Artifact {
     private static Map<String, Item> items = new HashMap<>();
     private static Map<String, Map<String, Shop>> itemLocations = new HashMap<>();
 
+    private static Map<Item, Integer> assemblyVolume = new HashMap<>();
+
     public static Iterable<? extends Item> getAllItems() {
         return items.values();
     }
@@ -110,7 +112,16 @@ public class ItemArtifact extends Artifact {
             }
         }
 
+        for (Entry<Item, Integer> entry : items.entrySet()) {
+            storage.reserve(entry.getKey(), entry.getValue());
+        }
+
         retReady.set(true);
+    }
+
+    @OPERATION
+    void unreserve(String itemName, int amount) {
+        StaticInfoArtifact.getStorage().unreserve(items.get(itemName), amount);
     }
 
     public static Map<Item, Integer> getItemMap(Map<String, Integer> map) {
@@ -121,6 +132,12 @@ public class ItemArtifact extends Artifact {
     void getRequiredItems(Object itemName, OpFeedbackParam<Object> ret) {
         ret.set(items.get(itemName).getRequiredItems().stream()
                 .collect(Collectors.toMap(Item::getName, x -> 1)));
+    }
+
+    @OPERATION
+    void getRequiredItems(Object itemName, int amount, OpFeedbackParam<Object> ret) {
+        ret.set(items.get(itemName).getRequiredItems().stream()
+                .collect(Collectors.toMap(Item::getName, x -> amount)));
     }
 
     /**
@@ -207,6 +224,26 @@ public class ItemArtifact extends Artifact {
                 .sum();
     }
 
+    public static int maxAssemblyVolume(Item item) {
+        if (assemblyVolume.containsKey(item)) {
+            return assemblyVolume.get(item);
+        }
+
+        int own = item.getVolume();
+        int parts;
+
+        if (item.needsAssembly()) {
+            parts = item.getRequiredItems().stream().map(ItemArtifact::maxAssemblyVolume).mapToInt(x -> x).sum();
+        } else {
+            parts = getVolume(item.getRequiredBaseItems());
+        }
+
+        int volume = Math.max(own, parts);
+        assemblyVolume.put(item, volume);
+
+        return volume;
+    }
+
     /**
      * Format: [map("item1", 10),...]
      *
@@ -259,14 +296,7 @@ public class ItemArtifact extends Artifact {
         for (Entry<Item, Integer> entry : Translator.convertASObjectToMap(items).entrySet()) {
             Item item = entry.getKey();
             int amount = entry.getValue();
-            int volume;
-
-            if (item.needsAssembly()) {
-                // We need to have space to hold the parts as we assemble those ourselves.
-                volume = getVolume(item.getRequiredItems());
-            } else {
-                volume = item.getVolume();
-            }
+            int volume = item.getVolume();
 
             int retAmount = 0;
 
