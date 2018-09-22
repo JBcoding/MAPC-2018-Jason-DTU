@@ -6,10 +6,10 @@ freeAgents([]).
 
 !focusArtifacts.
 
-+step(X) <- // .print(""); .print("STEP ", X); .print("").
-    .print("---------------------------------------------------------",
-           "---------------------------------------------------------",
-           "------------------------------------------------------> ", X).
+// +step(X) <- // .print(""); .print("STEP ", X); .print("").
+//    .print("---------------------------------------------------------",
+//           "---------------------------------------------------------",
+//           "------------------------------------------------------> ", X).
 
 
 +task(TaskId, Type) : Type \== "auction" & freeAgents(Agents) & .length(Agents, N) & step(StartStep) <-
@@ -17,6 +17,8 @@ freeAgents([]).
 	.print("New task: ", TaskId, " - ", Items, " - Type: ", Type);
     haveItemsReady(Items, X);
     estimateSteps(TaskId, Agents, Steps);
+    // TODO: Consider pushing missions a few steps forward and try again.
+    // Or keeping some stuff reserved for missions.
     if (X & N > 0 & StartStep + Steps < EndStep) {
 	    if (Type = "mission") {
             .print("~~~ TAKING MISSION: ", TaskId, " (", EndStep, ") ", " ~~~");

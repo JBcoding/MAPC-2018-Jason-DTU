@@ -70,6 +70,19 @@ public class CExploredMap {
                 l = isLocationGood(latSquare - range, lonn); if (l != null) return l;
             }
             range ++;
+
+            if (range > 1000) {
+                resetMap();
+                range = 1;
+            }
+        }
+    }
+
+    private void resetMap() {
+        for (int lat = 0; lat < explored.length; lat++) {
+            for (int lon = 0; lon < explored[lat].length; lon++) {
+                explored[lat][lon] = false;
+            }
         }
     }
 

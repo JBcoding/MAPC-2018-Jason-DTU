@@ -11,7 +11,7 @@
 
 !startLoop.
 
-// !continueLoopSleep.
+!continueLoopSleep.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 

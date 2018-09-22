@@ -1,9 +1,11 @@
 package data;
 
+import info.AgentArtifact;
 import info.FacilityArtifact;
 import info.ItemArtifact;
 import info.StaticInfoArtifact;
 import massim.scenario.city.data.Item;
+import massim.scenario.city.data.Location;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Storage;
@@ -54,13 +56,24 @@ public class CStorage {
         return items.get(name) + itemsVar.get(name);
     }
 
-    public synchronized Facility getLowestResourceNode() {
+    public synchronized Facility getLowestResourceNode(AgentArtifact agent) {
+        String agentName = agent.agentName;
+        int speed = agent.getEntity().getCurrentSpeed();
+
         Collection<Facility> nodes = FacilityArtifact.getFacilities(FacilityArtifact.RESOURCE_NODE);
+
         ResourceNode bestNode = null;
         double lowestAmount = Double.MAX_VALUE;
+
+        Location storageLoc = getMainStorageFacility().getLocation();
+
         for (Facility nodeF : nodes) {
             ResourceNode node = (ResourceNode) nodeF;
-            if (getItemCountWithVar(node.getResource().getName()) < lowestAmount) {
+            if (getItemCountWithVar(node.getResource().getName()) < lowestAmount
+                || (bestNode != null
+                    && getItemCountWithVar(node.getResource().getName()) <= lowestAmount
+                    && StaticInfoArtifact.getRoute(agentName, node.getLocation(), storageLoc).getRouteDuration(speed)
+                    < StaticInfoArtifact.getRoute(agentName, bestNode.getLocation(), storageLoc).getRouteDuration(speed))) {
                 lowestAmount = getItemCountWithVar(node.getResource().getName());
                 bestNode = node;
             }

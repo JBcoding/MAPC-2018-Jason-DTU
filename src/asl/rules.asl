@@ -26,6 +26,7 @@ inShop	    		:- inFacility(F) & isShop(F).
 inShop(F)			:- inFacility(F) & inShop.
 inResourceNode      :- inFacility(F) & isResourceNode(F).
 inWell              :- inFacility(F) & isWell(F).
+inFacility          :- inFacility(F) & F \== "none".
 inOwnWell           :- inWell & inOwnWell(X) & X.
 inEnemyWell         :- inWell & not inOwnWell.
 

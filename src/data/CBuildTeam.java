@@ -106,6 +106,7 @@ public class CBuildTeam {
                 Set<Item> missing = item.getRequiredItems().stream()
                         .filter(Item::needsAssembly)
                         .filter(i -> storage.getAmount(i) == 0)
+                        .filter(i -> !toBuild.contains(i.getName()))
                         .collect(Collectors.toSet());
 
                 for (Item i : missing) {

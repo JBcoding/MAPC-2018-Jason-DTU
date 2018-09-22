@@ -41,11 +41,13 @@
     if (not X) {
         !doAction(build);
         !buildWell;
-    }
-    else {
+    } else {
         stopBuilding;
         .print("Done building well");
     }.
++!buildWell : atPeriphery & inFacility & not inOwnWell <-
+    .print("Hoping for different well builder. In: ", F);
+    stopBuilding.
 +!buildWell :
     atPeriphery
     <-
@@ -124,7 +126,6 @@
 +!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("successful_partial").
 +!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("useless").
 +!deliverItems(TaskId) <-
-	.print("At facility. Delivering.");
  	!doAction(deliver_job(TaskId));
  	!deliverItems(TaskId).
 
@@ -201,12 +202,19 @@
 	!getToFacility(F);
 	!charge.
 
-+!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); /* .print("Scouting"); */ !scout(Lat, Lon).
++!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); !scout(Lat, Lon).
 +!scoutt.
 
 +!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
 +!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
-+!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(Lat, Lon) : scout(X) & X <-
+    !doAction(goto(Lat, Lon));
+    canSee(Lat, Lon, Yes);
+    if (Yes) {
+        !scoutt;
+    } else {
+        !scout(Lat, Lon);
+    }.
 +!scout(_, _) : scout(X) & not X.
 
 +!gatherUntilFull(_) : build <-

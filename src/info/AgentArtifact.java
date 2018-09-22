@@ -554,7 +554,7 @@ public class AgentArtifact extends Artifact {
 		}
 
 	    if (FacilityArtifact.calculateMissingResourceNodes().size() == 0) {
-            stopScouting(); // TODO: We might want to keep 1 scout
+            stopScouting();
         }
     }
 
@@ -565,7 +565,7 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     void getResourceNode(OpFeedbackParam<Facility> f) {
-        f.set(StaticInfoArtifact.getStorage().getLowestResourceNode());
+        f.set(StaticInfoArtifact.getStorage().getLowestResourceNode(this));
 	}
 
     @OPERATION
@@ -648,7 +648,11 @@ public class AgentArtifact extends Artifact {
 		int quantity = getEntity().getCurrentCapacity() / volume;
         CStorage storage = StaticInfoArtifact.getStorage();
 
-		if (!level1Item) {
+        if (level1Item) {
+            for (Map.Entry<Item, Integer> entry : item.getRequiredBaseItems().entrySet()) {
+                storage.reserve(entry.getKey(), entry.getValue() * quantity);
+            }
+        } else {
             for (Item part : item.getRequiredItems()) {
                 quantity = Math.min(quantity, storage.getAmount(part));
             }
@@ -732,11 +736,17 @@ public class AgentArtifact extends Artifact {
 		getObsProperty("inOwnWell").updateValue(false);
 	}
 
-    private void stopScouting() {
+    private synchronized void stopScouting() {
+        String role = this.getEntity().getRole().getName();
+        long dronesLeft = scouts.stream().filter(a -> getEntity(a).getRole().getName().equals("drone")).count();
+
+        if (role.equals("drone") && dronesLeft == 1) {
+            return;
+        }
+
         getObsProperty("scout").updateValue(false);
         scouts.remove(this.agentName);
 
-        String role = this.getEntity().getRole().getName();
         if (role.equals("drone")) {
             setToDeliver();
         } else {
