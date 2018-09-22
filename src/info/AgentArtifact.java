@@ -155,7 +155,7 @@ public class AgentArtifact extends Artifact {
 	/**
 	 * @return The entity associated with this agent artifact
 	 */
-	private CEntity getEntity() {
+	public CEntity getEntity() {
 		return entities.get(this.agentName);
 	}
 
@@ -614,10 +614,8 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void getMainTruckName(OpFeedbackParam<String> v, OpFeedbackParam<Integer> step) {
-        Pair<String, Integer> res = StaticInfoArtifact.getBuildTeam().getTruckName();
-        v.set(res.getFirst());
-        step.set(res.getSecond());
+    void getMainTruckName(OpFeedbackParam<String> v) {
+        v.set(StaticInfoArtifact.getBuildTeam().getTruckName());
     }
 
     @OPERATION
@@ -714,8 +712,8 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void requestHelp(int step) {
-        StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName, step);
+    void requestHelp() {
+        StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
     }
 
 	public boolean canSee(Location loc) {

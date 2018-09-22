@@ -38,8 +38,8 @@
 	+free.
 
 +!deliver([], [], _, _).
-+!deliver(ItemsForMe, ItemsRest, TaskId, DeliveryLocation) <-
-    .send(announcer, tell, busy);
++!deliver(ItemsForMe, ItemsRest, TaskId, DeliveryLocation) : .my_name(Me) <-
+    .send(announcer, untell, available(Me));
 
     // We cannot carry it all, so we need some more deliverers.
 	if (not ItemsRest = []) {
@@ -51,9 +51,9 @@
 	!getItems(ItemsForMe);
 	!getToFacility(DeliveryLocation);
 	!deliverItems(TaskId);
-    .send(announcer, tell, available);
 	!getToFacility(S);
-	!emptyInventory.
+	!emptyInventory;
+    .send(announcer, tell, available(Me)).
 
 +free : deliverRequest(Items, TaskId, DeliveryLocation, _, CNPId) & remainingCapacity(Capacity) <-
 	getItemsToCarry(Items, Capacity, ItemsForMe, ItemsRest);

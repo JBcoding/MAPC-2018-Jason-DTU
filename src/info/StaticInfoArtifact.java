@@ -132,11 +132,16 @@ public class StaticInfoArtifact extends Artifact {
 	 * @param to The location
 	 * @return The route to the location
 	 */
-	public static Route getRoute(String agentName, Location to)
-	{
+	public static Route getRoute(String agentName, Location to) {
 		CEntity agent = AgentArtifact.getEntity(agentName);
 		
 		return StaticInfoArtifact.getMap().findRoute(agent.getLocation(), to, agent.getPermissions());
+	}
+
+	public static Route getRoute(String agentName, Location from, Location to) {
+		CEntity agent = AgentArtifact.getEntity(agentName);
+
+		return StaticInfoArtifact.getMap().findRoute(from, to, agent.getPermissions());
 	}
 
 	public static void perceiveInitial(Collection<Percept> percepts) {

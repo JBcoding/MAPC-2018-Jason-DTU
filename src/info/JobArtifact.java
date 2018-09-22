@@ -1,13 +1,7 @@
 package info;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -15,11 +9,13 @@ import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import cnp.TaskArtifact;
+import data.CStorage;
 import data.CUtil;
 import eis.iilang.Percept;
 import env.EIArtifact;
 import env.Translator;
 import massim.scenario.city.data.*;
+import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.Storage;
 
 public class JobArtifact extends Artifact {
@@ -94,10 +90,64 @@ public class JobArtifact extends Artifact {
 	 * @param job 
 	 * @return The estimate of how many steps it is going to take to complete this job
 	 */
-	public static int estimateSteps(Job job)
-	{
-		// TODO
-		return 1;
+
+    public static int estimateSteps(Job job) {
+        return 1;
+    }
+
+    @OPERATION
+    void estimateSteps(String taskId, Object[] agentNames, OpFeedbackParam<Integer> steps) {
+        List<AgentArtifact> agents = new ArrayList<>();
+
+        for (Object agentName : agentNames) {
+            agents.add(AgentArtifact.getAgentArtifact((String) agentName));
+        }
+
+        steps.set(estimateSteps(taskId, agents));
+    }
+
+	private static int estimateSteps(String taskId, List<AgentArtifact> agents) {
+        Job job = getJob(taskId);
+
+        CStorage storage = StaticInfoArtifact.getStorage();
+        Facility workshop = FacilityArtifact.getFacility(storage.getMainWorkShop());
+
+	    ItemBox itemBox = job.getRequiredItems();
+	    Map<Item, Integer> items = new HashMap<>();
+
+	    for (Item type : itemBox.getStoredTypes()) {
+	        items.put(type, itemBox.getItemCount(type));
+        }
+
+        int volume = ItemArtifact.getVolume(items);
+	    int bestDuration = Integer.MAX_VALUE;
+	    int worstDuration = 0;
+
+	    for (AgentArtifact agent : agents) {
+	        int capacity = agent.getEntity().getCurrentCapacity();
+	        int speed = agent.getEntity().getCurrentSpeed();
+            int toWs = StaticInfoArtifact.getRoute(agent.agentName, workshop.getLocation()).getRouteDuration(speed);
+            int toDeliver = StaticInfoArtifact.getRoute(agent.agentName, job.getStorage().getLocation()).getRouteDuration(speed);
+
+            int duration = toWs + toDeliver + items.size() + 5; // + 5 for good luck
+
+	        if (capacity >= volume && duration < bestDuration) {
+	            bestDuration = duration;
+            }
+
+            if (duration > worstDuration) {
+                // Let's just use the worst case for now.
+                worstDuration = duration;
+            }
+        }
+
+        if (bestDuration == Integer.MAX_VALUE) {
+            bestDuration = worstDuration;
+        }
+
+        final double safetyFactor = 1.2;
+
+        return (int)(bestDuration * safetyFactor);
 	}
 	
 	@OPERATION

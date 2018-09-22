@@ -143,7 +143,6 @@ public class FacilityArtifact extends Artifact {
 	{
 	    Facility fac = getFacility(facilityName);
 	    if (fac == null) {
-	        // TODO: idk
 	        distance.set(Integer.MAX_VALUE);
         } else {
             Route route = StaticInfoArtifact.getRoute(getOpUserName(),fac.getLocation());

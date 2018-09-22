@@ -27,12 +27,7 @@
     !getItems(Items).
 +!getItems([map(Item, Amount) | Items])
     : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
-    itemInStorage(Item, Amount, Yes);
-    if (Yes) {
-        !doAction(retrieve(Item, Amount));
-    } else {
-        !doAction(recharge);
-    }
+    !doAction(retrieve(Item, Amount));
     // Sometimes it seems to take a bit to observe the retrieve,
     // so try to retrieve the rest of the items first.
     !getItems(NewItems).
@@ -248,10 +243,10 @@
     !emptyInventory;
     !gatherRole.
 
-+!assembleItemM(Item, Quantity) : step(Step)<-
++!assembleItemM(Item, Quantity) <-
     haveItem(Item, X, Quantity);
     if (not X) {
-        requestHelp(Step);
+        requestHelp;
         !doAction(assemble(Item));
         !assembleItemM(Item, Quantity);
     }.
@@ -260,22 +255,14 @@
     getRequiredItems(Item, Q, Items);
     !getItems(Items).
 
-+!assistRole : step(X) <-
-    getMainTruckName(T, Y);
-    if (X > Y) {
-        .wait(50);
-        !assistRole;
-    } else {
-        !doAction(assist_assemble(T));
-    }.
-
 +!builderRole: builder(X) & X <-
     getWorkShop(W);
     isTruck(N);
     if (not N) {
         !getToFacility(W);
         .wait(100); // dirty fix (wait for requestHelp calls to complete)
-        !assistRole;
+        getMainTruckName(T);
+        !doAction(assist_assemble(T));
     } else {
         getMainStorageFacility(S);
         !getToFacility(S);

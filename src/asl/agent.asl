@@ -11,14 +11,14 @@
 
 !startLoop.
 
-!continueLoopSleep.
+// !continueLoopSleep.
 
 +!startLoop <- .wait({+step(_)}); .wait(500); !loop.
 
 +!loop : scout(X) & X <- .print("Scouting"); !scoutt; !loop.
-+!loop : deliver(X) & X <-
++!loop : deliver(X) & X & .my_name(Me) <-
     .print("Delivering items");
-    .send(announcer, tell, available);
+    .send(announcer, tell, available(Me));
     getMainStorageFacility(S);
     !getToFacility(S);
     +free.

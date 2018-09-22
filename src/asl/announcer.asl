@@ -2,7 +2,7 @@
 { include("stdlib.asl") }
 { include("rules.asl") }
 
-freeCount(0).
+freeAgents([]).
 
 !focusArtifacts.
 
@@ -12,21 +12,18 @@ freeCount(0).
            "------------------------------------------------------> ", X).
 
 
-+task(TaskId, Type) : Type \== "auction" & freeCount(N) <-
++task(TaskId, Type) : Type \== "auction" & freeAgents(Agents) & .length(Agents, N) & step(StartStep) <-
 	getJob(TaskId, Storage, Items, EndStep);
 	.print("New task: ", TaskId, " - ", Items, " - Type: ", Type);
     haveItemsReady(Items, X);
-    if (X) {
+    estimateSteps(TaskId, Agents, Steps);
+    if (X & N > 0 & StartStep + Steps < EndStep) {
 	    if (Type = "mission") {
             .print("~~~ TAKING MISSION: ", TaskId, " (", EndStep, ") ", " ~~~");
 	        !announceDeliver(Items, TaskId, Storage, "mission");
         } else {
-            if (true) { // TODO: +available does not work right now (consider keeping one free for missions)
-                .print("~~~ TAKING JOB: ", TaskId, " (", EndStep, ") ", "~~~");
-                !announceDeliver(Items, TaskId, Storage, "new");
-            } else {
-                .print("No agents available for: ", TaskId);
-            }
+            .print("~~~ TAKING JOB: ", TaskId, " (", EndStep, ") ", "~~~");
+            !announceDeliver(Items, TaskId, Storage, "new");
         }
     } else {
         .print("Forgoing ", Type, " ", TaskId);
@@ -48,7 +45,7 @@ freeCount(0).
 	}.
 
 @freeCount1[atomic]
-+busy : freeCount(N) <- .print("Available: ", N - 1); -+freeCount(N - 1).
++available(Agent) : freeAgents(L) <- .print("Available: ", L); -+freeAgents([Agent|L]).
 
 @freeCount2[atomic]
-+available : freeCount(N) <- .print("Available: ", N + 1); -+freeCount(N + 1).
+-available(Agent) : freeAgents(L) & delete(Agent, L, L2) <- .print("Available: ", L2); -+freeAgents(L2).

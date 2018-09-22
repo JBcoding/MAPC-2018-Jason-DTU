@@ -56,8 +56,8 @@ public class CBuildTeam {
         toBuild.add(itemName);
     }
 
-    public synchronized Pair<String, Integer> getTruckName() {
-        return new Pair<>(truckName, lastChangeRound);
+    public synchronized String getTruckName() {
+        return truckName;
     }
 
     public synchronized String thingToBuild(String agentName) {
@@ -130,8 +130,9 @@ public class CBuildTeam {
         return missingAgents.get(roleName) > 0;
     }
 
-    public synchronized void requestHelp(String agentName, int step) {
-        if (lastChangeRound >= step) {
+    public synchronized void requestHelp(String agentName) {
+        int step = StaticInfoArtifact.getCurrentStep();
+        if (lastChangeRound == step) {
             return;
         }
 

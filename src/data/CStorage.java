@@ -104,6 +104,6 @@ public class CStorage {
             amount -= reserved.getOrDefault(item, 0);
         }
 
-        return amount;
+        return Math.max(amount, 0);
     }
 }
