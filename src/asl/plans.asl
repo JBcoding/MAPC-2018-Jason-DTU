@@ -231,7 +231,11 @@
 +!gatherUntilFull(_) : build <-
     !buildWell;
     // Perform the previous step for !gatherRole
-    getResourceNode(F);
+    getResourceNode(F, SSS);
+    if (not SSS) {
+        .print("____________________");
+        !dismantleEnemyWell;
+    }
     getFacilityName(F, N);
     getCoords(F, Lat, Lon);
     !getToLocation(N, Lat, Lon);
@@ -251,7 +255,11 @@
     !emptyInventory(NewItems).
 
 +!gatherRole: gather(X) & X <-
-    getResourceNode(F);
+    getResourceNode(F, SSS);
+    if (not SSS) {
+        .print("____________________");
+        !dismantleEnemyWell;
+    }
     getFacilityName(F, N);
     getCoords(F, Lat, Lon);
     !getToLocation(N, Lat, Lon);

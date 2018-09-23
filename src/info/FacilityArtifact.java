@@ -338,15 +338,22 @@ public class FacilityArtifact extends Artifact {
             StaticInfoArtifact.getStorage().clearItemsCount();
         }
 
+        int c = 0;
+
         ItemBox itemBox = new ItemBox();
         for (Object tuple : items) {
             Object[] tup = (Object[])tuple;
             itemBox.store(ItemArtifact.getItem((String)tup[0]), (int) tup[1]);
             if (StaticInfoArtifact.getStorage() != null && name.equals(StaticInfoArtifact.getStorage().getMainStorageFacility().getName())) {
                 StaticInfoArtifact.getStorage().updateItemCount((String)tup[0], (Integer) tup[1]);
+                c ++;
             }
         }
 
+
+        if (c > 1 && ((double)usedCap) / capacity > .85) {
+            StaticInfoArtifact.getStorage().gatherEnabled = false;
+        }
 
         // Set<String> teamNames?
 
@@ -395,7 +402,6 @@ public class FacilityArtifact extends Artifact {
 
         wellsIntegrityDiff.put(name, 0);
 
-		System.out.println("______________" + name + " __ " + integrity);
 		if (wells.containsKey(name)) {
 			Well well = wells.get(name);
 			well.build(integrity - well.getIntegrity());

@@ -25,9 +25,14 @@
     map(I, Amount) = Item;
     unreserve(I, Amount);
     !getItems(Items).
-+!getItems([map(Item, Amount) | Items])
-    : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
-    !doAction(retrieve(Item, Amount));
++!getItems([map(Item, Amount) | Items]) : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
+    isBase(Item, BaseItem);
+    itemInStorageIncludingReserved(Item, Amount, Ready);
+    if (BaseItem & not Ready) {
+        !doAction(recharge);
+    } else {
+        !doAction(retrieve(Item, Amount));
+    }
     // Sometimes it seems to take a bit to observe the retrieve,
     // so try to retrieve the rest of the items first.
     !getItems(NewItems).
@@ -177,6 +182,14 @@
 
 // Gets close to this location
 +!getToPeripheryLocationStart(Lat, Lon) :
+    destroy &
+    lastAction("goto") &
+    lastActionResult("failed_no_route")
+    <-
+    // Go somewhere else if we can't get to the assigned well
+    getRandomPeripheralLocation(PerLat, PerLon);
+    !getToPeripheryLocation(PerLat, PerLon, true).
++!getToPeripheryLocationStart(Lat, Lon) :
     destroy
     <-
     getEnemyWell(F, _, _);
@@ -184,16 +197,6 @@
         canSee(Lat, Lon, CanSee);
         !getToPeripheryLocation(Lat, Lon, CanSee);
     }.
-//+!getToPeripheryLocationStart(Lat, Lon) :
-//    build
-//    <-
-//    canSeeWell(CanSeeWell, NewLat, NewLon);
-//    if (not CanSeeWell) {
-//        !getToPeripheryLocation(Lat, Lon, true);
-//    } else {
-//        .print("WOOOP: finding new location because of well");
-//        getToPeripheryLocationStart(NewLat, NewLon);
-//    }.
 +!getToPeripheryLocationStart(Lat, Lon) <- !getToPeripheryLocation(Lat, Lon, true).
 +!getToPeripheryLocation(Lat, Lon, CanSee) : atPeriphery & CanSee.
 +!getToPeripheryLocation(Lat, Lon, CanSee) : not canMove <- !doAction(recharge); !getToPeripheryLocationStart(Lat, Lon).
@@ -228,7 +231,11 @@
 +!gatherUntilFull(_) : build <-
     !buildWell;
     // Perform the previous step for !gatherRole
-    getResourceNode(F);
+    getResourceNode(F, SSS);
+    if (not SSS) {
+        .print("____________________");
+        !dismantleEnemyWell;
+    }
     getFacilityName(F, N);
     getCoords(F, Lat, Lon);
     !getToLocation(N, Lat, Lon);
@@ -248,7 +255,11 @@
     !emptyInventory(NewItems).
 
 +!gatherRole: gather(X) & X <-
-    getResourceNode(F);
+    getResourceNode(F, SSS);
+    if (not SSS) {
+        .print("____________________");
+        !dismantleEnemyWell;
+    }
     getFacilityName(F, N);
     getCoords(F, Lat, Lon);
     !getToLocation(N, Lat, Lon);
@@ -260,8 +271,8 @@
     !gatherRole.
 
 +!assembleItemM(Item, Quantity) <-
-    haveItem(Item, X, Quantity);
-    if (not X) {
+    haveItem(Item, Quantity, Yes);
+    if (not Yes) {
         requestHelp;
         !doAction(assemble(Item));
         !assembleItemM(Item, Quantity);
@@ -271,36 +282,36 @@
     getRequiredItems(Item, Q, Items);
     !getItems(Items).
 
-+!builderRole: builder(X) & X <-
++!builderRole: assister <-
     getWorkShop(W);
-    isTruck(N);
-    if (not N) {
+    !getToFacility(W);
+    .wait(100); // dirty fix (wait for requestHelp calls to complete)
+    getMainTruckName(T);
+    !doAction(assist_assemble(T));
+    !builderRole.
+
++!builderRole: builder(X) & X & myRole("truck") <-
+    getWorkShop(W);
+    getMainStorageFacility(S);
+    !getToFacility(S);
+    somethingToBuild(Y);
+    if (Y) {
+        getItemToBuild(Item, Quantity);
+
+        // Below is a 5 step plan to build anything !!!
+        // 1. Take needed items out
+        !getItemsToBuildItem(Item, Quantity);
+        // 2. go to workshop
         !getToFacility(W);
-        .wait(100); // dirty fix (wait for requestHelp calls to complete)
-        getMainTruckName(T);
-        !doAction(assist_assemble(T));
-    } else {
-        getMainStorageFacility(S);
+        // 3. assemble
+        !assembleItemM(Item, Quantity);
+        // 4. go to storage
         !getToFacility(S);
-        somethingToBuild(Y);
-        if (Y) {
-            getItemToBuild(Item, Quantity);
+        // 5. empty inventory
+        !emptyInventory;
 
-            // Below is a 5 step plan to build anything !!!
-            // 1. Take needed items out
-            !getItemsToBuildItem(Item, Quantity);
-            // 2. go to workshop
-            !getToFacility(W);
-            // 3. assemble
-            !assembleItemM(Item, Quantity);
-            // 4. go to storage
-            !getToFacility(S);
-            // 5. empty inventory
-            !emptyInventory;
-
-        } else {
-            .print("Currently nothing to build");
-            .wait({+step(_)});
-        }
+    } else {
+        .print("Currently nothing to build");
+        .wait({+step(_)});
     }
     !builderRole.

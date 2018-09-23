@@ -65,7 +65,7 @@ public class AgentArtifact extends Artifact {
 	
 	public String agentName;
 
-	private static final double EPSILON = 1E-3;
+	public static final double EPSILON = 1E-3;
 
 	private static Deque<String> scouts = new ConcurrentLinkedDeque<String>();
 	private static Set<String> wellBuilders = ConcurrentHashMap.newKeySet();
@@ -564,13 +564,24 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void getResourceNode(OpFeedbackParam<Facility> f) {
-        f.set(StaticInfoArtifact.getStorage().getLowestResourceNode(this));
+    void getResourceNode(OpFeedbackParam<Facility> f, OpFeedbackParam<Boolean> success) {
+	    Facility facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
+	    if (facility == null) {
+	        success.set(false);
+	        f.set(FacilityArtifact.getResourceNodes().values().iterator().next());
+        } else {
+	        success.set(true);
+	        f.set(facility);
+        }
 	}
 
     @OPERATION
-    void getFacilityName(ResourceNode facility, OpFeedbackParam<String> name) {
-        name.set(facility.getName());
+    void getFacilityName(Object facility, OpFeedbackParam<String> name) {
+	    if (facility != null) {
+            name.set(((ResourceNode)facility).getName());
+        } else {
+	        name.set("null");
+        }
     }
 
 	@OPERATION

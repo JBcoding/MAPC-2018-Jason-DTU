@@ -310,7 +310,7 @@ public class CCityMap implements Serializable {
 		double lat = centerLat + (l.getLat()-centerLat)*Math.cos(angle) - (l.getLon()-centerLon)*Math.sin(angle);
 		double lon = centerLon + (l.getLat()-centerLat)*Math.sin(angle) + (l.getLon()-centerLon)*Math.cos(angle);
 
-		System.out.println("Got next clockwise position");
+		//System.out.println("Got next clockwise position");
 
 		return new Location(lon, lat);
 	}

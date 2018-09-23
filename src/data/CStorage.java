@@ -25,6 +25,8 @@ public class CStorage {
 
     private HashMap<String, Integer> reserved;
 
+    public boolean gatherEnabled = true;
+
     public CStorage() {
         Collection<Facility> storages = FacilityArtifact.getFacilities(FacilityArtifact.STORAGE);
         Collection<Facility> workshops = FacilityArtifact.getFacilities(FacilityArtifact.WORKSHOP);
@@ -58,6 +60,9 @@ public class CStorage {
     }
 
     public synchronized Facility getLowestResourceNode(AgentArtifact agent) {
+        if (!gatherEnabled) {
+            return null;
+        }
         String agentName = agent.agentName;
         int speed = agent.getEntity().getCurrentSpeed();
 

@@ -79,7 +79,9 @@ public class StaticInfoArtifact extends Artifact {
 
 	public static void incrementStep() {
 		currentStep ++;
-		System.out.println("____________" + Arrays.toString(FacilityArtifact.wells.values().stream().filter(w -> !w.getTeam().equals(getTeam())).toArray()));
+		/*if (currentStep == 10) {
+		    getStorage().gatherEnabled = false;
+        }*/
 	}
 
 	public static int getCurrentStep() {
