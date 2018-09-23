@@ -568,6 +568,8 @@ public class AgentArtifact extends Artifact {
 	    Facility facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
 	    if (facility == null) {
 	        success.set(false);
+	        getObsProperty("gather").updateValue(false);
+	        setToDestroy();
 	        f.set(FacilityArtifact.getResourceNodes().values().iterator().next());
         } else {
 	        success.set(true);

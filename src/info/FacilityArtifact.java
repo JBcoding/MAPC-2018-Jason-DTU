@@ -33,6 +33,8 @@ public class FacilityArtifact extends Artifact {
 	public static final String RESOURCE_NODE		= "resourceNode";
 	public static final String WELL	 			    = "well";
 
+	private static final double STOP_GATHER_RATIO = 0.85;
+
 	public static final Set<String>	STATIC_PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(CHARGING_STATION, DUMP, SHOP, STORAGE, WORKSHOP)));
 
@@ -351,7 +353,8 @@ public class FacilityArtifact extends Artifact {
         }
 
 
-        if (c > 1 && ((double)usedCap) / capacity > .85) {
+        if (c > 1 && ((double)usedCap) / capacity > STOP_GATHER_RATIO) {
+            System.out.println("STOPPING GATHERING!");
             StaticInfoArtifact.getStorage().gatherEnabled = false;
         }
 

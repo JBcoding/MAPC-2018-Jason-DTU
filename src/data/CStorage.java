@@ -63,6 +63,7 @@ public class CStorage {
         if (!gatherEnabled) {
             return null;
         }
+
         String agentName = agent.agentName;
         int speed = agent.getEntity().getCurrentSpeed();
 

@@ -235,12 +235,13 @@
     if (not SSS) {
         .print("____________________");
         !dismantleEnemyWell;
-    }
-    getFacilityName(F, N);
-    getCoords(F, Lat, Lon);
-    !getToLocation(N, Lat, Lon);
-    getItemVolume(F, V);
-    !gatherUntilFull(V).
+    } else {
+        getFacilityName(F, N);
+        getCoords(F, Lat, Lon);
+        !getToLocation(N, Lat, Lon);
+        getItemVolume(F, V);
+        !gatherUntilFull(V);
+    }.
 +!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
@@ -259,16 +260,17 @@
     if (not SSS) {
         .print("____________________");
         !dismantleEnemyWell;
-    }
-    getFacilityName(F, N);
-    getCoords(F, Lat, Lon);
-    !getToLocation(N, Lat, Lon);
-    getItemVolume(F, V);
-    !gatherUntilFull(V);
-    getMainStorageFacility(S);
-    !getToFacility(S);
-    !emptyInventory;
-    !gatherRole.
+    } else {
+        getFacilityName(F, N);
+        getCoords(F, Lat, Lon);
+        !getToLocation(N, Lat, Lon);
+        getItemVolume(F, V);
+        !gatherUntilFull(V);
+        getMainStorageFacility(S);
+        !getToFacility(S);
+        !emptyInventory;
+        !gatherRole;
+    }.
 
 +!assembleItemM(Item, Quantity) <-
     haveItem(Item, Quantity, Yes);
