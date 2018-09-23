@@ -77,12 +77,12 @@
 
 //+!dismantleOwnWell : inOwnWell <- !doAction(dismantle); !dismantleOwnWell.
 
-+!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell; markWellDestroyed.
++!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell.
 +!dismantleEnemyWell
     <-
     getEnemyWell(F, Lat, Lon);
     if (not (F == "none")) {
-        !getToLocation(F, Lat, Lon);
+        !getToLocationWell(F, Lat, Lon);
     } else {
         getRandomPeripheralLocation(PerLat, PerLon);
         !getToPeripheryLocationStart(PerLat, PerLon);
@@ -160,12 +160,20 @@
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F)    <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
-// Meant for getting to resource nodes and wells
+// Meant for getting to resource nodes
 +!getToLocation(F, Lat, Lon) : build <- !buildWell; !getToLocation(F, Lat, Lon).
 +!getToLocation(F, _, _) : inFacility(F).
 +!getToLocation(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocation(F, Lat, Lon).
+
+// Meant for getting to wells
++!getToLocationWell(F, Lat, Lon) : build <- !buildWell; !getToLocationWell(F, Lat, Lon).
++!getToLocationWell(F, _, _) : inFacility(F).
++!getToLocationWell(F, Lat, Lon) <- doesWellExist(F, X); if (X) {!getToLocationWellP2(F, Lat, Lon);}.
++!getToLocationWellP2(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocationWell(F, Lat, Lon).
++!getToLocationWellP2(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocationWell(F, Lat, Lon).
++!getToLocationWellP2(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocationWell(F, Lat, Lon).
 
 // Gets close to this location
 +!getToPeripheryLocationStart(Lat, Lon) :

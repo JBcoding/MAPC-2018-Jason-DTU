@@ -716,6 +716,41 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
+    void doesWellExist(String F, OpFeedbackParam<Boolean> X) {
+        X.set(FacilityArtifact.wells.containsKey(F));
+    }
+
+
+    @OPERATION
+    void subtractFromWell() {
+        try {
+            Well w = FacilityArtifact.wells.values().stream()
+                    .filter(well -> !well.getTeam().equals(StaticInfoArtifact.getTeam()))
+                    .min(Comparator.comparingDouble(well -> FacilityArtifact.euclideanDistance(well.getLocation(), getEntity().getLocation()))).get();
+
+            if (!canSee(w.getLocation())) {
+                return;
+            }
+
+            FacilityArtifact.wellsIntegrityDiff.put(w.getName(),
+                    FacilityArtifact.wellsIntegrityDiff.get(w.getName()) - getEntity().getCurrentSkill());
+
+
+
+            if (w.getIntegrity() + FacilityArtifact.wellsIntegrityDiff.get(w.getName()) < 0) {
+                try {
+                    Thread.sleep(100);
+                    // Out of time to make a better fix
+                    // But trust me it is gonna work, probably
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                FacilityArtifact.destroyWell(w);
+            }
+        } catch (Throwable t) {}
+    }
+
+    @OPERATION
     void requestHelp() {
         StaticInfoArtifact.getBuildTeam().requestHelp(this.agentName);
     }

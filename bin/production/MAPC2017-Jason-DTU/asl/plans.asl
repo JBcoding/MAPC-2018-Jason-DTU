@@ -22,10 +22,16 @@
 // Assumes we are at the storage facility.
 +!getItems([]).
 +!getItems([Item|Items]) : getInventory(Inv) & contains(Item, Inv) <-
+    map(I, Amount) = Item;
+    unreserve(I, Amount);
     !getItems(Items).
-+!getItems([map(Item, Amount) | Items]) <-
++!getItems([map(Item, Amount) | Items])
+    : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
     !doAction(retrieve(Item, Amount));
-    !getItems([map(Item, Amount) | Items]).
+    // Sometimes it seems to take a bit to observe the retrieve,
+    // so try to retrieve the rest of the items first.
+    !getItems(NewItems).
+
 
 +!buildWell :
     inOwnWell &
@@ -35,11 +41,13 @@
     if (not X) {
         !doAction(build);
         !buildWell;
-    }
-    else {
+    } else {
         stopBuilding;
         .print("Done building well");
     }.
++!buildWell : atPeriphery & inFacility & not inOwnWell <-
+    .print("Hoping for different well builder. In: ", F);
+    stopBuilding.
 +!buildWell :
     atPeriphery
     <-
@@ -69,12 +77,12 @@
 
 //+!dismantleOwnWell : inOwnWell <- !doAction(dismantle); !dismantleOwnWell.
 
-+!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell; markWellDestroyed.
++!dismantleEnemyWell : inEnemyWell <- !doAction(dismantle); !dismantleEnemyWell.
 +!dismantleEnemyWell
     <-
     getEnemyWell(F, Lat, Lon);
     if (not (F == "none")) {
-        !getToLocation(F, Lat, Lon);
+        !getToLocationWell(F, Lat, Lon);
     } else {
         getRandomPeripheralLocation(PerLat, PerLon);
         !getToPeripheryLocationStart(PerLat, PerLon);
@@ -113,10 +121,13 @@
 	}
 	else { .print("Can not find any resource nodes"); }.
 
-+!deliverItems(TaskId, Facility) <-
-	!getToFacility(Facility);
-	.print("At facility. Delivering.");
- 	!doAction(deliver_job(TaskId)).
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("failed_job_status").
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("successful").
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("successful_partial").
++!deliverItems(TaskId) : lastAction("deliver_job") & lastActionResult("useless").
++!deliverItems(TaskId) <-
+ 	!doAction(deliver_job(TaskId));
+ 	!deliverItems(TaskId).
 
 +!assembleItems([]).
 +!assembleItems([map(Item, Amount) | Items])
@@ -149,12 +160,20 @@
 +!getToFacility(F) : not enoughCharge & not isChargingStation(F)    <- !charge; !getToFacility(F).
 +!getToFacility(F) 													<- !doAction(goto(F)); 	!getToFacility(F).
 
-// Meant for getting to resource nodes and wells
+// Meant for getting to resource nodes
 +!getToLocation(F, Lat, Lon) : build <- !buildWell; !getToLocation(F, Lat, Lon).
 +!getToLocation(F, _, _) : inFacility(F).
 +!getToLocation(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocation(F, Lat, Lon).
 +!getToLocation(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocation(F, Lat, Lon).
+
+// Meant for getting to wells
++!getToLocationWell(F, Lat, Lon) : build <- !buildWell; !getToLocationWell(F, Lat, Lon).
++!getToLocationWell(F, _, _) : inFacility(F).
++!getToLocationWell(F, Lat, Lon) <- doesWellExist(F, X); if (X) {!getToLocationWellP2(F, Lat, Lon);}.
++!getToLocationWellP2(F, Lat, Lon) : not canMove <- !doAction(recharge); !getToLocationWell(F, Lat, Lon).
++!getToLocationWellP2(F, Lat, Lon) : not enoughCharge & not isChargingStation(F) <- !charge; !getToLocationWell(F, Lat, Lon).
++!getToLocationWellP2(F, Lat, Lon) <- !doAction(goto(Lat, Lon)); !getToLocationWell(F, Lat, Lon).
 
 // Gets close to this location
 +!getToPeripheryLocationStart(Lat, Lon) :
@@ -191,12 +210,19 @@
 	!getToFacility(F);
 	!charge.
 
-+!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); /* .print("Scouting"); */ !scout(Lat, Lon).
++!scoutt : scout(X) & X <- getClosestUnexploredPosition(Lat, Lon); !scout(Lat, Lon).
 +!scoutt.
 
 +!scout(Lat, Lon) : scout(X) & X & not canMove <- !doAction(recharge); !scout(Lat, Lon).
 +!scout(Lat, Lon) : scout(X) & X & not enoughCharge <- !charge; !scout(Lat, Lon).
-+!scout(Lat, Lon) : scout(X) & X <- !doAction(goto(Lat, Lon)); 	!scoutt.
++!scout(Lat, Lon) : scout(X) & X <-
+    !doAction(goto(Lat, Lon));
+    canSee(Lat, Lon, Yes);
+    if (Yes) {
+        !scoutt;
+    } else {
+        !scout(Lat, Lon);
+    }.
 +!scout(_, _) : scout(X) & not X.
 
 +!gatherUntilFull(_) : build <-
@@ -211,14 +237,15 @@
 +!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
-+!emptyInventory : build <- !buildWell; !emptyInventory.
-+!emptyInventory : inStorage & load(L) & L >= 1 <-
-    getItemNameAndQuantity(Item, Quantity);
-    if (not Quantity == -1) {
-        !doAction(store(Item, Quantity));
-        !emptyInventory;
-    }.
-+!emptyInventory.
++!emptyInventory : build <- !buildWell; getMainStorageFacility(S); !getToFacility(S); !emptyInventory.
++!emptyInventory : getInventory(Inv) <- !emptyInventory(Inv).
+
+// This way we can change the order and mitigate slow inventory updates
++!emptyInventory([]).
++!emptyInventory([Item|Items]) : getInventory(Inv) & not contains(Item, Inv) <- !emptyInventory(Items).
++!emptyInventory([map(Item, Amount) | Items]) : append(Items, [map(Item, Amount)], NewItems) <-
+    !doAction(store(Item, Amount));
+    !emptyInventory(NewItems).
 
 +!gatherRole: gather(X) & X <-
     getResourceNode(F);
@@ -241,18 +268,15 @@
     }.
 
 +!getItemsToBuildItem(Item, Q) <-
-    getMissingItemToBuildItem(Item, ItemToRetrieve, Quantity);
-    if (not Quantity == -1) {
-        !doAction(retrieve(ItemToRetrieve, Q));
-        !getItemsToBuildItem(Item, Q);
-    }.
+    getRequiredItems(Item, Q, Items);
+    !getItems(Items).
 
 +!builderRole: builder(X) & X <-
     getWorkShop(W);
     isTruck(N);
     if (not N) {
         !getToFacility(W);
-        .wait(100); // dirty fix
+        .wait(100); // dirty fix (wait for requestHelp calls to complete)
         getMainTruckName(T);
         !doAction(assist_assemble(T));
     } else {
