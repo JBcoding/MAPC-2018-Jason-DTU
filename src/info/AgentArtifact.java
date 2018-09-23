@@ -755,7 +755,8 @@ public class AgentArtifact extends Artifact {
     }
 
 	public boolean canSee(Location loc) {
-		return StaticInfoArtifact.getMap().isVisible(getEntity().getLocation(), loc, this.getEntity().getCurrentVision());
+	    return loc.inRange(getEntity().getLocation());
+//		return StaticInfoArtifact.getMap().isVisible(getEntity().getLocation(), loc, getEntity().getCurrentVision());
 	}
 
 	@OPERATION

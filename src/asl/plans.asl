@@ -182,6 +182,14 @@
 
 // Gets close to this location
 +!getToPeripheryLocationStart(Lat, Lon) :
+    destroy &
+    lastAction("goto") &
+    lastActionResult("failed_no_route")
+    <-
+    // Go somewhere else if we can't get to the assigned well
+    getRandomPeripheralLocation(PerLat, PerLon);
+    !getToPeripheryLocation(PerLat, PerLon, true).
++!getToPeripheryLocationStart(Lat, Lon) :
     destroy
     <-
     getEnemyWell(F, _, _);
@@ -189,16 +197,6 @@
         canSee(Lat, Lon, CanSee);
         !getToPeripheryLocation(Lat, Lon, CanSee);
     }.
-//+!getToPeripheryLocationStart(Lat, Lon) :
-//    build
-//    <-
-//    canSeeWell(CanSeeWell, NewLat, NewLon);
-//    if (not CanSeeWell) {
-//        !getToPeripheryLocation(Lat, Lon, true);
-//    } else {
-//        .print("WOOOP: finding new location because of well");
-//        getToPeripheryLocationStart(NewLat, NewLon);
-//    }.
 +!getToPeripheryLocationStart(Lat, Lon) <- !getToPeripheryLocation(Lat, Lon, true).
 +!getToPeripheryLocation(Lat, Lon, CanSee) : atPeriphery & CanSee.
 +!getToPeripheryLocation(Lat, Lon, CanSee) : not canMove <- !doAction(recharge); !getToPeripheryLocationStart(Lat, Lon).

@@ -33,6 +33,7 @@
     doActionStart; jia.action(Me, Action); .wait({+step(_)}); doActionEnd.
 
 +step(X) : lastAction("dismantle") & lastActionResult("successful") <- subtractFromWell.
++step(X) : lastAction("goto") & lastActionResult("failed_no_route") & fullCharge <- !loop.
 +step(X) : lastAction("goto") & lastActionResult("failed_no_route") <- !charge.
 +step(X) : lastAction("build") & lastActionResult("failed_location") <- stopBuilding.
 +step(X) : lastAction("assist_assemble") & lastActionResult("failed_counterpart").
