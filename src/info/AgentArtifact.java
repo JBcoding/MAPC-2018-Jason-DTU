@@ -191,6 +191,10 @@ public class AgentArtifact extends Artifact {
 			lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
 		}
 
+        //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
+        //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
+
+		//Location l = new Location(lon, lat);
 		Location l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
 		Lat.set(l.getLat());
 		Lon.set(l.getLon());
@@ -286,10 +290,10 @@ public class AgentArtifact extends Artifact {
 		CCityMap m = StaticInfoArtifact.getMap();
 		Location l = getEntity().getLocation();
 		getObsProperty("atPeriphery").updateValue(
-			m.isVisible(l, new Location(m.getMinLon(), l.getLat()), vision) ||
-			m.isVisible(l, new Location(m.getMaxLon(), l.getLat()), vision) ||
-			m.isVisible(l, new Location(l.getLon(), m.getMinLat()), vision) ||
-			m.isVisible(l, new Location(l.getLon(), m.getMaxLat()), vision)
+			m.isVisible(l, new Location(m.getMinLon(), l.getLat()), vision * 4) ||
+			m.isVisible(l, new Location(m.getMaxLon(), l.getLat()), vision * 4) ||
+			m.isVisible(l, new Location(l.getLon(), m.getMinLat()), vision * 4) ||
+			m.isVisible(l, new Location(l.getLon(), m.getMaxLat()), vision * 4)
 		);
 	}
 

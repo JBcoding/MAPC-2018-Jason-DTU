@@ -234,6 +234,7 @@
     getResourceNode(F, SSS);
     if (not SSS) {
         .print("____________________");
+        +destroy;
         !dismantleEnemyWell;
     } else {
         getFacilityName(F, N);
@@ -259,6 +260,7 @@
     getResourceNode(F, SSS);
     if (not SSS) {
         .print("____________________");
+        +destroy;
         !dismantleEnemyWell;
     } else {
         getFacilityName(F, N);

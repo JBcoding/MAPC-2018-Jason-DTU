@@ -341,21 +341,16 @@ public class CCityMap implements Serializable {
 
 		int outerIterations = 0;
 
+
 		// If we can't find a route to the nearest periphery, we just want to go towards anything reachable in that general direction
 		while (!existsRoute(l, loc)) {
-			int iterations = 10;
-			for (int i = 0; i < iterations && !existsRoute(l, loc); i++) {
-				loc = getNextClockwisePosition(loc);
-			}
+			double lat = loc.getLat();
+			double lon = loc.getLon();
 
-			outerIterations++;
+            lat = lat * 0.99 + getCenter().getLat() * 0.01;
+            lon = lon * 0.99 + getCenter().getLon() * 0.01;
 
-			if (outerIterations > 10) {
-				Set<String> roadTypes = new HashSet<String>();
-				roadTypes.add("road");
-				loc = getRandomLocation(roadTypes, iterations);
-				break;
-			}
+            loc = new Location(lon, lat);
 
 //		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
 //		    loc = FacilityArtifact.getFacility(facility).getLocation();
