@@ -45,7 +45,8 @@ public class FacilityArtifact extends Artifact {
 	private static Map<String, Storage> 		storages 			= new HashMap<>();
 	private static Map<String, Workshop> 		workshops 			= new HashMap<>();
 	private static Map<String, ResourceNode>	resourceNodes		= new HashMap<>();
-	private static Map<String, Well>			wells				= new HashMap<>();
+	static Map<String, Well>			wells				= new HashMap<>();
+	static Map<String, Integer> wellsIntegrityDiff = new HashMap<>();
 
 	public static List<Map<String, ? extends Facility>> getAllFacilities() {
 		return allFacilities;
@@ -201,16 +202,25 @@ public class FacilityArtifact extends Artifact {
 		}
 	}
 
-	public static void destroyWell(AgentArtifact agent) {
-		try {
-			Well well = wells.values().stream().filter(w -> agent.canSee(w.getLocation())).findFirst().get();
-			wells.remove(well.getName());
-			allFacilities = new ArrayList<>(Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
-		} catch (NoSuchElementException | NullPointerException e) {
-			// Already destroyed
-			System.out.println("Already destroyed well");
-		}
-	}
+    public static void destroyWell(AgentArtifact agent) {
+        try {
+            Well well = wells.values().stream().filter(w -> agent.canSee(w.getLocation())).findFirst().get();
+            destroyWell(well);
+        } catch (NoSuchElementException | NullPointerException e) {
+            // Already destroyed
+            System.out.println("Already destroyed well");
+        }
+    }
+
+    public static void destroyWell(Well well) {
+        try {
+            wells.remove(well.getName());
+            allFacilities = new ArrayList<>(Arrays.asList(chargingStations, dumps, shops, storages, resourceNodes, workshops, resourceNodes, wells));
+        } catch (NoSuchElementException | NullPointerException e) {
+            // Already destroyed
+            System.out.println("Already destroyed well");
+        }
+    }
 
 	/**
 	 * @param l location to search from
@@ -383,6 +393,9 @@ public class FacilityArtifact extends Artifact {
 		String team = (String) args[4];
 		int integrity = (int) args[5];
 
+        wellsIntegrityDiff.put(name, 0);
+
+		System.out.println("______________" + name + " __ " + integrity);
 		if (wells.containsKey(name)) {
 			Well well = wells.get(name);
 			well.build(integrity - well.getIntegrity());
