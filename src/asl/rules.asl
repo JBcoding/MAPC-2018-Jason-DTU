@@ -35,6 +35,7 @@ atPeriphery         :- atPeriphery(X) & X.
 enoughMoneyForWell  :- enoughMoneyForWell(X) & X.
 build               :- build(X) & X.
 destroy             :- destroy(X) & X.
+assister            :- builder(X) & X & not myRole("truck").
 
 contains(map(Item, X), [map(Item, Y) | _]) 	:- X <= Y. 		// There is a .member function, but we need to unwrap the objects
 contains(Item, [_ | Inventory]) 		    :- contains(Item, Inventory).

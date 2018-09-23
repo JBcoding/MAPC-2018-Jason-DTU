@@ -12,17 +12,18 @@ import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Workshop;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class CStorage {
 
-    Storage storage;
-    Workshop mainWorkshop;
+    private Storage storage;
+    private Workshop mainWorkshop;
 
-    Map<String, Double> itemsVar;
-    Map<String, Integer> items;
+    private Map<String, Double> itemsVar;
+    private Map<String, Integer> items;
 
-    Map<Item, Integer> reserved;
+    private HashMap<String, Integer> reserved;
 
     public CStorage() {
         Collection<Facility> storages = FacilityArtifact.getFacilities(FacilityArtifact.STORAGE);
@@ -53,7 +54,7 @@ public class CStorage {
     }
 
     private double getItemCountWithVar(String name) {
-        return items.get(name) + itemsVar.get(name);
+        return getAmount(name) + itemsVar.get(name);
     }
 
     public synchronized Facility getLowestResourceNode(AgentArtifact agent) {
@@ -102,21 +103,25 @@ public class CStorage {
         return mainWorkshop.getName();
     }
 
-    public void reserve(Item item, int amount) {
-        reserved.put(item, amount + reserved.getOrDefault(item, 0));
+    public synchronized void reserve(String itemName, int amount) {
+        reserved.put(itemName, amount + reserved.getOrDefault(itemName, 0));
     }
 
-    public synchronized void unreserve(Item item, int amount) {
-        reserved.put(item, Math.max(reserved.getOrDefault(item, 0) - amount, 0));
+    public synchronized void unreserve(String itemName, int amount) {
+        reserved.put(itemName, reserved.getOrDefault(itemName, 0) - amount);
     }
 
-    public int getAmount(Item item) {
-        int amount = items.getOrDefault(item.getName(), 0);
+    public synchronized int getAmount(String itemName) {
+        int amount = items.getOrDefault(itemName, 0);
 
         if (amount > 0) {
-            amount -= reserved.getOrDefault(item, 0);
+            amount -= reserved.getOrDefault(itemName, 0);
         }
 
         return Math.max(amount, 0);
+    }
+
+    public synchronized int getActualAmount(String itemName) {
+        return items.getOrDefault(itemName, 0);
     }
 }

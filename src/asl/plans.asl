@@ -25,9 +25,14 @@
     map(I, Amount) = Item;
     unreserve(I, Amount);
     !getItems(Items).
-+!getItems([map(Item, Amount) | Items])
-    : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
-    !doAction(retrieve(Item, Amount));
++!getItems([map(Item, Amount) | Items]) : getInventory(Inv) & append(Items, [map(Item, Amount)], NewItems) <-
+    isBase(Item, BaseItem);
+    itemInStorageIncludingReserved(Item, Amount, Ready);
+    if (BaseItem & not Ready) {
+        !doAction(recharge);
+    } else {
+        !doAction(retrieve(Item, Amount));
+    }
     // Sometimes it seems to take a bit to observe the retrieve,
     // so try to retrieve the rest of the items first.
     !getItems(NewItems).
@@ -252,8 +257,8 @@
     !gatherRole.
 
 +!assembleItemM(Item, Quantity) <-
-    haveItem(Item, X, Quantity);
-    if (not X) {
+    haveItem(Item, Quantity, Yes);
+    if (not Yes) {
         requestHelp;
         !doAction(assemble(Item));
         !assembleItemM(Item, Quantity);
@@ -263,36 +268,36 @@
     getRequiredItems(Item, Q, Items);
     !getItems(Items).
 
-+!builderRole: builder(X) & X <-
++!builderRole: assister <-
     getWorkShop(W);
-    isTruck(N);
-    if (not N) {
+    !getToFacility(W);
+    .wait(100); // dirty fix (wait for requestHelp calls to complete)
+    getMainTruckName(T);
+    !doAction(assist_assemble(T));
+    !builderRole.
+
++!builderRole: builder(X) & X & myRole("truck") <-
+    getWorkShop(W);
+    getMainStorageFacility(S);
+    !getToFacility(S);
+    somethingToBuild(Y);
+    if (Y) {
+        getItemToBuild(Item, Quantity);
+
+        // Below is a 5 step plan to build anything !!!
+        // 1. Take needed items out
+        !getItemsToBuildItem(Item, Quantity);
+        // 2. go to workshop
         !getToFacility(W);
-        .wait(100); // dirty fix (wait for requestHelp calls to complete)
-        getMainTruckName(T);
-        !doAction(assist_assemble(T));
-    } else {
-        getMainStorageFacility(S);
+        // 3. assemble
+        !assembleItemM(Item, Quantity);
+        // 4. go to storage
         !getToFacility(S);
-        somethingToBuild(Y);
-        if (Y) {
-            getItemToBuild(Item, Quantity);
+        // 5. empty inventory
+        !emptyInventory;
 
-            // Below is a 5 step plan to build anything !!!
-            // 1. Take needed items out
-            !getItemsToBuildItem(Item, Quantity);
-            // 2. go to workshop
-            !getToFacility(W);
-            // 3. assemble
-            !assembleItemM(Item, Quantity);
-            // 4. go to storage
-            !getToFacility(S);
-            // 5. empty inventory
-            !emptyInventory;
-
-        } else {
-            .print("Currently nothing to build");
-            .wait({+step(_)});
-        }
+    } else {
+        .print("Currently nothing to build");
+        .wait({+step(_)});
     }
     !builderRole.

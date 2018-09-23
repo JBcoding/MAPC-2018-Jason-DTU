@@ -76,7 +76,7 @@ public class CBuildTeam {
         while (toBuild.size() == 0) {
             List<Item> missingItems = new ArrayList<>();
             for (Item item : levelNon0Items) {
-                if (storage.getAmount(item) == 0) {
+                if (storage.getAmount(item.getName()) == 0) {
                     missingItems.add(item);
                 }
             }
@@ -94,7 +94,7 @@ public class CBuildTeam {
             boolean add = true;
 
             for (Item i : item.getRequiredItems()) {
-                if (storage.getAmount(i) == 0) {
+                if (storage.getAmount(i.getName()) == 0) {
                     add = false;
                     break;
                 }
@@ -105,7 +105,7 @@ public class CBuildTeam {
             } else {
                 Set<Item> missing = item.getRequiredItems().stream()
                         .filter(Item::needsAssembly)
-                        .filter(i -> storage.getAmount(i) == 0)
+                        .filter(i -> storage.getAmount(i.getName()) == 0)
                         .filter(i -> !toBuild.contains(i.getName()))
                         .collect(Collectors.toSet());
 

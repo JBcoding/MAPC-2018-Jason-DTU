@@ -650,17 +650,17 @@ public class AgentArtifact extends Artifact {
 
         if (level1Item) {
             for (Map.Entry<Item, Integer> entry : item.getRequiredBaseItems().entrySet()) {
-                storage.reserve(entry.getKey(), entry.getValue() * quantity);
+                storage.reserve(entry.getKey().getName(), entry.getValue() * quantity);
             }
         } else {
             for (Item part : item.getRequiredItems()) {
-                quantity = Math.min(quantity, storage.getAmount(part));
+                quantity = Math.min(quantity, storage.getAmount(part.getName()));
             }
 
             quantity = Math.max(quantity, 1);
 
             for (Item part : item.getRequiredItems()) {
-                storage.reserve(part, quantity);
+                storage.reserve(part.getName(), quantity);
             }
         }
 
@@ -670,10 +670,9 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void itemInStorage(String itemName, int amount, OpFeedbackParam<Boolean> contained) {
+    void itemInStorageIncludingReserved(String itemName, int amount, OpFeedbackParam<Boolean> contained) {
         CStorage storage = StaticInfoArtifact.getStorage();
-        Item item = ItemArtifact.getItem(itemName);
-        contained.set(storage.getAmount(item) >= amount);
+        contained.set(storage.getActualAmount(itemName) >= amount);
     }
 
     private boolean isLevel1Item(Item item) {
@@ -681,7 +680,7 @@ public class AgentArtifact extends Artifact {
     }
 
     @OPERATION
-    void haveItem(String item, OpFeedbackParam<Boolean> x, int quantity) {
+    void haveItem(String item, int quantity, OpFeedbackParam<Boolean> x) {
         x.set(getEntity().getInventory().getItemCount(ItemArtifact.getItem(item)) >= quantity);
     }
 

@@ -87,13 +87,18 @@ public class ItemArtifact extends Artifact {
             Item item = entry.getKey();
             int amount = entry.getValue();
 
-            int ready = storage.getAmount(item);
+            int ready = storage.getAmount(item.getName());
             int needed = amount - ready;
 
             for (int i = 0; i < needed; i++) {
                 buildTeam.build(item.getName());
             }
         }
+    }
+
+    @OPERATION
+    void isBase(String itemName, OpFeedbackParam<Boolean> ret) {
+        ret.set(!getItem(itemName).needsAssembly());
     }
 
     @OPERATION
@@ -106,14 +111,14 @@ public class ItemArtifact extends Artifact {
             Item item = entry.getKey();
             int amount = entry.getValue();
 
-            if (storage.getAmount(item) < amount) {
+            if (storage.getAmount(item.getName()) < amount) {
                 retReady.set(false);
                 return;
             }
         }
 
         for (Entry<Item, Integer> entry : items.entrySet()) {
-            storage.reserve(entry.getKey(), entry.getValue());
+            storage.reserve(entry.getKey().getName(), entry.getValue());
         }
 
         retReady.set(true);
@@ -121,7 +126,7 @@ public class ItemArtifact extends Artifact {
 
     @OPERATION
     void unreserve(String itemName, int amount) {
-        StaticInfoArtifact.getStorage().unreserve(items.get(itemName), amount);
+        StaticInfoArtifact.getStorage().unreserve(itemName, amount);
     }
 
     public static Map<Item, Integer> getItemMap(Map<String, Integer> map) {
