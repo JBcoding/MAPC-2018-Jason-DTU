@@ -885,6 +885,34 @@ public class AgentArtifact extends Artifact {
 		canBuild.set((boolean)getObsProperty("build").getValue()); // Only set false if not already a builder
     }
 
+
+    @OPERATION
+    void getClosestChargingTo(Location from, OpFeedbackParam<Object> facility) {
+
+        Collection<Facility> chs = FacilityArtifact.getFacilities(FacilityArtifact.CHARGING_STATION);
+        ChargingStation best = (ChargingStation) chs.stream().findFirst().get();
+        int bestDuration = Integer.MAX_VALUE;
+
+        for (Facility chF : chs) {
+            int duration = StaticInfoArtifact.getRoute(this.agentName, from, chF.getLocation())
+                    .getRouteDuration(getEntity().getCurrentSpeed());
+
+            if (duration < bestDuration) {
+                bestDuration = duration;
+                best = (ChargingStation) chF;
+            }
+        }
+
+        facility.set(best.getName());
+    }
+
+    @OPERATION
+    void getCurrentTarget(OpFeedbackParam<Object> ret) {
+        List<Location> wayPoints = getEntity().getRoute().getWaypoints();
+        Location last = wayPoints.get(wayPoints.size() - 1);
+        ret.set(last);
+    }
+
     @OPERATION
     void stopBuilding() {
 		try {
