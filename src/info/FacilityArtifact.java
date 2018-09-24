@@ -188,7 +188,7 @@ public class FacilityArtifact extends Artifact {
 	}
 
 	@OPERATION
-	void getEnemyWell(OpFeedbackParam<String> name, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
+	void synchronized getEnemyWell(OpFeedbackParam<String> name, OpFeedbackParam<Double> lat, OpFeedbackParam<Double> lon) {
 		Location agentLoc = AgentArtifact.getEntity(getOpUserName()).getLocation();
 		try {
 			Well w = wells.values().stream()
