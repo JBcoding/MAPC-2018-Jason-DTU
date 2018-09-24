@@ -174,33 +174,41 @@ public class AgentArtifact extends Artifact {
 
 	@OPERATION
 	void getRandomPeripheralLocation(OpFeedbackParam<Double> Lat, OpFeedbackParam<Double> Lon) {
-		CCityMap cityMap = StaticInfoArtifact.getMap();
-		double lat, lon;
+	    try {
+            CCityMap cityMap = StaticInfoArtifact.getMap();
+            double lat, lon;
 
-		Location l;
-		int duration;
-		final int battery = getEntity().getCurrentBattery();
+            Location l = null;
+            int duration;
+            final int battery = getEntity().getCurrentBattery();
 
-		do {
-            if (RNG.nextInt() % 2 == 0) {
-                lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
-                lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
-            } else {
-                lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
-                lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
-            }
+            do {
+                if (RNG.nextInt() % 2 == 0) {
+                    lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
+                    lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
+                } else {
+                    lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
+                    lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
+                }
 
-            //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
-            //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
+                //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
+                //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
 
-            //Location l = new Location(lon, lat);
-            l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
-            duration = StaticInfoArtifact.getRoute(this.agentName, l).getRouteDuration(getEntity().getCurrentSpeed());
+                //Location l = new Location(lon, lat);
+                try {
+                    l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
+                    duration = StaticInfoArtifact.getRoute(this.agentName, l).getRouteDuration(getEntity().getCurrentSpeed());
+                } catch (Exception e) {
+                    duration = Integer.MAX_VALUE;
+                }
 
-        } while (duration > 0.65*battery);
+            } while (duration > 0.65 * battery);
 
-		Lat.set(l.getLat());
-		Lon.set(l.getLon());
+            Lat.set(l.getLat());
+            Lon.set(l.getLon());
+        } catch (Exception e) {
+	        e.printStackTrace();
+        }
 	}
 
 	@OPERATION
@@ -832,7 +840,7 @@ public class AgentArtifact extends Artifact {
 			.filter(a ->
 				a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 				a.getEntity().getRole().getName().equals("truck") &&
-                ((boolean)a.getObsProperty("gather").getValue() /* || (boolean)a.getObsProperty("destroy").getValue()*/) &&
+                ((boolean)a.getObsProperty("gather").getValue() || (boolean)a.getObsProperty("destroy").getValue()) &&
 				!wellBuilders.contains(a))
 			.sorted(
 				Comparator.comparingDouble(a ->
