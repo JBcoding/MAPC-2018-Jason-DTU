@@ -909,7 +909,12 @@ public class AgentArtifact extends Artifact {
     @OPERATION
     void getCurrentTarget(OpFeedbackParam<Object> ret) {
         List<Location> wayPoints = getEntity().getRoute().getWaypoints();
-        Location last = wayPoints.get(wayPoints.size() - 1);
+        Location last;
+        if (wayPoints.isEmpty()) {
+            last = FacilityArtifact.getFacilities(FacilityArtifact.CHARGING_STATION).stream().findFirst().get().getLocation();
+        } else {
+            last = wayPoints.get(wayPoints.size() - 1);
+        }
         ret.set(last);
     }
 
