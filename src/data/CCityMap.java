@@ -129,7 +129,7 @@ public class CCityMap implements Serializable {
 	        return true;
         }
 		GHResponse rsp = queryGH(from, to);
-		rsp.getErrors().forEach(error -> System.out.println("Error from rsp: " + error.getMessage()));
+		//rsp.getErrors().forEach(error -> System.out.println("Error from rsp: " + error.getMessage()));
 		return !rsp.hasErrors() && rsp.getBest().getPoints().size() > 0;
 	}
 
@@ -359,7 +359,7 @@ public class CCityMap implements Serializable {
             outerIterations ++;
 
             if (outerIterations == 20) {
-                return FacilityArtifact.getFacility(FacilityArtifact.CHARGING_STATION).getLocation();
+                return center;//FacilityArtifact.getFacility(FacilityArtifact.CHARGING_STATION).getLocation();
             }
 
 //		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));

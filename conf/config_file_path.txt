@@ -1,2 +1,2 @@
-conf/eismassimconfig_comp_like.json
+conf/eismassimconfig_ac1.json
 Jason-DTU

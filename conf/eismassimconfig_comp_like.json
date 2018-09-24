@@ -1,6 +1,6 @@
 {
   "scenario": "city2018",
-  "host": "localhost",
+  "host": "10.16.160.162",
   "port": 12300,
   "scheduling": true,
   "timeout": 40000,

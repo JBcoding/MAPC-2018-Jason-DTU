@@ -905,7 +905,7 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     public void increaseMaxDestroyers() {
-        maxDestroyers = 32;
+        maxDestroyers = 34;
     }
 
     @OPERATION
