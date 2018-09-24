@@ -231,9 +231,9 @@ public class StaticInfoArtifact extends Artifact {
 	// Literal(String)
 	private static void perceiveId(Percept percept)
 	{
-		Object[] args = Translator.perceptToObject(percept);
+		//Object[] args = Translator.perceptToObject(percept);
 		
-		id = (String) args[0];
+		id = "hej";
 	}
 
 	// Literal(String)
