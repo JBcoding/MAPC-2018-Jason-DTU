@@ -219,9 +219,8 @@
     !charge.
 +!charge : not canMove <- !doAction(recharge); !charge.
 +!charge <-
-    getCurrentTarget(Loc);
 	// getClosestFacility("chargingStation", F);
-	getClosestChargingTo(Loc, F);
+	getClosestChargingTo(F);
 	!getToFacility(F);
 	!charge.
 
