@@ -21,6 +21,7 @@
     .send(announcer, tell, available(Me));
     getMainStorageFacility(S);
     !getToFacility(S);
+    !emptyInventory;
     +free.
 +!loop : build <- .print("Building well"); !buildWell; !loop.
 +!loop : destroy <- .print("Dismantling wells"); !dismantleEnemyWell; !loop.
