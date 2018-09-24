@@ -251,7 +251,7 @@
         getItemVolume(F, V);
         !gatherUntilFull(V);
     }.
-+!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
++!gatherUntilFull(V) : remainingCapacity(C) & C >= V & inResourceNode <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
 +!emptyInventory : build <- !buildWell; getMainStorageFacility(S); !getToFacility(S); !emptyInventory.
@@ -297,7 +297,7 @@
 +!builderRole: assister <-
     getWorkShop(W);
     !getToFacility(W);
-    .wait(100); // dirty fix (wait for requestHelp calls to complete)
+    .wait(150); // dirty fix (wait for requestHelp calls to complete)
     getMainTruckName(T);
     !doAction(assist_assemble(T));
     !builderRole.

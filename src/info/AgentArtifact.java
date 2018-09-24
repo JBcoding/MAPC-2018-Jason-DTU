@@ -562,27 +562,23 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     void getResourceNode(OpFeedbackParam<Facility> f, OpFeedbackParam<Boolean> success) {
-	    Facility facility;
-	    do {
-            facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
-            if (facility == null) {
-                break;
-            }
+	    Facility facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
 
-            if (facility instanceof ChargingStation) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+	    while (facility == null && StaticInfoArtifact.getCurrentStep() < 200) {
+            try {
+                Thread.sleep(1000);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } while (facility instanceof ChargingStation);
+            facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
+        }
 
 	    if (facility == null) {
 	        success.set(false);
 	        getObsProperty("gather").updateValue(false);
 	        setToDestroy();
-	        f.set(FacilityArtifact.getResourceNodes().values().iterator().next());
+	        f.set(FacilityArtifact.getFacility(FacilityArtifact.CHARGING_STATION));
         } else {
 	        success.set(true);
 	        f.set(facility);

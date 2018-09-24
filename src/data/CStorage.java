@@ -64,35 +64,35 @@ public class CStorage {
             return null;
         }
 
-        String agentName = agent.agentName;
-        int speed = agent.getEntity().getCurrentSpeed();
+        try {
+            String agentName = agent.agentName;
+            int speed = agent.getEntity().getCurrentSpeed();
 
-        Collection<Facility> nodes = FacilityArtifact.getFacilities(FacilityArtifact.RESOURCE_NODE);
+            Collection<Facility> nodes = FacilityArtifact.getFacilities(FacilityArtifact.RESOURCE_NODE);
 
-        ResourceNode bestNode = null;
-        double lowestAmount = Double.MAX_VALUE;
+            ResourceNode bestNode = null;
+            double lowestAmount = Double.MAX_VALUE;
 
-        Location storageLoc = getMainStorageFacility().getLocation();
+            Location storageLoc = getMainStorageFacility().getLocation();
 
-        for (Facility nodeF : nodes) {
-            ResourceNode node = (ResourceNode) nodeF;
-            if (getItemCountWithVar(node.getResource().getName()) < lowestAmount
-                || (bestNode != null
-                    && getItemCountWithVar(node.getResource().getName()) <= lowestAmount
-                    && StaticInfoArtifact.getRoute(agentName, node.getLocation(), storageLoc).getRouteDuration(speed)
-                    < StaticInfoArtifact.getRoute(agentName, bestNode.getLocation(), storageLoc).getRouteDuration(speed))) {
-                lowestAmount = getItemCountWithVar(node.getResource().getName());
-                bestNode = node;
+            for (Facility nodeF : nodes) {
+                ResourceNode node = (ResourceNode) nodeF;
+                if (getItemCountWithVar(node.getResource().getName()) < lowestAmount
+                        || (bestNode != null
+                        && getItemCountWithVar(node.getResource().getName()) <= lowestAmount
+                        && StaticInfoArtifact.getRoute(agentName, node.getLocation(), storageLoc).getRouteDuration(speed)
+                        < StaticInfoArtifact.getRoute(agentName, bestNode.getLocation(), storageLoc).getRouteDuration(speed))) {
+                    lowestAmount = getItemCountWithVar(node.getResource().getName());
+                    bestNode = node;
+                }
             }
-        }
 
-        if (bestNode == null) {
-            return FacilityArtifact.getFacility(FacilityArtifact.CHARGING_STATION);
-        }
 
-        itemsVar.put(bestNode.getResource().getName(), itemsVar.get(bestNode.getResource().getName()) + 0.0001);
+            itemsVar.put(bestNode.getResource().getName(), itemsVar.get(bestNode.getResource().getName()) + 0.0001);
 
-        return bestNode;
+            return bestNode;
+        } catch (Exception e) {}
+        return null;
     }
 
     public Storage getMainStorageFacility() {
