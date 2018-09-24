@@ -124,6 +124,9 @@ public class CCityMap implements Serializable {
 	 */
 	private boolean existsRoute(Location from, Location to) 
 	{
+	    if (from.equals(to)) {
+	        return true;
+        }
 		GHResponse rsp = queryGH(from, to);
 		rsp.getErrors().forEach(error -> System.out.println("Error from rsp: " + error.getMessage()));
 		return !rsp.hasErrors() && rsp.getBest().getPoints().size() > 0;
@@ -355,7 +358,7 @@ public class CCityMap implements Serializable {
             outerIterations ++;
 
             if (outerIterations == 20) {
-                break;
+                return center;
             }
 
 //		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
