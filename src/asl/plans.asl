@@ -187,8 +187,12 @@
 // Gets close to this location
 +!getToPeripheryLocationStart(Lat, Lon) :
     destroy &
-    lastAction("goto") &
-    lastActionResult("failed_no_route")
+    (
+        (lastAction("goto") &
+        lastActionResult("failed_no_route"))
+        |
+        not enoughBattery
+    )
     <-
     // Go somewhere else if we can't get to the assigned well
     getRandomPeripheralLocation(PerLat, PerLon);

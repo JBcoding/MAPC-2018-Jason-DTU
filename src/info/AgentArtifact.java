@@ -283,10 +283,10 @@ public class AgentArtifact extends Artifact {
 		CCityMap m = StaticInfoArtifact.getMap();
 		Location l = getEntity().getLocation();
 		getObsProperty("atPeriphery").updateValue(
-			m.isVisible(l, new Location(m.getMinLon(), l.getLat()), vision * 4) ||
-			m.isVisible(l, new Location(m.getMaxLon(), l.getLat()), vision * 4) ||
-			m.isVisible(l, new Location(l.getLon(), m.getMinLat()), vision * 4) ||
-			m.isVisible(l, new Location(l.getLon(), m.getMaxLat()), vision * 4)
+			m.isVisible(l, new Location(m.getMinLon(), l.getLat()), vision * 3) ||
+			m.isVisible(l, new Location(m.getMaxLon(), l.getLat()), vision * 3) ||
+			m.isVisible(l, new Location(l.getLon(), m.getMinLat()), vision * 3) ||
+			m.isVisible(l, new Location(l.getLon(), m.getMaxLat()), vision * 3)
 		);
 	}
 
@@ -423,12 +423,11 @@ public class AgentArtifact extends Artifact {
 		}
 		else 
 		{
-			if (!entity.getFacilityName().equals("none"))
-			{
+			// if (!entity.getFacilityName().equals("none")) {
 				entity.setFacility(null);
 				getObsProperty("inFacility").updateValue(entity.getFacilityName());
 				getObsProperty("inOwnWell").updateValue(false);
-			}
+			// }
 		}
 		
 	}

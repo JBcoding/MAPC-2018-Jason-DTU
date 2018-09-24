@@ -45,6 +45,10 @@ fullCharge :- charge(X) & currentBattery(X).
 enoughCharge :- routeLength(L) & enoughCharge(L).
 enoughCharge(L) :- speed(S) & charge(C) & chargeThreshold(Threshold) & 
 				Steps = math.ceil(L / S) & Steps <= (C - Threshold).
+
+enoughBattery :- routeLength(L) & enoughBattery(L).
+enoughBattery(L) :- speed(S) & currentBattery(C) & chargeThreshold(Threshold) &
+				Steps = math.ceil(L / S) & Steps <= (C - Threshold).
 				
 getInventory(Inventory)			:- .my_name(Me) & getInventory(Me, Inventory).
 getInventory(Agent, Inventory) 	:- jia.getInventory(Agent, Inventory).
