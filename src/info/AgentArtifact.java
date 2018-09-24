@@ -177,19 +177,28 @@ public class AgentArtifact extends Artifact {
 		CCityMap cityMap = StaticInfoArtifact.getMap();
 		double lat, lon;
 
-		if (RNG.nextInt() % 2 == 0) {
-			lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
-			lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
-		} else {
-			lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
-			lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
-		}
+		Location l;
+		int duration;
+		final int battery = getEntity().getCurrentBattery();
 
-        //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
-        //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
+		do {
+            if (RNG.nextInt() % 2 == 0) {
+                lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
+                lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
+            } else {
+                lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
+                lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
+            }
 
-		//Location l = new Location(lon, lat);
-		Location l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
+            //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
+            //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
+
+            //Location l = new Location(lon, lat);
+            l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
+            duration = StaticInfoArtifact.getRoute(this.agentName, l).getRouteDuration(getEntity().getCurrentSpeed());
+
+        } while (duration > 0.65*battery);
+
 		Lat.set(l.getLat());
 		Lon.set(l.getLon());
 	}

@@ -20,6 +20,8 @@
     !gatherItem(Node, map(Item, Amount)).
 
 // Assumes we are at the storage facility.
++!getItems(Items) : lastActionResult("failed_capacity") <-
+    getMainStorageFacility(S); !getToFacility(S); !emptyInventory.
 +!getItems([]).
 +!getItems([Item|Items]) : getInventory(Inv) & contains(Item, Inv) <-
     map(I, Amount) = Item;
