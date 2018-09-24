@@ -247,7 +247,7 @@
         getItemVolume(F, V);
         !gatherUntilFull(V);
     }.
-+!gatherUntilFull(V) : remainingCapacity(C) & C >= V <- !doAction(gather); !gatherUntilFull(V).
++!gatherUntilFull(V) : remainingCapacity(C) & C >= V & inResourceNode <- !doAction(gather); !gatherUntilFull(V).
 +!gatherUntilFull(V).
 
 +!emptyInventory : build <- !buildWell; getMainStorageFacility(S); !getToFacility(S); !emptyInventory.
