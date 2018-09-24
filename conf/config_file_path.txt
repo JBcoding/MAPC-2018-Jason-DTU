@@ -1,2 +1,2 @@
-conf/eismassimconfig.json
-A
+conf/eismassimconfig_comp_like.json
+Jason-DTU
