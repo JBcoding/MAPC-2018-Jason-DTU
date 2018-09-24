@@ -8,10 +8,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import cartago.Artifact;
-import cartago.GUARD;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
-import data.CBuildTeam;
 import data.CCityMap;
 import data.CEntity;
 import data.CStorage;
@@ -20,19 +18,14 @@ import eis.iilang.Percept;
 import eis.iilang.PrologVisitor;
 import env.EIArtifact;
 import env.Translator;
-import jason.util.Pair;
 import massim.protocol.messagecontent.Action;
-import massim.scenario.city.data.Entity;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
-import massim.scenario.city.data.facilities.Storage;
 import massim.scenario.city.data.facilities.Well;
 import massim.util.RNG;
-
-import javax.xml.bind.SchemaOutputResolver;
 
 public class AgentArtifact extends Artifact {
 	
@@ -71,7 +64,7 @@ public class AgentArtifact extends Artifact {
 	private static Set<String> wellBuilders = ConcurrentHashMap.newKeySet();
 	private static Deque<String> destroyers = new ConcurrentLinkedDeque<String>();
 
-	private static final int MAX_DESTROYERS = 3;
+	private static int maxDestroyers = 3;
 
 	// TODO: replace with synchronized keyword?
 	private static Semaphore buildSemaphore = new Semaphore(1);
@@ -819,7 +812,7 @@ public class AgentArtifact extends Artifact {
 			.filter(a ->
 				a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 				a.getEntity().getRole().getName().equals("truck") &&
-				(boolean)a.getObsProperty("gather").getValue() &&
+                ((boolean)a.getObsProperty("gather").getValue() || (boolean)a.getObsProperty("destroy").getValue()) &&
 				!wellBuilders.contains(a))
 			.sorted(
 				Comparator.comparingDouble(a ->
@@ -832,7 +825,7 @@ public class AgentArtifact extends Artifact {
 			.limit(DynamicInfoArtifact.getMoney() / wellPrice)
 			.forEach(AgentArtifact::setToBuild);
 
-		System.out.println("Current builders: " + wellBuilders.size() + " - " + wellBuilders);
+		System.out.println("Current f: " + wellBuilders.size() + " - " + wellBuilders);
 	}
 
     public void setToBuild() {
@@ -885,7 +878,7 @@ public class AgentArtifact extends Artifact {
     public void setToDestroy() {
 		try {
 			destroySemaphore.acquire();
-			if (destroyers.size() < MAX_DESTROYERS) {
+			if (destroyers.size() < maxDestroyers) {
 				getObsProperty("destroy").updateValue(true);
 				destroyers.add(this.agentName);
 			}
@@ -896,8 +889,13 @@ public class AgentArtifact extends Artifact {
     }
 
     public static boolean needMoreDestroyers() {
-		return destroyers.size() < MAX_DESTROYERS;
-	}
+        return destroyers.size() < maxDestroyers;
+    }
+
+    @OPERATION
+    public void increaseMaxDestroyers() {
+        maxDestroyers = 32;
+    }
 
     @OPERATION
     void stopDestroying() {

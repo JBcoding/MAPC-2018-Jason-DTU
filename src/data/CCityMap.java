@@ -110,7 +110,7 @@ public class CCityMap implements Serializable {
 	 */
 	private GHResponse queryGH(Location from, Location to)
 	{
-		GHRequest req = new GHRequest(from.getLat(), from.getLon(), to.getLat(), to.getLon())
+        GHRequest req = new GHRequest(from.getLat(), from.getLon(), to.getLat(), to.getLon())
 				.setWeighting("shortest")
 				.setVehicle("car");
 		return GraphHopperManager.getHopper().route(req);

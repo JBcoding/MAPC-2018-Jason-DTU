@@ -89,6 +89,10 @@
     if (not (F == "none")) {
         !getToLocationWell(F, Lat, Lon);
     } else {
+        if (build) {
+            .print("BUILDING WELL NOW");
+            !buildWell;
+        }
         getRandomPeripheralLocation(PerLat, PerLon);
         !getToPeripheryLocationStart(PerLat, PerLon);
     }

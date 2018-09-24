@@ -216,8 +216,8 @@ public class StaticInfoArtifact extends Artifact {
 
 		String team = (String) args[1];
 		String name = ((String) args[0]); // This is team + number
-		double lon 	= (double) args[2];
-		double lat 	= (double) args[3];
+		double lat 	= (double) args[2];
+		double lon 	= (double) args[3];
 		String role = (String) args[4];
 
 		// Entity has not been made public
@@ -252,6 +252,9 @@ public class StaticInfoArtifact extends Artifact {
         double maxLat = (double) args[4];
         double maxLon = (double) args[5];
         Location center = new Location((double)args[7], (double)args[6]);
+
+        System.out.println("AAAAA " + minLat + "|" + maxLat + "|" + minLon + "|" + maxLon);
+        System.out.println(center.getLat() + "||" + center.getLon());
 
 		cityMap = new CCityMap(map, cellSize, minLat, maxLat, minLon, maxLon, center);
 		exploredMap = new CExploredMap(cityMap);

@@ -33,7 +33,7 @@ public class FacilityArtifact extends Artifact {
 	public static final String RESOURCE_NODE		= "resourceNode";
 	public static final String WELL	 			    = "well";
 
-	private static final double STOP_GATHER_RATIO = 0.85;
+	private static final double STOP_GATHER_RATIO = 0.2;
 
 	public static final Set<String>	STATIC_PERCEPTS = Collections.unmodifiableSet(
 		new HashSet<String>(Arrays.asList(CHARGING_STATION, DUMP, SHOP, STORAGE, WORKSHOP)));

@@ -53,4 +53,4 @@
 +reset <- .print("resetting"); .drop_all_desires; .drop_all_events; .drop_all_intentions; -reset.
 
 +!continueLoopSleep <- .wait({+step(_)}); !continueLoop.
-+!continueLoop <- .wait(500); doingAction(X); if (not X) {!doAction(recharge); !continueLoop;} else {!continueLoopSleep;}.
++!continueLoop <- .wait(750); doingAction(X); if (not X) {!doAction(recharge); !continueLoop;} else {!continueLoopSleep;}.
