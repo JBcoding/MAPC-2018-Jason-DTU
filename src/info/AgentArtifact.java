@@ -827,7 +827,7 @@ public class AgentArtifact extends Artifact {
 			.filter(a ->
 				a != null && a.getEntity() != null && a.getEntity().getRole() != null &&
 				a.getEntity().getRole().getName().equals("truck") &&
-                ((boolean)a.getObsProperty("gather").getValue() || (boolean)a.getObsProperty("destroy").getValue()) &&
+                ((boolean)a.getObsProperty("gather").getValue() /* || (boolean)a.getObsProperty("destroy").getValue()*/) &&
 				!wellBuilders.contains(a))
 			.sorted(
 				Comparator.comparingDouble(a ->
