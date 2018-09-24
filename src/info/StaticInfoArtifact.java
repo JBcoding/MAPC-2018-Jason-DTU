@@ -232,7 +232,8 @@ public class StaticInfoArtifact extends Artifact {
 	private static void perceiveId(Percept percept)
 	{
 		//Object[] args = Translator.perceptToObject(percept);
-		
+		//[] args = Translator.perceptToObject(percept);
+
 		id = "hej";
 	}
 

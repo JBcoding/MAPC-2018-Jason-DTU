@@ -204,7 +204,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 			// Define step
 			defineObsProperty("step", DynamicInfoArtifact.getStep());
 			defineObsProperty("money", DynamicInfoArtifact.getMoney());
-			defineObsProperty("enoughMoneyForWell", !StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getName().equals("none"));
+			//defineObsProperty("enoughMoneyForWell", !StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()).getName().equals("none"));
 			
 			FacilityArtifact.announceShops();
 		}
@@ -249,7 +249,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 
             getObsProperty("step").updateValue(DynamicInfoArtifact.getStep());
             getObsProperty("money").updateValue(DynamicInfoArtifact.getMoney());
-			getObsProperty("enoughMoneyForWell").updateValue(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()) != null);
+			//getObsProperty("enoughMoneyForWell").updateValue(StaticInfoArtifact.getBestWellType(DynamicInfoArtifact.getMoney()) != null);
 
 			logData();
 
@@ -257,6 +257,7 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 		} 
 		catch (Throwable e) 
 		{
+			e.printStackTrace();
 			logger.log(Level.SEVERE, "Failure in perceive: " + e.getMessage(), e);
 		}
 	}

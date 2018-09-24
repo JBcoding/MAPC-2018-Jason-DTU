@@ -174,24 +174,41 @@ public class AgentArtifact extends Artifact {
 
 	@OPERATION
 	void getRandomPeripheralLocation(OpFeedbackParam<Double> Lat, OpFeedbackParam<Double> Lon) {
-		CCityMap cityMap = StaticInfoArtifact.getMap();
-		double lat, lon;
+	    try {
+            CCityMap cityMap = StaticInfoArtifact.getMap();
+            double lat, lon;
 
-		if (RNG.nextInt() % 2 == 0) {
-			lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
-			lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
-		} else {
-			lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
-			lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
-		}
+            Location l = null;
+            int duration;
+            final int battery = getEntity().getCurrentBattery();
 
-        //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
-        //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
+            do {
+                if (RNG.nextInt() % 2 == 0) {
+                    lat = RNG.nextInt() % 2 == 0 ? cityMap.getMinLat() : cityMap.getMaxLat();
+                    lon = cityMap.getMinLon() + (cityMap.getMaxLon() - cityMap.getMinLon()) * RNG.nextDouble();
+                } else {
+                    lat = cityMap.getMinLat() + (cityMap.getMaxLat() - cityMap.getMinLat()) * RNG.nextDouble();
+                    lon = RNG.nextInt() % 2 == 0 ? cityMap.getMinLon() : cityMap.getMaxLon();
+                }
 
-		//Location l = new Location(lon, lat);
-		Location l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
-		Lat.set(l.getLat());
-		Lon.set(l.getLon());
+                //lat = lat * 0.9 + cityMap.getCenter().getLat() * 0.1;
+                //lon = lon * 0.9 + cityMap.getCenter().getLon() * 0.1;
+
+                //Location l = new Location(lon, lat);
+                try {
+                    l = StaticInfoArtifact.getMap().getClosestPeriphery(new Location(lon, lat), EPSILON);
+                    duration = StaticInfoArtifact.getRoute(this.agentName, l).getRouteDuration(getEntity().getCurrentSpeed());
+                } catch (Exception e) {
+                    duration = Integer.MAX_VALUE;
+                }
+
+            } while (duration > 0.65 * battery);
+
+            Lat.set(l.getLat());
+            Lon.set(l.getLon());
+        } catch (Exception e) {
+	        e.printStackTrace();
+        }
 	}
 
 	@OPERATION
@@ -871,6 +888,49 @@ public class AgentArtifact extends Artifact {
 		canBuild.set((boolean)getObsProperty("build").getValue()); // Only set false if not already a builder
     }
 
+
+    @OPERATION
+    void getClosestChargingTo(OpFeedbackParam<Object> facility) {
+        Location to = currentTarget();
+        if (to == null) {
+            to = getEntity().getLocation();
+        }
+
+        Collection<Facility> chs = FacilityArtifact.getFacilities(FacilityArtifact.CHARGING_STATION);
+        ChargingStation best = null;
+        int bestDuration = Integer.MAX_VALUE;
+
+        for (Facility chF : chs) {
+            int duration = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation())
+                    .getRouteDuration(getEntity().getCurrentSpeed());
+
+            if (duration < getEntity().getCurrentCharge()) {
+                int duration2 = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation(), to)
+                        .getRouteDuration(getEntity().getCurrentSpeed());
+
+                if (duration2 < bestDuration) {
+                    bestDuration = duration;
+                    best = (ChargingStation) chF;
+                }
+            }
+        }
+
+        if (best == null) {
+            facility.set("chargingStation0");
+        } else {
+            facility.set(best.getName());
+        }
+    }
+
+    private Location currentTarget() {
+        List<Location> wayPoints = getEntity().getRoute().getWaypoints();
+        if (wayPoints.isEmpty()) {
+            return null;
+        } else {
+             return wayPoints.get(wayPoints.size() - 1);
+        }
+    }
+
     @OPERATION
     void stopBuilding() {
 		try {
@@ -908,7 +968,7 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     public void increaseMaxDestroyers() {
-        maxDestroyers = 32;
+        maxDestroyers = 34;
     }
 
     @OPERATION
