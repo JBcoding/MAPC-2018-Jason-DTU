@@ -347,14 +347,14 @@ public class CCityMap implements Serializable {
 			double lat = loc.getLat();
 			double lon = loc.getLon();
 
-            lat = lat * 0.99 + getCenter().getLat() * 0.01;
-            lon = lon * 0.99 + getCenter().getLon() * 0.01;
+            lat = lat * 0.97 + getCenter().getLat() * 0.03;
+            lon = lon * 0.97 + getCenter().getLon() * 0.03;
 
             loc = new Location(lon, lat);
 
             outerIterations ++;
 
-            if (outerIterations == 200) {
+            if (outerIterations == 20) {
                 break;
             }
 
@@ -366,7 +366,7 @@ public class CCityMap implements Serializable {
 //				loc = getRandomLocation(roadTypes, iterations);
 //			}
         }
-		//Location loc = latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat());
+		//Location loc = latDiff < lonDiff ? new Location(l.getLoninFacility(), newLat) : new Location(newLon, l.getLat());
 		//Location loc = getNearestRoad(latDiff < lonDiff ? new Location(l.getLon(), newLat) : new Location(newLon, l.getLat()));
 
 		//System.out.println(String.format("Current location: %f, %f Goal location: %f, %f", l.getLat(), l.getLon(), loc.getLat(), loc.getLon()));
