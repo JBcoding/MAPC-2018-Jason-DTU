@@ -22,6 +22,7 @@ import massim.protocol.messagecontent.Action;
 import massim.scenario.city.data.Item;
 import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Route;
+import massim.scenario.city.data.facilities.ChargingStation;
 import massim.scenario.city.data.facilities.Facility;
 import massim.scenario.city.data.facilities.ResourceNode;
 import massim.scenario.city.data.facilities.Well;
@@ -561,7 +562,22 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     void getResourceNode(OpFeedbackParam<Facility> f, OpFeedbackParam<Boolean> success) {
-	    Facility facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
+	    Facility facility;
+	    do {
+            facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
+            if (facility == null) {
+                break;
+            }
+
+            if (facility instanceof ChargingStation) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        } while (facility instanceof ChargingStation);
+
 	    if (facility == null) {
 	        success.set(false);
 	        getObsProperty("gather").updateValue(false);

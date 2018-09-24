@@ -86,6 +86,10 @@ public class CStorage {
             }
         }
 
+        if (bestNode == null) {
+            return FacilityArtifact.getFacility(FacilityArtifact.CHARGING_STATION);
+        }
+
         itemsVar.put(bestNode.getResource().getName(), itemsVar.get(bestNode.getResource().getName()) + 0.0001);
 
         return bestNode;
