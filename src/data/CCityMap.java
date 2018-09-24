@@ -352,6 +352,12 @@ public class CCityMap implements Serializable {
 
             loc = new Location(lon, lat);
 
+            outerIterations ++;
+
+            if (outerIterations == 200) {
+                break;
+            }
+
 //		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
 //		    loc = FacilityArtifact.getFacility(facility).getLocation();
 //		    Set<String> roadTypes = new HashSet<String>();
