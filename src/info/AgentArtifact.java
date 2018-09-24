@@ -890,27 +890,33 @@ public class AgentArtifact extends Artifact {
     void getClosestChargingTo(OpFeedbackParam<Object> facility) {
         Location to = currentTarget();
         if (to == null) {
-            to = StaticInfoArtifact.getMap().getCenter();
+            to = getEntity().getLocation();
         }
 
-        Location own = getEntity().getLocation();
-        Location inBetween = new Location((own.getLon() + to.getLon()) / 2, (own.getLat() + to.getLat()) / 2);
-
         Collection<Facility> chs = FacilityArtifact.getFacilities(FacilityArtifact.CHARGING_STATION);
-        ChargingStation best = (ChargingStation) chs.stream().findFirst().get();
+        ChargingStation best = null;
         int bestDuration = Integer.MAX_VALUE;
 
         for (Facility chF : chs) {
-            int duration = StaticInfoArtifact.getRoute(this.agentName, inBetween, chF.getLocation())
+            int duration = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation())
                     .getRouteDuration(getEntity().getCurrentSpeed());
 
-            if (duration < bestDuration) {
-                bestDuration = duration;
-                best = (ChargingStation) chF;
+            if (duration < getEntity().getCurrentCharge()) {
+                int duration2 = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation(), to)
+                        .getRouteDuration(getEntity().getCurrentSpeed());
+
+                if (duration2 < bestDuration) {
+                    bestDuration = duration;
+                    best = (ChargingStation) chF;
+                }
             }
         }
 
-        facility.set(best.getName());
+        if (best == null) {
+            facility.set("chargingStation0");
+        } else {
+            facility.set(best.getName());
+        }
     }
 
     private Location currentTarget() {
