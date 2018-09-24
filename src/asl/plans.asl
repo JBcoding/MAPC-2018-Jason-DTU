@@ -297,7 +297,7 @@
 +!builderRole: assister <-
     getWorkShop(W);
     !getToFacility(W);
-    .wait(100); // dirty fix (wait for requestHelp calls to complete)
+    .wait(150); // dirty fix (wait for requestHelp calls to complete)
     getMainTruckName(T);
     !doAction(assist_assemble(T));
     !builderRole.
