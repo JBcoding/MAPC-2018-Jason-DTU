@@ -589,6 +589,9 @@ public class AgentArtifact extends Artifact {
                 e.printStackTrace();
             }
             facility = StaticInfoArtifact.getStorage().getLowestResourceNode(this);
+            if (!StaticInfoArtifact.getStorage().gatherEnabled) {
+                break;
+            }
         }
 
 	    if (facility == null) {
