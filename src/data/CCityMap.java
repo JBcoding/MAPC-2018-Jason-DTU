@@ -9,6 +9,7 @@ import com.graphhopper.util.shapes.GHPoint;
 import com.graphhopper.util.shapes.GHPoint3D;
 import info.FacilityArtifact;
 import massim.protocol.scenario.city.util.LocationUtil;
+import massim.scenario.city.data.facilities.Facility;
 import massim.util.Log;
 import massim.util.RNG;
 import massim.scenario.city.data.Location;
@@ -358,7 +359,7 @@ public class CCityMap implements Serializable {
             outerIterations ++;
 
             if (outerIterations == 20) {
-                return center;
+                return FacilityArtifact.getFacility(FacilityArtifact.CHARGING_STATION).getLocation();
             }
 
 //		    String facility = FacilityArtifact.getClosestFacility(loc, FacilityArtifact.getAllFacilities().stream().flatMap(fType -> fType.values().stream()).collect(Collectors.toSet()));
