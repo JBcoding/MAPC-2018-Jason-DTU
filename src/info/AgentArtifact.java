@@ -423,12 +423,11 @@ public class AgentArtifact extends Artifact {
 		}
 		else 
 		{
-			if (!entity.getFacilityName().equals("none"))
-			{
+			// if (!entity.getFacilityName().equals("none")) {
 				entity.setFacility(null);
 				getObsProperty("inFacility").updateValue(entity.getFacilityName());
 				getObsProperty("inOwnWell").updateValue(false);
-			}
+			// }
 		}
 		
 	}
