@@ -71,7 +71,7 @@ public class AgentArtifact extends Artifact {
 	private static Semaphore buildSemaphore = new Semaphore(1);
 	private static Semaphore destroySemaphore = new Semaphore(1);
 
-	private int updateRound = -1;
+	private Location lastGoto;
 
 	void init() {
 	    // This will be agent + some id, this comes from the Jason config.
@@ -288,12 +288,14 @@ public class AgentArtifact extends Artifact {
 
 		updateAtPeriphery();
 
-		updateRound = StaticInfoArtifact.getCurrentStep();
-
 		if (EIArtifact.LOGGING_ENABLED)
 		{
 			logger.info(agentName + " perceived");
 		}
+	}
+
+	public void setLastGoto(Location l) {
+		this.lastGoto = l;
 	}
 
 	private void updateAtPeriphery() {
@@ -548,10 +550,14 @@ public class AgentArtifact extends Artifact {
 	@OPERATION
 	private void perceiveRouteLength(Percept percept)
 	{
-		int length = (int) Translator.perceptToObject(percept)[0];
+	    int length;
+	    if (lastGoto == null || getEntity() == null || StaticInfoArtifact.getRoute(this.agentName, lastGoto) == null) {
+            length = (int) Translator.perceptToObject(percept)[0];
+        } else {
+            length = StaticInfoArtifact.getRoute(this.agentName, lastGoto).getRouteDuration(getEntity().getCurrentSpeed());
+        }
 
-		if (this.getEntity().getRouteLength() != length)
-		{
+		if (this.getEntity().getRouteLength() != length) {
 			this.getEntity().setRouteLength(length);
 			getObsProperty("routeLength").updateValue(this.getEntity().getRouteLength());
 		}
@@ -891,7 +897,7 @@ public class AgentArtifact extends Artifact {
 
     @OPERATION
     void getClosestChargingTo(OpFeedbackParam<Object> facility) {
-        Location to = currentTarget();
+        Location to = lastGoto;
         if (to == null) {
             to = getEntity().getLocation();
         }
@@ -900,13 +906,13 @@ public class AgentArtifact extends Artifact {
         ChargingStation best = null;
         int bestDuration = Integer.MAX_VALUE;
 
-        for (Facility chF : chs) {
-            int duration = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation())
-                    .getRouteDuration(getEntity().getCurrentSpeed());
+        int speed = getEntity().getCurrentSpeed();
 
-            if (duration < getEntity().getCurrentCharge()) {
-                int duration2 = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation(), to)
-                        .getRouteDuration(getEntity().getCurrentSpeed());
+        for (Facility chF : chs) {
+            int duration = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation()).getRouteDuration(speed);
+
+            if (duration < 0.60 * getEntity().getCurrentCharge()) {
+                int duration2 = StaticInfoArtifact.getRoute(this.agentName, chF.getLocation(), to).getRouteDuration(speed);
 
                 if (duration2 < bestDuration) {
                     bestDuration = duration;

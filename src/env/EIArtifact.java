@@ -3,13 +3,8 @@ package env;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +23,9 @@ import info.JobArtifact;
 import info.StaticInfoArtifact;
 import logging.LoggerFactory;
 import massim.eismassim.EnvironmentInterface;
+import massim.scenario.city.data.Location;
 import massim.scenario.city.data.Role;
+import massim.scenario.city.data.facilities.Facility;
 
 public class EIArtifact extends Artifact implements AgentListener, EnvironmentListener {
 
@@ -144,6 +141,18 @@ public class EIArtifact extends Artifact implements AgentListener, EnvironmentLi
 				params.add(new Identifier(otherAgent));
 				
 				action.setParameters(params);
+			} else if (action.getName().equals("goto")) {
+			    List<Parameter> params = action.getParameters();
+			    if (params.size() == 1) {
+                    String facName = PrologVisitor.staticVisit(params.get(0));
+                    Facility fac = FacilityArtifact.getFacility(facName);
+                    AgentArtifact.getAgentArtifact(agentName).setLastGoto(fac.getLocation());
+                } else if (params.size() == 2) {
+                    PrologVisitor visitor = new PrologVisitor();
+                    double lat = (double) params.get(0).accept(visitor, "");
+                    double lon = (double) params.get(1).accept(visitor, "");
+                    AgentArtifact.getAgentArtifact(agentName).setLastGoto(new Location(lon, lat));
+                }
 			}
 
 			ei.performAction(agentName, action);
