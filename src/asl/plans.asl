@@ -309,6 +309,7 @@
     getWorkShop(W);
     getMainStorageFacility(S);
     !getToFacility(S);
+    !emptyInventory;
     somethingToBuild(Y);
     if (Y) {
         getItemToBuild(Item, Quantity);
